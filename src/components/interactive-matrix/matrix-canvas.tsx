@@ -22,7 +22,9 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
     <div
       ref={(node) => {
         setNodeRef(node);
-        (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        (
+          containerRef as React.MutableRefObject<HTMLDivElement | null>
+        ).current = node;
       }}
       className={cn(
         "relative flex-1 bg-[#f5f5f0] rounded-lg overflow-hidden",
@@ -96,34 +98,50 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
         {/* Vertical Line (Urgente) */}
         <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-[#2a6b5c]" />
         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gray-400/50" />
-        
+
         {/* Horizontal Line (Importante) */}
         <div className="absolute left-0 right-0 bottom-0 h-0.5 bg-[#2a6b5c]" />
         <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-gray-400/50" />
       </div>
 
       {/* Axis Labels */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 rotate-90 origin-center pointer-events-none">
-        <span className="text-lg font-bold text-[#2a6b5c] tracking-widest">
-          URGENTE
+      <div className="absolute right-1 top-[-15px] origin-bottom-right -rotate-90 pointer-events-none flex items-center gap-2">
+        <span className="text-lg font-bold text-[#2a6b5c] tracking-widest whitespace-nowrap">
+          MÁS URGENTE
         </span>
-      </div>
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 pointer-events-none">
-        <span className="text-lg font-bold text-[#2a6b5c] tracking-widest">
-          IMPORTANTE
-        </span>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#2a6b5c"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="rotate-90"
+        >
+          <path d="M12 19V5" />
+          <path d="M5 12l7-7 7 7" />
+        </svg>
       </div>
 
-      {/* Arrow indicators */}
-      <div className="absolute right-1 top-4 pointer-events-none">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#2a6b5c">
-          <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)" />
+      <div className="absolute bottom-1 left-2 pointer-events-none flex items-center gap-2">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#2a6b5c"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
         </svg>
-      </div>
-      <div className="absolute left-4 bottom-1 pointer-events-none">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#2a6b5c" style={{ transform: "rotate(180deg)" }}>
-          <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
-        </svg>
+        <span className="text-lg font-bold text-[#2a6b5c] tracking-widest whitespace-nowrap">
+          MÁS IMPORTANTE
+        </span>
       </div>
 
       {/* Positioned Tasks */}

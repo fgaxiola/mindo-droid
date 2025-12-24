@@ -96,7 +96,7 @@ export function EisenhowerBoard({
           </div>
           <div className="flex-1 flex">
             <div className="flex flex-col justify-center px-2 text-xs text-muted-foreground">
-              <div className="writing-mode-vertical rotate-180 flex items-center gap-2">
+              <div className="writing-mode-vertical flex items-center gap-2">
                 <span>↑ Important</span>
                 <span className="mx-4">|</span>
                 <span>Not Important ↓</span>
