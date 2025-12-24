@@ -72,7 +72,7 @@ export function DraggableTaskOverlay({ task, isFromMatrix }: { task: PositionedT
     <div 
       style={isFromMatrix ? { transform: "translate(-50%, -50%)" } : undefined}
       className={cn(
-        "bg-white border border-border rounded-lg shadow-xl rotate-3",
+        "bg-white border border-border rounded-lg shadow-xl rotate-3 cursor-grabbing",
         isFromMatrix ? "p-2 w-32" : "p-3 w-56"
       )}
     >

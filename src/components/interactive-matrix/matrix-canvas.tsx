@@ -94,7 +94,7 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
       {/* Axis Lines */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Vertical Line (Urgente) */}
-        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#2a6b5c]" />
+        <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-[#2a6b5c]" />
         <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gray-400/50" />
         
         {/* Horizontal Line (Importante) */}
@@ -103,7 +103,7 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
       </div>
 
       {/* Axis Labels */}
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 origin-center pointer-events-none">
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 rotate-90 origin-center pointer-events-none">
         <span className="text-lg font-bold text-[#2a6b5c] tracking-widest">
           URGENTE
         </span>
@@ -115,13 +115,13 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
       </div>
 
       {/* Arrow indicators */}
-      <div className="absolute left-1 top-4 pointer-events-none">
+      <div className="absolute right-1 top-4 pointer-events-none">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="#2a6b5c">
           <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" transform="rotate(-90 12 12)" />
         </svg>
       </div>
-      <div className="absolute right-4 bottom-1 pointer-events-none">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#2a6b5c">
+      <div className="absolute left-4 bottom-1 pointer-events-none">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#2a6b5c" style={{ transform: "rotate(180deg)" }}>
           <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
         </svg>
       </div>
