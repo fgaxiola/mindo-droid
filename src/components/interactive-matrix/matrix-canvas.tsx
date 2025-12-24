@@ -5,6 +5,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { DraggableTask } from "./draggable-task";
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
@@ -12,6 +13,7 @@ interface MatrixCanvasProps {
 
 export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const dictionary = useDictionary();
   const { setNodeRef, isOver } = useDroppable({
     id: "matrix-canvas",
   });
@@ -68,27 +70,27 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
       {/* Quadrant Labels */}
       <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#2a6b5c]">1 HACER</span>
+          <span className="text-2xl font-bold text-[#2a6b5c]">{dictionary.interactive_matrix.hacer}</span>
           <span className="text-sm text-[#2a6b5c]/70 text-center mt-1">
-            Acciones inmediatas críticas
+            {dictionary.interactive_matrix.hacer_desc}
           </span>
         </div>
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#c44f2e]">2 DECIDIR</span>
+          <span className="text-2xl font-bold text-[#c44f2e]">{dictionary.interactive_matrix.decidir}</span>
           <span className="text-sm text-[#c44f2e]/70 text-center mt-1">
-            Mejoras que requieren planificación
+            {dictionary.interactive_matrix.decidir_desc}
           </span>
         </div>
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#b8860b]">3 DELEGAR</span>
+          <span className="text-2xl font-bold text-[#b8860b]">{dictionary.interactive_matrix.delegar}</span>
           <span className="text-sm text-[#b8860b]/70 text-center mt-1">
-            Tareas que otros pueden hacer
+            {dictionary.interactive_matrix.delegar_desc}
           </span>
         </div>
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#6b5b95]">4 ELIMINAR</span>
+          <span className="text-2xl font-bold text-[#6b5b95]">{dictionary.interactive_matrix.eliminar}</span>
           <span className="text-sm text-[#6b5b95]/70 text-center mt-1">
-            Actividades que no aportan valor
+            {dictionary.interactive_matrix.eliminar_desc}
           </span>
         </div>
       </div>
@@ -107,7 +109,7 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
       {/* Axis Labels */}
       <div className="absolute right-1 top-[-15px] origin-bottom-right -rotate-90 pointer-events-none flex items-center gap-2">
         <span className="text-lg font-bold text-[#2a6b5c] tracking-widest whitespace-nowrap">
-          MÁS URGENTE
+          {dictionary.interactive_matrix.more_urgent}
         </span>
         <svg
           width="24"
@@ -140,7 +142,7 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
           <path d="M12 19l-7-7 7-7" />
         </svg>
         <span className="text-lg font-bold text-[#2a6b5c] tracking-widest whitespace-nowrap">
-          MÁS IMPORTANTE
+          {dictionary.interactive_matrix.more_important}
         </span>
       </div>
 

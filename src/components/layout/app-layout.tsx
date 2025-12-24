@@ -3,6 +3,8 @@
 import { useAuth } from "@/providers/auth-provider";
 import { Sidebar } from "./sidebar";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "./language-switcher";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -10,11 +12,12 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { user, signOut, loading } = useAuth();
+  const dictionary = useDictionary();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
+        <div className="text-muted-foreground">{dictionary.common.loading}</div>
       </div>
     );
   }
@@ -29,6 +32,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-14 border-b border-border flex items-center justify-end px-4 bg-background">
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <span className="text-sm text-muted-foreground">{user.email}</span>
             <Button
               onClick={signOut}
@@ -36,7 +40,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               size="sm"
               className="text-sm text-muted-foreground hover:text-foreground"
             >
-              Sign out
+              {dictionary.common.sign_out}
             </Button>
           </div>
         </header>

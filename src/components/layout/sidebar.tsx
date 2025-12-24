@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { useSidebarStore } from "@/stores/sidebar-store";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface NavItem {
   href: string;
@@ -121,27 +122,29 @@ function ChevronRightIcon({ className }: { className?: string }) {
   );
 }
 
-const NAV_ITEMS: NavItem[] = [
-  {
-    href: "/",
-    label: "Home",
-    icon: <HomeIcon className="w-5 h-5" />,
-  },
-  {
-    href: "/matrix",
-    label: "Priority Matrix",
-    icon: <GridIcon className="w-5 h-5" />,
-  },
-  {
-    href: "/interactive-matrix",
-    label: "Interactive Matrix",
-    icon: <CrosshairIcon className="w-5 h-5" />,
-  },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
   const { isCollapsed, toggle } = useSidebarStore();
+  const dictionary = useDictionary();
+  const currentLang = pathname.split("/")[1] || "en";
+
+  const NAV_ITEMS: NavItem[] = [
+    {
+      href: `/${currentLang}`,
+      label: dictionary.sidebar.home,
+      icon: <HomeIcon className="w-5 h-5" />,
+    },
+    {
+      href: `/${currentLang}/matrix`,
+      label: dictionary.sidebar.priority_matrix,
+      icon: <GridIcon className="w-5 h-5" />,
+    },
+    {
+      href: `/${currentLang}/interactive-matrix`,
+      label: dictionary.sidebar.interactive_matrix,
+      icon: <CrosshairIcon className="w-5 h-5" />,
+    },
+  ];
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -159,7 +162,7 @@ export function Sidebar() {
         >
           {!isCollapsed && (
             <span className="font-semibold text-foreground text-sm">
-              Focus App
+              {dictionary.common.app_name}
             </span>
           )}
         </div>
@@ -222,7 +225,7 @@ export function Sidebar() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={10}>
-              {isCollapsed ? "Expand" : "Collapse"}
+              {isCollapsed ? dictionary.sidebar.expand : dictionary.sidebar.collapse}
             </TooltipContent>
           </Tooltip>
         </div>

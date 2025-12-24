@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 type TimerMode = "work" | "shortBreak" | "longBreak";
 
@@ -14,6 +15,7 @@ const TIMER_SETTINGS = {
 };
 
 export function PomodoroTimer() {
+  const dictionary = useDictionary();
   const [mode, setMode] = useState<TimerMode>("work");
   const [timeLeft, setTimeLeft] = useState(TIMER_SETTINGS.work);
   const [isRunning, setIsRunning] = useState(false);
@@ -75,11 +77,11 @@ export function PomodoroTimer() {
   const getModeLabel = () => {
     switch (mode) {
       case "work":
-        return "Focus";
+        return dictionary.pomodoro.focus;
       case "shortBreak":
-        return "Short Break";
+        return dictionary.pomodoro.short_break;
       case "longBreak":
-        return "Long Break";
+        return dictionary.pomodoro.long_break;
     }
   };
 
@@ -110,14 +112,14 @@ export function PomodoroTimer() {
                   variant="default"
                   className="px-8 py-2 text-sm font-medium rounded-md transition-all hover:opacity-90"
                 >
-                  {isRunning ? "Pause" : "Start"}
+                  {isRunning ? dictionary.pomodoro.pause : dictionary.pomodoro.start}
                 </Button>
                 <Button
                   onClick={resetTimer}
                   variant="ghost"
                   className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-all"
                 >
-                  Reset
+                  {dictionary.pomodoro.reset}
                 </Button>
               </div>
             </div>
@@ -134,10 +136,10 @@ export function PomodoroTimer() {
                   }`}
                 >
                   {m === "work"
-                    ? "Focus"
+                    ? dictionary.pomodoro.focus
                     : m === "shortBreak"
-                      ? "Short"
-                      : "Long"}
+                      ? dictionary.pomodoro.short_break
+                      : dictionary.pomodoro.long_break}
                 </button>
               ))}
             </div>
@@ -145,15 +147,12 @@ export function PomodoroTimer() {
             <div className="pt-6 border-t border-border">
               <div className="flex items-center justify-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Sessions completed:
+                  {dictionary.pomodoro.sessions_completed}:
                 </span>
                 <span className="text-sm font-medium text-foreground">
                   {completedSessions}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {4 - (completedSessions % 4)} more until long break
-              </p>
             </div>
           </div>
         </CardContent>

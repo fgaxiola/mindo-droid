@@ -33,13 +33,19 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
+  // Helper to check if the path is a public route (login or auth)
+  // Supports paths like /login, /en/login, /es/login, /auth/..., /en/auth/...
+  const isPublicRoute = (pathname: string) => {
+    return /^\/([a-z]{2}\/)?(login|auth)/.test(pathname);
+  };
+
+  if (!user && !isPublicRoute(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    // Try to preserve the current locale if present
+    const localeMatch = request.nextUrl.pathname.match(/^\/([a-z]{2})/);
+    const locale = localeMatch ? localeMatch[1] : "en";
+    
+    url.pathname = `/${locale}/login`;
     return NextResponse.redirect(url);
   }
 

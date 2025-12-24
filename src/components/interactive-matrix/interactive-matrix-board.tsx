@@ -19,6 +19,7 @@ import { MatrixCanvas } from "./matrix-canvas";
 import { TaskPanel } from "./task-panel";
 import { DraggableTaskOverlay } from "./draggable-task";
 import { Task } from "@/types/task";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface InteractiveMatrixBoardProps {
   initialTasks: Task[];
@@ -29,6 +30,7 @@ export function InteractiveMatrixBoard({
   initialTasks,
   onTaskPositionChange,
 }: InteractiveMatrixBoardProps) {
+  const dictionary = useDictionary();
   const { tasks, setTasks, updateTaskPosition } = useInteractiveMatrixStore();
   const [activeTask, setActiveTask] = useState<PositionedTask | null>(null);
   const matrixRef = useRef<HTMLDivElement>(null);
@@ -102,10 +104,10 @@ export function InteractiveMatrixBoard({
         <div className="flex-1 flex flex-col p-4">
           <div className="mb-4">
             <h1 className="text-lg font-semibold text-foreground">
-              Matriz de Eisenhower Interactiva
+              {dictionary.interactive_matrix.title}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Arrastra las tareas libremente sobre la matriz para priorizarlas
+              {dictionary.interactive_matrix.subtitle}
             </p>
           </div>
           <div ref={matrixRef} className="flex-1 flex">

@@ -4,12 +4,14 @@ import { useDroppable } from "@dnd-kit/core";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { DraggableTask } from "./draggable-task";
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface TaskPanelProps {
   tasks: PositionedTask[];
 }
 
 export function TaskPanel({ tasks }: TaskPanelProps) {
+  const dictionary = useDictionary();
   const { setNodeRef, isOver } = useDroppable({
     id: "task-panel",
   });
@@ -25,9 +27,9 @@ export function TaskPanel({ tasks }: TaskPanelProps) {
       )}
     >
       <div className="p-4 border-b border-border">
-        <h2 className="text-sm font-semibold text-foreground">Tareas</h2>
+        <h2 className="text-sm font-semibold text-foreground">{dictionary.interactive_matrix.tasks}</h2>
         <p className="text-xs text-muted-foreground mt-1">
-          Arrastra las tareas a la matriz
+          {dictionary.interactive_matrix.drag_to_matrix}
         </p>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -36,13 +38,13 @@ export function TaskPanel({ tasks }: TaskPanelProps) {
         ))}
         {unpositionedTasks.length === 0 && (
           <div className="text-center py-8 text-xs text-muted-foreground">
-            Todas las tareas están en la matriz
+            {dictionary.interactive_matrix.all_tasks_in_matrix}
           </div>
         )}
       </div>
       <div className="p-3 border-t border-border">
         <p className="text-[10px] text-muted-foreground text-center">
-          Arrastra tareas de vuelta aquí para removerlas de la matriz
+          {dictionary.interactive_matrix.remove_instructions}
         </p>
       </div>
     </div>
