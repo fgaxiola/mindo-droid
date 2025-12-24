@@ -31,7 +31,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
       className={cn(
         "p-3 cursor-grab active:cursor-grabbing select-none",
         "border border-border bg-card hover:bg-accent/50 transition-colors",
-        isDragging && "opacity-50",
+        isDragging && "opacity-0",
         isOverlay && "shadow-lg rotate-3"
       )}
     >

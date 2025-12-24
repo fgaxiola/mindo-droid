@@ -31,7 +31,7 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
       {...attributes}
       className={cn(
         "bg-white border border-border rounded-lg shadow-sm cursor-grab active:cursor-grabbing select-none transition-shadow hover:shadow-md",
-        isDragging && "opacity-70 shadow-lg z-50",
+        isDragging && "opacity-0",
         isOnMatrix ? "absolute p-2 w-32" : "p-3"
       )}
     >
@@ -60,12 +60,22 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
   );
 }
 
-export function DraggableTaskOverlay({ task }: { task: PositionedTask }) {
+export function DraggableTaskOverlay({ task, isFromMatrix }: { task: PositionedTask; isFromMatrix?: boolean }) {
   return (
-    <div className="bg-white border border-border rounded-lg shadow-xl p-2 w-32 rotate-3">
+    <div 
+      className={cn(
+        "bg-white border border-border rounded-lg shadow-xl rotate-3",
+        isFromMatrix ? "p-2 w-32" : "p-3 w-56"
+      )}
+    >
       <h4 className="text-xs font-medium text-foreground line-clamp-2">
         {task.title}
       </h4>
+      {!isFromMatrix && task.description && (
+        <p className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
+          {task.description}
+        </p>
+      )}
       {task.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">
           {task.tags.slice(0, 2).map((tag) => (

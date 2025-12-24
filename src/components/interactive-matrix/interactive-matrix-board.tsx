@@ -114,8 +114,13 @@ export function InteractiveMatrixBoard({
         </div>
         <TaskPanel tasks={tasks} />
       </div>
-      <DragOverlay>
-        {activeTask ? <DraggableTaskOverlay task={activeTask} /> : null}
+      <DragOverlay dropAnimation={null}>
+        {activeTask ? (
+          <DraggableTaskOverlay 
+            task={activeTask} 
+            isFromMatrix={activeTask.matrixPosition !== null} 
+          />
+        ) : null}
       </DragOverlay>
     </DndContext>
   );
