@@ -114,7 +114,7 @@ export function InteractiveMatrixBoard({
         </div>
         <TaskPanel tasks={tasks} />
       </div>
-      <DragOverlay>
+      <DragOverlay dropAnimation={null}>
         {activeTask ? (
           <DraggableTaskOverlay 
             task={activeTask} 
