@@ -27,11 +27,17 @@ export const useInteractiveMatrixStore = create<InteractiveMatrixState>()(
       setTasks: (tasks) => set({ tasks }),
 
       updateTaskPosition: (taskId, position) =>
-        set((state) => ({
-          tasks: state.tasks.map((task) =>
-            task.id === taskId ? { ...task, matrixPosition: position } : task
-          ),
-        })),
+        set((state) => {
+          const taskIndex = state.tasks.findIndex((t) => t.id === taskId);
+          if (taskIndex === -1) return state;
+
+          const updatedTask = { ...state.tasks[taskIndex], matrixPosition: position };
+          const otherTasks = state.tasks.filter((t) => t.id !== taskId);
+
+          return {
+            tasks: [...otherTasks, updatedTask],
+          };
+        }),
 
       addTask: (task) =>
         set((state) => ({
