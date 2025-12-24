@@ -18,9 +18,16 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
       data: { task },
     });
 
+  const dndTransform = transform ? CSS.Translate.toString(transform) : "";
+  const styleTransform = style?.transform || "";
+  
+  const combinedTransform = dndTransform 
+    ? (styleTransform ? `${dndTransform} ${styleTransform}` : dndTransform)
+    : styleTransform;
+
   const dragStyle = {
-    transform: CSS.Translate.toString(transform),
     ...style,
+    transform: combinedTransform,
   };
 
   return (
@@ -63,6 +70,7 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
 export function DraggableTaskOverlay({ task, isFromMatrix }: { task: PositionedTask; isFromMatrix?: boolean }) {
   return (
     <div 
+      style={isFromMatrix ? { transform: "translate(-50%, -50%)" } : undefined}
       className={cn(
         "bg-white border border-border rounded-lg shadow-xl rotate-3",
         isFromMatrix ? "p-2 w-32" : "p-3 w-56"
