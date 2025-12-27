@@ -49,11 +49,20 @@ export function InteractiveMatrixBoard({
 
   useEffect(() => {
     if (tasks) {
-        // We need to preserve the order of localTasks if we are just receiving updates
-        // but for now, let's just sync with server to ensure consistency
-        // A better approach would be to only update if not dragging, but 
-        // local state should handle the dragging phase.
-        setLocalTasks(tasks);
+      setLocalTasks(prev => {
+        // Create a map of updated tasks for O(1) lookup
+        const tasksMap = new Map(tasks.map(t => [t.id, t]));
+        
+        // Keep existing order for tasks that are still in the list
+        const mergedTasks = prev.map(t => tasksMap.get(t.id) || t)
+          .filter(t => tasksMap.has(t.id));
+          
+        // Add any new tasks that weren't in the previous state
+        const prevIds = new Set(prev.map(t => t.id));
+        const newTasks = tasks.filter(t => !prevIds.has(t.id));
+        
+        return [...mergedTasks, ...newTasks];
+      });
     }
   }, [tasks]);
 
