@@ -24,7 +24,7 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
     id: "matrix-canvas",
   });
 
-  const positionedTasks = tasks.filter((t) => t.matrixPosition !== null);
+  const positionedTasks = tasks.filter((t) => t.matrixPosition != null);
 
   return (
     <div
