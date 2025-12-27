@@ -32,7 +32,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
         "p-3 cursor-grab active:cursor-grabbing select-none",
         "border border-border bg-card hover:bg-accent/50 transition-colors",
         isDragging && "opacity-0",
-        isOverlay && "shadow-lg rotate-3"
+        isOverlay && "shadow-lg rotate-3 cursor-grabbing"
       )}
     >
       <div className="space-y-2">

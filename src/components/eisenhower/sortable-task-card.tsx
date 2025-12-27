@@ -39,28 +39,28 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
       )}
     >
       <div className="space-y-2">
-          <h4 className="text-sm font-medium text-foreground line-clamp-2">
-            {task.title}
-          </h4>
-          {task.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2">
-              {task.description}
-            </p>
-          )}
-          {task.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {task.tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="px-1.5 py-0.5 text-[10px] font-medium rounded"
-                  style={{ backgroundColor: tag.color + "20", color: tag.color }}
-                >
-                  {tag.name}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </Card>
+        <h4 className="text-sm font-medium text-foreground line-clamp-2">
+          {task.title}
+        </h4>
+        {task.description && (
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {task.description}
+          </p>
+        )}
+        {task.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {task.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="px-1.5 py-0.5 text-[10px] font-medium rounded"
+                style={{ backgroundColor: tag.color + "20", color: tag.color }}
+              >
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }

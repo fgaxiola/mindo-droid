@@ -17,7 +17,7 @@
     "already_have_account": "Already have an account?"
   },
   "sidebar": {
-    "home": "Home",
+    "pomodoro": "Pomodoro",
     "priority_matrix": "Priority Matrix",
     "interactive_matrix": "Interactive Matrix",
     "expand": "Expand",

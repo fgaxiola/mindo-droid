@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
+import { TimerIcon } from "lucide-react";
 
 interface NavItem {
   href: string;
@@ -131,8 +132,8 @@ export function Sidebar() {
   const NAV_ITEMS: NavItem[] = [
     {
       href: `/${currentLang}`,
-      label: dictionary.sidebar.home,
-      icon: <HomeIcon className="w-5 h-5" />,
+      label: dictionary.sidebar.pomodoro,
+      icon: <TimerIcon className="w-5 h-5" />,
     },
     {
       href: `/${currentLang}/matrix`,
@@ -225,7 +226,9 @@ export function Sidebar() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={10}>
-              {isCollapsed ? dictionary.sidebar.expand : dictionary.sidebar.collapse}
+              {isCollapsed
+                ? dictionary.sidebar.expand
+                : dictionary.sidebar.collapse}
             </TooltipContent>
           </Tooltip>
         </div>
