@@ -1,8 +1,12 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Task } from "@/types/task";
-import { TaskCard } from "./task-card";
+import { SortableTaskCard } from "./sortable-task-card";
 import { cn } from "@/lib/utils";
 
 interface TaskSidebarProps {
@@ -34,9 +38,14 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
         </p>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {unassignedTasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
+        <SortableContext
+          items={unassignedTasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {unassignedTasks.map((task) => (
+            <SortableTaskCard key={task.id} task={task} />
+          ))}
+        </SortableContext>
         {unassignedTasks.length === 0 && (
           <div className="text-center py-8 text-xs text-muted-foreground">
             All tasks are assigned

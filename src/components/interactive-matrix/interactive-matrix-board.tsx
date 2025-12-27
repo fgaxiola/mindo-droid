@@ -6,9 +6,11 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  DragOverEvent,
   PointerSensor,
   useSensor,
   useSensors,
+  pointerWithin,
 } from "@dnd-kit/core";
 import {
   PositionedTask,
@@ -31,7 +33,7 @@ export function InteractiveMatrixBoard({
   onTaskPositionChange,
 }: InteractiveMatrixBoardProps) {
   const dictionary = useDictionary();
-  const { tasks, setTasks, updateTaskPosition } = useInteractiveMatrixStore();
+  const { tasks, setTasks, updateTaskPosition, moveTask } = useInteractiveMatrixStore();
   const [activeTask, setActiveTask] = useState<PositionedTask | null>(null);
   const matrixRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +63,44 @@ export function InteractiveMatrixBoard({
     }
   };
 
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    const currentTask = tasks.find((t) => t.id === activeId);
+    const overTask = tasks.find((t) => t.id === overId);
+
+    if (!currentTask) return;
+
+    // Determine if we are over the list (either the panel itself or a list item)
+    const isOverList = overId === "task-panel" || (overTask && overTask.matrixPosition === null);
+
+    if (isOverList) {
+      // If task is not currently in list mode, put it in list mode
+      if (currentTask.matrixPosition !== null) {
+        updateTaskPosition(activeId as string, null);
+      }
+      
+      // Perform sorting if over another task
+      if (overTask && overTask.matrixPosition === null) {
+        moveTask(activeId as string, overId as string);
+      }
+    } else {
+      // We are NOT over the list (presumably over matrix or a matrix task)
+      
+      // If the task was originally from the matrix, and we temporarily moved it to list, restore it
+      // This prevents it from getting stuck in the list if we drag out without dropping
+      if (currentTask.matrixPosition === null && activeTask?.matrixPosition) {
+         updateTaskPosition(activeId as string, activeTask.matrixPosition);
+      }
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
@@ -69,6 +109,7 @@ export function InteractiveMatrixBoard({
 
     const taskId = active.id as string;
 
+    // Check if dropped into the matrix area
     if (over.id === "matrix-canvas" && matrixRef.current) {
       const rect = matrixRef.current.getBoundingClientRect();
       const activeRect = active.rect.current.translated;
@@ -88,16 +129,24 @@ export function InteractiveMatrixBoard({
         updateTaskPosition(taskId, position);
         onTaskPositionChange?.(taskId, position);
       }
-    } else if (over.id === "task-panel") {
-      updateTaskPosition(taskId, null);
-      onTaskPositionChange?.(taskId, null);
+    } else {
+      // Check if dropped into the sidebar (task-panel or onto another task in the list)
+      const isOverTaskPanel = over.id === "task-panel";
+      const isOverPanelTask = tasks.find(t => t.id === over.id)?.matrixPosition === null;
+
+      if (isOverTaskPanel || isOverPanelTask) {
+        updateTaskPosition(taskId, null);
+        onTaskPositionChange?.(taskId, null);
+      }
     }
   };
 
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-full w-full">

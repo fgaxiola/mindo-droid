@@ -1,8 +1,12 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
-import { DraggableTask } from "./draggable-task";
+import { SortableTask } from "./sortable-task";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
 
@@ -27,15 +31,22 @@ export function TaskPanel({ tasks }: TaskPanelProps) {
       )}
     >
       <div className="p-4 border-b border-border">
-        <h2 className="text-sm font-semibold text-foreground">{dictionary.interactive_matrix.tasks}</h2>
+        <h2 className="text-sm font-semibold text-foreground">
+          {dictionary.interactive_matrix.tasks}
+        </h2>
         <p className="text-xs text-muted-foreground mt-1">
           {dictionary.interactive_matrix.drag_to_matrix}
         </p>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {unpositionedTasks.map((task) => (
-          <DraggableTask key={task.id} task={task} />
-        ))}
+        <SortableContext
+          items={unpositionedTasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {unpositionedTasks.map((task) => (
+            <SortableTask key={task.id} task={task} />
+          ))}
+        </SortableContext>
         {unpositionedTasks.length === 0 && (
           <div className="text-center py-8 text-xs text-muted-foreground">
             {dictionary.interactive_matrix.all_tasks_in_matrix}

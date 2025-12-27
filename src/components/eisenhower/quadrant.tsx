@@ -1,8 +1,12 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { Task, Quadrant as QuadrantType } from "@/types/task";
-import { TaskCard } from "./task-card";
+import { SortableTaskCard } from "./sortable-task-card";
 import { cn } from "@/lib/utils";
 
 interface QuadrantProps {
@@ -32,9 +36,14 @@ export function Quadrant({ quadrant, tasks }: QuadrantProps) {
         <p className="text-xs text-muted-foreground">{quadrant.description}</p>
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto">
-        {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
-        ))}
+        <SortableContext
+          items={tasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {tasks.map((task) => (
+            <SortableTaskCard key={task.id} task={task} />
+          ))}
+        </SortableContext>
         {tasks.length === 0 && (
           <div className="flex items-center justify-center h-full min-h-[100px] text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md">
             Drop tasks here

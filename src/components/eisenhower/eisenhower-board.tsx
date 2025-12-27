@@ -6,9 +6,11 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  DragOverEvent,
   PointerSensor,
   useSensor,
   useSensors,
+  closestCorners,
 } from "@dnd-kit/core";
 import { useState } from "react";
 import { Task, TaskCoords } from "@/types/task";
@@ -16,6 +18,7 @@ import { useTaskStore } from "@/stores/task-store";
 import { Matrix } from "./matrix";
 import { TaskSidebar } from "./task-sidebar";
 import { TaskCard } from "./task-card";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface EisenhowerBoardProps {
   initialTasks: Task[];
@@ -26,7 +29,8 @@ export function EisenhowerBoard({
   initialTasks,
   onTaskCoordsChange,
 }: EisenhowerBoardProps) {
-  const { tasks, setTasks, updateTaskCoords } = useTaskStore();
+  const dictionary = useDictionary();
+  const { tasks, setTasks, updateTaskCoords, moveTask } = useTaskStore();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const sensors = useSensors(
@@ -49,6 +53,32 @@ export function EisenhowerBoard({
     }
   };
 
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    const activeTask = tasks.find((t) => t.id === activeId);
+    const overTask = tasks.find((t) => t.id === overId);
+
+    if (!activeTask) return;
+
+    // If over a task
+    if (overTask) {
+      // Allow sorting if in same container
+      if (
+        activeTask.coords.x === overTask.coords.x &&
+        activeTask.coords.y === overTask.coords.y
+      ) {
+        moveTask(activeId as string, overId as string);
+      }
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
@@ -56,18 +86,21 @@ export function EisenhowerBoard({
     if (!over) return;
 
     const taskId = active.id as string;
-    const dropData = over.data.current as { coords: TaskCoords } | undefined;
-
-    if (dropData?.coords) {
-      updateTaskCoords(taskId, dropData.coords);
-      onTaskCoordsChange?.(taskId, dropData.coords);
+    
+    // Check if dropped on a Quadrant droppable area
+    if (over.data.current?.coords) {
+      const targetCoords = over.data.current.coords as TaskCoords;
+      updateTaskCoords(taskId, targetCoords);
+      onTaskCoordsChange?.(taskId, targetCoords);
     }
   };
 
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div className="flex h-full w-full">
@@ -76,19 +109,19 @@ export function EisenhowerBoard({
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-lg font-semibold text-foreground">
-                  Eisenhower Matrix
+                  {dictionary.matrix.title}
                 </h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Prioritize tasks by urgency and importance
+                  {dictionary.matrix.subtitle}
                 </p>
               </div>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <span>←</span>
-                  <span>Not Urgent</span>
+                  <span>{dictionary.matrix.not_urgent}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span>Urgent</span>
+                  <span>{dictionary.matrix.urgent}</span>
                   <span>→</span>
                 </div>
               </div>
@@ -97,9 +130,9 @@ export function EisenhowerBoard({
           <div className="flex-1 flex">
             <div className="flex flex-col justify-center px-2 text-xs text-muted-foreground">
               <div className="writing-mode-vertical flex items-center gap-2">
-                <span>↑ Important</span>
+                <span>↑ {dictionary.matrix.important}</span>
                 <span className="mx-4">|</span>
-                <span>Not Important ↓</span>
+                <span>{dictionary.matrix.not_important} ↓</span>
               </div>
             </div>
             <Matrix tasks={tasks} />
