@@ -43,7 +43,22 @@ export function EisenhowerBoard({
   );
 
   useEffect(() => {
-    if (tasks) setLocalTasks(tasks);
+    if (tasks) {
+      setLocalTasks(prev => {
+        // Create a map of updated tasks for O(1) lookup
+        const tasksMap = new Map(tasks.map(t => [t.id, t]));
+        
+        // Keep existing order for tasks that are still in the list
+        const mergedTasks = prev.map(t => tasksMap.get(t.id) || t)
+          .filter(t => tasksMap.has(t.id));
+          
+        // Add any new tasks that weren't in the previous state
+        const prevIds = new Set(prev.map(t => t.id));
+        const newTasks = tasks.filter(t => !prevIds.has(t.id));
+        
+        return [...mergedTasks, ...newTasks];
+      });
+    }
   }, [tasks]);
 
   const moveTaskLocally = (activeId: string, overId: string) => {

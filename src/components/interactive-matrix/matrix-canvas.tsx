@@ -6,7 +6,6 @@ import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { DraggableTask } from "./draggable-task";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
-import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
 
@@ -16,7 +15,10 @@ interface MatrixCanvasProps {
 
 export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [createPosition, setCreatePosition] = useState<{ x: number; y: number } | null>(null);
+  const [createPosition, setCreatePosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const { createTask } = useTaskMutations();
   const containerRef = useRef<HTMLDivElement>(null);
   const dictionary = useDictionary();
@@ -38,13 +40,6 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
         "relative flex-1 bg-[#f5f5f0] rounded-lg overflow-hidden group"
       )}
     >
-      <div className="absolute top-4 right-4 z-20">
-         <CreateTaskButton onClick={() => {
-             setIsCreateOpen(true);
-             setCreatePosition({ x: 50, y: 50 });
-         }} className="relative opacity-0 group-hover:opacity-100 transition-opacity" />
-      </div>
-
       {/* Grid Background */}
       <div className="absolute inset-0 opacity-20">
         <svg width="100%" height="100%">
@@ -82,25 +77,33 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
       {/* Quadrant Labels */}
       <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 pointer-events-none">
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#2a6b5c]">{dictionary.interactive_matrix.hacer}</span>
+          <span className="text-2xl font-bold text-[#2a6b5c]">
+            {dictionary.interactive_matrix.hacer}
+          </span>
           <span className="text-sm text-[#2a6b5c]/70 text-center mt-1">
             {dictionary.interactive_matrix.hacer_desc}
           </span>
         </div>
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#c44f2e]">{dictionary.interactive_matrix.decidir}</span>
+          <span className="text-2xl font-bold text-[#c44f2e]">
+            {dictionary.interactive_matrix.decidir}
+          </span>
           <span className="text-sm text-[#c44f2e]/70 text-center mt-1">
             {dictionary.interactive_matrix.decidir_desc}
           </span>
         </div>
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#b8860b]">{dictionary.interactive_matrix.delegar}</span>
+          <span className="text-2xl font-bold text-[#b8860b]">
+            {dictionary.interactive_matrix.delegar}
+          </span>
           <span className="text-sm text-[#b8860b]/70 text-center mt-1">
             {dictionary.interactive_matrix.delegar_desc}
           </span>
         </div>
         <div className="flex flex-col items-center justify-center p-4">
-          <span className="text-2xl font-bold text-[#6b5b95]">{dictionary.interactive_matrix.eliminar}</span>
+          <span className="text-2xl font-bold text-[#6b5b95]">
+            {dictionary.interactive_matrix.eliminar}
+          </span>
           <span className="text-sm text-[#6b5b95]/70 text-center mt-1">
             {dictionary.interactive_matrix.eliminar_desc}
           </span>
