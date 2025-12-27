@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -76,6 +76,18 @@ export function TaskDialog({
       estimated_time: task?.estimated_time || 0,
     },
   });
+
+  // Reset form when task changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      reset({
+        title: task?.title || "",
+        description: task?.description || "",
+        due_date: task?.due_date ? new Date(task.due_date) : undefined,
+        estimated_time: task?.estimated_time || 0,
+      });
+    }
+  }, [task, open, reset]);
 
   const onSubmit = async (data: TaskFormData) => {
     await onSave(data);
