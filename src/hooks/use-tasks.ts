@@ -88,8 +88,9 @@ export function useTaskMutations() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["task_versions", variables.id] });
     },
   });
 

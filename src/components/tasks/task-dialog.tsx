@@ -114,7 +114,12 @@ export function TaskDialog({
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
-                <Input id="title" {...register("title")} placeholder="Task title" />
+                <Input 
+                  id="title" 
+                  {...register("title")} 
+                  placeholder="Task title"
+                  autoFocus 
+                />
                 {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
               </div>
 

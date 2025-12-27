@@ -30,7 +30,7 @@ export function Quadrant({ quadrant, tasks }: QuadrantProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col p-4 rounded-lg border-2 transition-all min-h-[200px] group relative",
+        "flex flex-col p-4 rounded-lg border-2 transition-all h-full group relative overflow-hidden",
         quadrant.color
       )}
     >
