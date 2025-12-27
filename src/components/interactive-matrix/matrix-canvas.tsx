@@ -29,8 +29,7 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
         ).current = node;
       }}
       className={cn(
-        "relative flex-1 bg-[#f5f5f0] rounded-lg overflow-hidden",
-        isOver && "ring-2 ring-primary ring-inset"
+        "relative flex-1 bg-[#f5f5f0] rounded-lg overflow-hidden"
       )}
     >
       {/* Grid Background */}

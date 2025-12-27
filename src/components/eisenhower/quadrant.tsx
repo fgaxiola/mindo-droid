@@ -25,8 +25,7 @@ export function Quadrant({ quadrant, tasks }: QuadrantProps) {
       ref={setNodeRef}
       className={cn(
         "flex flex-col p-4 rounded-lg border-2 transition-all min-h-[200px]",
-        quadrant.color,
-        isOver && "ring-2 ring-primary ring-offset-2"
+        quadrant.color
       )}
     >
       <div className="mb-3">

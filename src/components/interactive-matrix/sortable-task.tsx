@@ -26,25 +26,16 @@ export function SortableTask({ task }: SortableTaskProps) {
   };
 
   return (
-    <div className="relative">
-      {isOver && !isDragging && (
-        <div 
-          className={cn(
-            "absolute left-0 right-0 h-0.5 bg-black z-10",
-            transform && transform.y > 0 ? "top-0 -translate-y-1" : "bottom-0 translate-y-1"
-          )} 
-        />
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        "bg-white border border-border rounded-lg shadow-sm cursor-grab active:cursor-grabbing select-none p-3 transition-shadow hover:shadow-md",
+        isDragging && "opacity-0"
       )}
-      <div
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-        className={cn(
-          "bg-white border border-border rounded-lg shadow-sm cursor-grab active:cursor-grabbing select-none p-3 transition-shadow hover:shadow-md",
-          isDragging && "opacity-0"
-        )}
-      >
+    >
         <h4 className="text-xs font-medium text-foreground line-clamp-2">
           {task.title}
         </h4>
@@ -64,7 +55,6 @@ export function SortableTask({ task }: SortableTaskProps) {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 }

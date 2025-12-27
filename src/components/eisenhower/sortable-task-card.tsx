@@ -27,27 +27,18 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
   };
 
   return (
-    <div className="relative">
-      {isOver && !isDragging && (
-        <div 
-          className={cn(
-            "absolute left-0 right-0 h-0.5 bg-black z-10",
-            transform && transform.y > 0 ? "bottom-0 translate-y-1" : "top-0 -translate-y-1"
-          )} 
-        />
+    <Card
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className={cn(
+        "p-3 cursor-grab active:cursor-grabbing select-none",
+        "border border-border bg-card hover:bg-accent/50 transition-colors",
+        isDragging && "opacity-0"
       )}
-      <Card
-        ref={setNodeRef}
-        style={style}
-        {...listeners}
-        {...attributes}
-        className={cn(
-          "p-3 cursor-grab active:cursor-grabbing select-none",
-          "border border-border bg-card hover:bg-accent/50 transition-colors",
-          isDragging && "opacity-0"
-        )}
-      >
-        <div className="space-y-2">
+    >
+      <div className="space-y-2">
           <h4 className="text-sm font-medium text-foreground line-clamp-2">
             {task.title}
           </h4>
@@ -71,6 +62,5 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
           )}
         </div>
       </Card>
-    </div>
   );
 }

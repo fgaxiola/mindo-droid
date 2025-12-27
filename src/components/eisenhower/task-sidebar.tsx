@@ -27,8 +27,7 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "w-72 border-l border-border bg-muted/30 flex flex-col",
-        isOver && "bg-muted/50"
+        "w-72 border-l border-border bg-muted/30 flex flex-col"
       )}
     >
       <div className="p-4 border-b border-border">
