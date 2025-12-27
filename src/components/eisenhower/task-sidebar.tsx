@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -8,13 +9,18 @@ import {
 import { Task } from "@/types/task";
 import { SortableTaskCard } from "./sortable-task-card";
 import { cn } from "@/lib/utils";
+import { CreateTaskButton } from "@/components/tasks/create-task-button";
+import { TaskDialog } from "@/components/tasks/task-dialog";
+import { useTaskMutations } from "@/hooks/use-tasks";
 
 interface TaskSidebarProps {
   tasks: Task[];
 }
 
 export function TaskSidebar({ tasks }: TaskSidebarProps) {
-  const { setNodeRef, isOver } = useDroppable({
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { createTask } = useTaskMutations();
+  const { setNodeRef } = useDroppable({
     id: "sidebar",
     data: { coords: { x: -1, y: -1 } },
   });
@@ -27,14 +33,17 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "w-72 border-l border-border bg-muted/30 flex flex-col"
+        "w-72 border-l border-border bg-muted/30 flex flex-col group relative"
       )}
     >
-      <div className="p-4 border-b border-border">
-        <h2 className="text-sm font-semibold text-foreground">Tasks</h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          Drag tasks to the matrix
-        </p>
+      <div className="p-4 border-b border-border flex justify-between items-start">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Tasks</h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Drag tasks to the matrix
+          </p>
+        </div>
+        <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="relative opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         <SortableContext
@@ -51,6 +60,17 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
           </div>
         )}
       </div>
+
+      <TaskDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onSave={async (data) => {
+          await createTask.mutateAsync({
+            ...data,
+            coords: { x: -1, y: -1 },
+          });
+        }}
+      />
     </div>
   );
 }

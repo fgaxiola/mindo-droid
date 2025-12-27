@@ -1,20 +1,26 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { DraggableTask } from "./draggable-task";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
+import { CreateTaskButton } from "@/components/tasks/create-task-button";
+import { TaskDialog } from "@/components/tasks/task-dialog";
+import { useTaskMutations } from "@/hooks/use-tasks";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
 }
 
 export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createPosition, setCreatePosition] = useState<{ x: number; y: number } | null>(null);
+  const { createTask } = useTaskMutations();
   const containerRef = useRef<HTMLDivElement>(null);
   const dictionary = useDictionary();
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: "matrix-canvas",
   });
 
@@ -29,9 +35,16 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
         ).current = node;
       }}
       className={cn(
-        "relative flex-1 bg-[#f5f5f0] rounded-lg overflow-hidden"
+        "relative flex-1 bg-[#f5f5f0] rounded-lg overflow-hidden group"
       )}
     >
+      <div className="absolute top-4 right-4 z-20">
+         <CreateTaskButton onClick={() => {
+             setIsCreateOpen(true);
+             setCreatePosition({ x: 50, y: 50 });
+         }} className="relative opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
+
       {/* Grid Background */}
       <div className="absolute inset-0 opacity-20">
         <svg width="100%" height="100%">
@@ -158,6 +171,17 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
           }}
         />
       ))}
+
+      <TaskDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onSave={async (data) => {
+          await createTask.mutateAsync({
+            ...data,
+            matrixPosition: createPosition,
+          });
+        }}
+      />
     </div>
   );
 }

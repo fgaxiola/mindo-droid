@@ -14,7 +14,6 @@ import {
 } from "@dnd-kit/core";
 import {
   PositionedTask,
-  useInteractiveMatrixStore,
   MatrixPosition,
 } from "@/stores/interactive-matrix-store";
 import { MatrixCanvas } from "./matrix-canvas";
@@ -22,6 +21,7 @@ import { TaskPanel } from "./task-panel";
 import { DraggableTaskOverlay } from "./draggable-task";
 import { Task } from "@/types/task";
 import { useDictionary } from "@/providers/dictionary-provider";
+import { useTaskMutations, useTasks } from "@/hooks/use-tasks";
 
 interface InteractiveMatrixBoardProps {
   initialTasks: Task[];
@@ -33,8 +33,10 @@ export function InteractiveMatrixBoard({
   onTaskPositionChange,
 }: InteractiveMatrixBoardProps) {
   const dictionary = useDictionary();
-  const { tasks, setTasks, updateTaskPosition, moveTask } = useInteractiveMatrixStore();
+  const { data: tasks = initialTasks } = useTasks();
+  const { updateTask } = useTaskMutations();
   const [activeTask, setActiveTask] = useState<PositionedTask | null>(null);
+  const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks);
   const matrixRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
@@ -46,20 +48,32 @@ export function InteractiveMatrixBoard({
   );
 
   useEffect(() => {
-    if (tasks.length === 0 && initialTasks.length > 0) {
-      const positionedTasks: PositionedTask[] = initialTasks.map((task) => ({
-        ...task,
-        matrixPosition: null,
-      }));
-      setTasks(positionedTasks);
+    if (tasks) {
+        // We need to preserve the order of localTasks if we are just receiving updates
+        // but for now, let's just sync with server to ensure consistency
+        // A better approach would be to only update if not dragging, but 
+        // local state should handle the dragging phase.
+        setLocalTasks(tasks);
     }
-  }, [initialTasks, tasks.length, setTasks]);
+  }, [tasks]);
+
+  const moveTaskLocally = (activeId: string, overId: string) => {
+      setLocalTasks((prev) => {
+          const oldIndex = prev.findIndex((t) => t.id === activeId);
+          const newIndex = prev.findIndex((t) => t.id === overId);
+          if (oldIndex === -1 || newIndex === -1) return prev;
+          const newTasks = [...prev];
+          const [removed] = newTasks.splice(oldIndex, 1);
+          newTasks.splice(newIndex, 0, removed);
+          return newTasks;
+      });
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const task = tasks.find((t) => t.id === active.id);
+    const task = localTasks.find((t) => t.id === active.id);
     if (task) {
-      setActiveTask(task);
+      setActiveTask(task as PositionedTask);
     }
   };
 
@@ -72,8 +86,8 @@ export function InteractiveMatrixBoard({
 
     if (activeId === overId) return;
 
-    const currentTask = tasks.find((t) => t.id === activeId);
-    const overTask = tasks.find((t) => t.id === overId);
+    const currentTask = localTasks.find((t) => t.id === activeId);
+    const overTask = localTasks.find((t) => t.id === overId);
 
     if (!currentTask) return;
 
@@ -83,25 +97,27 @@ export function InteractiveMatrixBoard({
     if (isOverList) {
       // If task is not currently in list mode, put it in list mode
       if (currentTask.matrixPosition !== null) {
-        updateTaskPosition(activeId as string, null);
+        // Update local state immediately
+        const updated = localTasks.map(t => t.id === activeId ? { ...t, matrixPosition: null } : t);
+        setLocalTasks(updated);
       }
       
       // Perform sorting if over another task
       if (overTask && overTask.matrixPosition === null) {
-        moveTask(activeId as string, overId as string);
+        moveTaskLocally(activeId as string, overId as string);
       }
     } else {
       // We are NOT over the list (presumably over matrix or a matrix task)
       
       // If the task was originally from the matrix, and we temporarily moved it to list, restore it
-      // This prevents it from getting stuck in the list if we drag out without dropping
       if (currentTask.matrixPosition === null && activeTask?.matrixPosition) {
-         updateTaskPosition(activeId as string, activeTask.matrixPosition);
+         const updated = localTasks.map(t => t.id === activeId ? { ...t, matrixPosition: activeTask.matrixPosition } : t);
+         setLocalTasks(updated);
       }
     }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
 
@@ -126,16 +142,24 @@ export function InteractiveMatrixBoard({
           y: Math.max(5, Math.min(95, y)),
         };
         
-        updateTaskPosition(taskId, position);
+        // Update locally first for immediate feedback (though handleDragOver usually handles this)
+        const updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: position } : t);
+        setLocalTasks(updated);
+
+        await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: position } });
         onTaskPositionChange?.(taskId, position);
       }
     } else {
       // Check if dropped into the sidebar (task-panel or onto another task in the list)
       const isOverTaskPanel = over.id === "task-panel";
-      const isOverPanelTask = tasks.find(t => t.id === over.id)?.matrixPosition === null;
+      const isOverPanelTask = localTasks.find(t => t.id === over.id)?.matrixPosition === null;
 
       if (isOverTaskPanel || isOverPanelTask) {
-        updateTaskPosition(taskId, null);
+        // Update locally first
+        const updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: null } : t);
+        setLocalTasks(updated);
+
+        await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: null } });
         onTaskPositionChange?.(taskId, null);
       }
     }
@@ -160,10 +184,10 @@ export function InteractiveMatrixBoard({
             </p>
           </div>
           <div ref={matrixRef} className="flex-1 flex">
-            <MatrixCanvas tasks={tasks} />
+            <MatrixCanvas tasks={localTasks as PositionedTask[]} />
           </div>
         </div>
-        <TaskPanel tasks={tasks} />
+        <TaskPanel tasks={localTasks as PositionedTask[]} />
       </div>
       <DragOverlay dropAnimation={null}>
         {activeTask ? (

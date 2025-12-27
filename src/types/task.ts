@@ -18,7 +18,14 @@ export interface Task {
   coords: TaskCoords;
   status: TaskStatus;
   tags: Tag[];
-  projectId: string;
+  projectId?: string;
+  due_date?: Date | string;
+  estimated_time?: number;
+  matrixPosition?: { x: number; y: number } | null;
+  // DB specific fields
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type QuadrantType = "do" | "schedule" | "delegate" | "eliminate";

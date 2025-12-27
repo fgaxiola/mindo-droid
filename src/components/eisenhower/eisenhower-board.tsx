@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -12,13 +12,12 @@ import {
   useSensors,
   pointerWithin,
 } from "@dnd-kit/core";
-import { useState } from "react";
+import { useTaskMutations, useTasks } from "@/hooks/use-tasks";
 import { Task, TaskCoords } from "@/types/task";
-import { useTaskStore } from "@/stores/task-store";
+import { useDictionary } from "@/providers/dictionary-provider";
 import { Matrix } from "./matrix";
 import { TaskSidebar } from "./task-sidebar";
 import { TaskCard } from "./task-card";
-import { useDictionary } from "@/providers/dictionary-provider";
 
 interface EisenhowerBoardProps {
   initialTasks: Task[];
@@ -30,8 +29,10 @@ export function EisenhowerBoard({
   onTaskCoordsChange,
 }: EisenhowerBoardProps) {
   const dictionary = useDictionary();
-  const { tasks, setTasks, updateTaskCoords, moveTask } = useTaskStore();
+  const { data: tasks = initialTasks } = useTasks();
+  const { updateTask } = useTaskMutations();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -42,12 +43,24 @@ export function EisenhowerBoard({
   );
 
   useEffect(() => {
-    setTasks(initialTasks);
-  }, [initialTasks, setTasks]);
+    if (tasks) setLocalTasks(tasks);
+  }, [tasks]);
+
+  const moveTaskLocally = (activeId: string, overId: string) => {
+      setLocalTasks((prev) => {
+          const oldIndex = prev.findIndex((t) => t.id === activeId);
+          const newIndex = prev.findIndex((t) => t.id === overId);
+          if (oldIndex === -1 || newIndex === -1) return prev;
+          const newTasks = [...prev];
+          const [removed] = newTasks.splice(oldIndex, 1);
+          newTasks.splice(newIndex, 0, removed);
+          return newTasks;
+      });
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const task = tasks.find((t) => t.id === active.id);
+    const task = localTasks.find((t) => t.id === active.id);
     if (task) {
       setActiveTask(task);
     }
@@ -62,13 +75,10 @@ export function EisenhowerBoard({
 
     if (activeId === overId) return;
 
-    const activeTask = tasks.find((t) => t.id === activeId);
+    const activeTask = localTasks.find((t) => t.id === activeId);
     if (!activeTask) return;
 
-    // Check if over a task
-    const overTask = tasks.find((t) => t.id === overId);
-    
-    // Check if over a container
+    const overTask = localTasks.find((t) => t.id === overId);
     const isOverContainer = over.data.current?.coords;
 
     let targetCoords: TaskCoords | null = null;
@@ -80,23 +90,49 @@ export function EisenhowerBoard({
     }
 
     if (targetCoords) {
-      // If moving to a different container (different coords)
       if (
         activeTask.coords.x !== targetCoords.x ||
         activeTask.coords.y !== targetCoords.y
       ) {
-        updateTaskCoords(activeId, targetCoords);
-        onTaskCoordsChange?.(activeId, targetCoords);
+        // Update local state immediately for responsiveness
+         const updated = localTasks.map(t => t.id === activeId ? { ...t, coords: targetCoords! } : t);
+         // Move to end of list to prevent "weird space" bug when moving between lists
+         const oldIndex = updated.findIndex(t => t.id === activeId);
+         if (oldIndex !== -1) {
+             const [movedTask] = updated.splice(oldIndex, 1);
+             updated.push(movedTask);
+         }
+         setLocalTasks(updated);
       } 
-      // If in same container and over another task, reorder
       else if (overTask) {
-        moveTask(activeId, overId);
+        moveTaskLocally(activeId, overId);
       }
     }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
     setActiveTask(null);
+
+    if (!over) return;
+
+    const taskId = active.id as string;
+    
+    // Check if dropped on a Quadrant droppable area or over another task
+    const isOverContainer = over.data.current?.coords;
+    const overTask = localTasks.find((t) => t.id === over.id);
+    
+    let targetCoords: TaskCoords | null = null;
+
+    if (overTask) {
+        targetCoords = overTask.coords;
+    } else if (isOverContainer) {
+        targetCoords = over.data.current?.coords as TaskCoords;
+    }
+
+    if (targetCoords) {
+      await updateTask.mutateAsync({ id: taskId, updates: { coords: targetCoords } });
+    }
   };
 
   return (
@@ -139,10 +175,10 @@ export function EisenhowerBoard({
                 <span>{dictionary.matrix.not_important} ↓</span>
               </div>
             </div>
-            <Matrix tasks={tasks} />
+            <Matrix tasks={localTasks} />
           </div>
         </div>
-        <TaskSidebar tasks={tasks} />
+        <TaskSidebar tasks={localTasks} />
       </div>
       <DragOverlay>
         {activeTask ? <TaskCard task={activeTask} isOverlay /> : null}

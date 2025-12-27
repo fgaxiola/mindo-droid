@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -8,6 +9,9 @@ import {
 import { Task, Quadrant as QuadrantType } from "@/types/task";
 import { SortableTaskCard } from "./sortable-task-card";
 import { cn } from "@/lib/utils";
+import { CreateTaskButton } from "@/components/tasks/create-task-button";
+import { TaskDialog } from "@/components/tasks/task-dialog";
+import { useTaskMutations } from "@/hooks/use-tasks";
 
 interface QuadrantProps {
   quadrant: QuadrantType;
@@ -15,7 +19,9 @@ interface QuadrantProps {
 }
 
 export function Quadrant({ quadrant, tasks }: QuadrantProps) {
-  const { setNodeRef, isOver } = useDroppable({
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { createTask } = useTaskMutations();
+  const { setNodeRef } = useDroppable({
     id: `quadrant-${quadrant.type}`,
     data: { coords: quadrant.coords },
   });
@@ -24,15 +30,18 @@ export function Quadrant({ quadrant, tasks }: QuadrantProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col p-4 rounded-lg border-2 transition-all min-h-[200px]",
+        "flex flex-col p-4 rounded-lg border-2 transition-all min-h-[200px] group relative",
         quadrant.color
       )}
     >
-      <div className="mb-3">
-        <h3 className="text-sm font-semibold text-foreground">
-          {quadrant.label}
-        </h3>
-        <p className="text-xs text-muted-foreground">{quadrant.description}</p>
+      <div className="mb-3 flex justify-between items-start">
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">
+            {quadrant.label}
+          </h3>
+          <p className="text-xs text-muted-foreground">{quadrant.description}</p>
+        </div>
+        <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="relative opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto">
         <SortableContext
@@ -49,6 +58,17 @@ export function Quadrant({ quadrant, tasks }: QuadrantProps) {
           </div>
         )}
       </div>
+
+      <TaskDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onSave={async (data) => {
+          await createTask.mutateAsync({
+            ...data,
+            coords: quadrant.coords,
+          });
+        }}
+      />
     </div>
   );
 }
