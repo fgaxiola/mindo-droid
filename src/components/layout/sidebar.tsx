@@ -168,6 +168,33 @@ export function Sidebar() {
           )}
         </div>
 
+        <div className="p-2 border-t border-border">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggle}
+                className={cn(
+                  "w-full justify-center text-muted-foreground hover:text-foreground",
+                  !isCollapsed && "justify-end"
+                )}
+              >
+                {isCollapsed ? (
+                  <ChevronRightIcon className="w-4 h-4" />
+                ) : (
+                  <ChevronLeftIcon className="w-4 h-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={10}>
+              {isCollapsed
+                ? dictionary.sidebar.expand
+                : dictionary.sidebar.collapse}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
         <nav className="flex-1 py-4">
           <ul className="space-y-1 px-2">
             {NAV_ITEMS.map((item) => {
@@ -205,33 +232,6 @@ export function Sidebar() {
             })}
           </ul>
         </nav>
-
-        <div className="p-2 border-t border-border">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggle}
-                className={cn(
-                  "w-full justify-center text-muted-foreground hover:text-foreground",
-                  !isCollapsed && "justify-end"
-                )}
-              >
-                {isCollapsed ? (
-                  <ChevronRightIcon className="w-4 h-4" />
-                ) : (
-                  <ChevronLeftIcon className="w-4 h-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={10}>
-              {isCollapsed
-                ? dictionary.sidebar.expand
-                : dictionary.sidebar.collapse}
-            </TooltipContent>
-          </Tooltip>
-        </div>
       </aside>
     </TooltipProvider>
   );
