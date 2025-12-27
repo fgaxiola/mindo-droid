@@ -105,21 +105,46 @@ export function EisenhowerBoard({
     }
 
     if (targetCoords) {
-      if (
-        activeTask.coords.x !== targetCoords.x ||
-        activeTask.coords.y !== targetCoords.y
-      ) {
+      // Check if task is moving to a different list
+      const isMovingToList = activeTask.coords.x !== targetCoords.x || activeTask.coords.y !== targetCoords.y;
+
+      if (isMovingToList) {
         // Update local state immediately for responsiveness
-         const updated = localTasks.map(t => t.id === activeId ? { ...t, coords: targetCoords! } : t);
-         // Move to end of list to prevent "weird space" bug when moving between lists
-         const oldIndex = updated.findIndex(t => t.id === activeId);
-         if (oldIndex !== -1) {
+        const updated = localTasks.map(t => t.id === activeId ? { ...t, coords: targetCoords! } : t);
+        
+        // If we are over a specific task in the new list, insert relative to it
+        if (overTask) {
+           const oldIndex = updated.findIndex(t => t.id === activeId);
+           const newIndex = updated.findIndex(t => t.id === overId);
+           
+           if (oldIndex !== -1 && newIndex !== -1) {
              const [movedTask] = updated.splice(oldIndex, 1);
-             updated.push(movedTask);
-         }
-         setLocalTasks(updated);
+             // Insert at new index (swapping basically)
+             updated.splice(newIndex, 0, movedTask);
+           }
+        } else {
+           // If dropped on container (empty space), move to end of array to be safe, 
+           // but technically it should be just added to the group.
+           // However, to prevent it from being stuck in "weird space" index if the list is filtered,
+           // pushing to end of GLOBAL list is usually safe for "bottom of list" behavior.
+           // But if we want it at top, we can't easily guess. 
+           // For now, let's just update coords. The sortable context will handle the rest via subsequent DragOver events if user moves it.
+           // BUT, if we simply update coords, the index in the global array remains the same.
+           // If the global array is [A(Q1), B(Q2)], and we move A to Q2.
+           // It becomes [A(Q2), B(Q2)].
+           // In Q2 list, A comes before B.
+           // If user dropped it on "container" (empty space at bottom), they expect it at bottom.
+           // So moving to end of array is actually correct for "drop on container".
+           const oldIndex = updated.findIndex(t => t.id === activeId);
+           if (oldIndex !== -1) {
+               const [movedTask] = updated.splice(oldIndex, 1);
+               updated.push(movedTask);
+           }
+        }
+        setLocalTasks(updated);
       } 
       else if (overTask) {
+        // Same list sorting
         moveTaskLocally(activeId, overId);
       }
     }
