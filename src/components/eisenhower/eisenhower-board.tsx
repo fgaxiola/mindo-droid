@@ -10,7 +10,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCorners,
+  pointerWithin,
 } from "@dnd-kit/core";
 import { useState } from "react";
 import { Task, TaskCoords } from "@/types/task";
@@ -57,48 +57,52 @@ export function EisenhowerBoard({
     const { active, over } = event;
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeId = active.id as string;
+    const overId = over.id as string;
 
     if (activeId === overId) return;
 
     const activeTask = tasks.find((t) => t.id === activeId);
-    const overTask = tasks.find((t) => t.id === overId);
-
     if (!activeTask) return;
 
-    // If over a task
+    // Check if over a task
+    const overTask = tasks.find((t) => t.id === overId);
+    
+    // Check if over a container
+    const isOverContainer = over.data.current?.coords;
+
+    let targetCoords: TaskCoords | null = null;
+
     if (overTask) {
-      // Allow sorting if in same container
+      targetCoords = overTask.coords;
+    } else if (isOverContainer) {
+      targetCoords = over.data.current?.coords as TaskCoords;
+    }
+
+    if (targetCoords) {
+      // If moving to a different container (different coords)
       if (
-        activeTask.coords.x === overTask.coords.x &&
-        activeTask.coords.y === overTask.coords.y
+        activeTask.coords.x !== targetCoords.x ||
+        activeTask.coords.y !== targetCoords.y
       ) {
-        moveTask(activeId as string, overId as string);
+        updateTaskCoords(activeId, targetCoords);
+        onTaskCoordsChange?.(activeId, targetCoords);
+      } 
+      // If in same container and over another task, reorder
+      else if (overTask) {
+        moveTask(activeId, overId);
       }
     }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
     setActiveTask(null);
-
-    if (!over) return;
-
-    const taskId = active.id as string;
-    
-    // Check if dropped on a Quadrant droppable area
-    if (over.data.current?.coords) {
-      const targetCoords = over.data.current.coords as TaskCoords;
-      updateTaskCoords(taskId, targetCoords);
-      onTaskCoordsChange?.(taskId, targetCoords);
-    }
   };
 
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}

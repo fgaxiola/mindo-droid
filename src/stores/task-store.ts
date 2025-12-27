@@ -17,11 +17,17 @@ export const useTaskStore = create<TaskState>((set) => ({
   setTasks: (tasks) => set({ tasks }),
   
   updateTaskCoords: (taskId, coords) =>
-    set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === taskId ? { ...task, coords } : task
-      ),
-    })),
+    set((state) => {
+      const taskIndex = state.tasks.findIndex((t) => t.id === taskId);
+      if (taskIndex === -1) return state;
+
+      const updatedTask = { ...state.tasks[taskIndex], coords };
+      const otherTasks = state.tasks.filter((t) => t.id !== taskId);
+
+      return {
+        tasks: [...otherTasks, updatedTask],
+      };
+    }),
   
   addTask: (task) =>
     set((state) => ({
