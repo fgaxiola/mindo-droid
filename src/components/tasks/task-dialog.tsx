@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -33,7 +34,9 @@ import { useDictionary } from "@/providers/dictionary-provider";
 const MAX_TITLE_LENGTH = 150;
 const MAX_DESCRIPTION_LENGTH = 1500;
 
-const createTaskSchema = (dict: any) =>
+type Dictionary = Record<string, any>;
+
+const createTaskSchema = (dict: Dictionary) =>
   z.object({
     title: z
       .string()
@@ -64,8 +67,8 @@ interface TaskDialogProps {
   task?: Task;
   onSave: (data: TaskFormData) => Promise<void>;
   onDelete?: () => Promise<void>;
-  onRestore?: (version: any) => Promise<void>;
-  versions?: any[];
+  onRestore?: (version: { id: string; created_at: string; snapshot: Task }) => Promise<void>;
+  versions?: Array<{ id: string; created_at: string; snapshot: Task }>;
   viewOnly?: boolean;
 }
 
@@ -83,6 +86,8 @@ export function TaskDialog({
   const [activeTab, setActiveTab] = useState("details");
   const [titleLength, setTitleLength] = useState(0);
   const [descriptionLength, setDescriptionLength] = useState(0);
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
+  const estimatedTimeRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -148,9 +153,33 @@ export function TaskDialog({
     reset();
   };
 
+  const isSubmitDisabled = isSubmitting || (task && !isDirty);
+
+  // Handle keyboard shortcuts (CMD+ENTER to submit)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      if (!isSubmitDisabled) {
+        handleSubmit(onSubmit)(e);
+      }
+    }
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setValue("due_date", date);
+    setIsDatePopoverOpen(false);
+    // Focus on estimated_time input after popover closes
+    setTimeout(() => {
+      estimatedTimeRef.current?.focus();
+    }, 100);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+      <DialogContent
+          className="max-w-2xl max-h-[90vh] flex flex-col"
+          onKeyDown={handleKeyDown}
+        >
         <DialogHeader>
           <DialogTitle>
             {task
@@ -218,7 +247,7 @@ export function TaskDialog({
                     control={control}
                     name="due_date"
                     render={({ field }) => (
-                      <Popover>
+                      <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant={"outline"}
@@ -241,7 +270,7 @@ export function TaskDialog({
                           <Calendar
                             mode="single"
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={handleDateSelect}
                             initialFocus
                           />
                         </PopoverContent>
@@ -262,6 +291,9 @@ export function TaskDialog({
                       disabled={fieldsDisabled}
                       className={cn("pl-9", fieldsDisabled && "opacity-70")}
                       {...register("estimated_time", { valueAsNumber: true })}
+                      ref={(e) => {
+                        if (e) estimatedTimeRef.current = e as HTMLInputElement;
+                      }}
                     />
                   </div>
                 </div>
@@ -320,7 +352,7 @@ export function TaskDialog({
                   </Button>
                   <Button
                     type="submit"
-                    disabled={isSubmitting || (task && !isDirty)}
+                    disabled={isSubmitDisabled}
                   >
                     {task
                       ? dictionary.task_dialog?.save_changes
@@ -337,7 +369,7 @@ export function TaskDialog({
           >
             <ScrollArea className="flex-1 h-[400px]">
               <div className="space-y-4 p-1">
-                {versions.map((version, index) => {
+                {versions.map((version) => {
                   const snapshot = version.snapshot;
                   return (
                     <div

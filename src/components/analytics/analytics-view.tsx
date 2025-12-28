@@ -9,7 +9,7 @@ import { WeekView } from "./week-view";
 import { MonthView } from "./month-view";
 import { StatsCard } from "./stats-card";
 import { TaskDialog } from "@/components/tasks/task-dialog";
-import { useTaskMutations, useTasks } from "@/hooks/use-tasks";
+import { useTaskMutations } from "@/hooks/use-tasks";
 import { subDays, isSameDay, isWeekend, subMonths, eachDayOfInterval } from "date-fns";
 
 interface AnalyticsViewProps {
@@ -22,7 +22,6 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isViewMode, setIsViewMode] = useState(true);
 
   const today = new Date();
 
@@ -33,16 +32,14 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
     return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
   });
 
-  const { data: latestTasks } = useTasks();
-  const { updateTask } = useTaskMutations();
+  const { updateTask, deleteTask } = useTaskMutations();
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
-    setIsViewMode(true);
     setIsDialogOpen(true);
   };
 
-  const handleSaveTask = async (data: any) => {
+  const handleSaveTask = async (data: { title: string; description?: string; due_date?: Date; estimated_time?: number; is_completed?: boolean }) => {
     if (!selectedTask) return;
 
     await updateTask.mutateAsync({
@@ -58,11 +55,13 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
   };
 
   const handleDeleteTask = async () => {
-    // Delete functionality - implement if needed with useTaskMutations
+    if (!selectedTask) return;
+    await deleteTask.mutateAsync(selectedTask.id);
   };
 
-  const handleRestoreTask = async (version: any) => {
+  const handleRestoreTask = async (version: { id: string; created_at: string; snapshot: Task }) => {
     // Restore functionality - implement if needed
+    console.log("Restore version:", version);
   };
 
   const handleToggleTask = async (taskId: string) => {
