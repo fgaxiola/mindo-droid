@@ -12,14 +12,6 @@ import { cn } from "@/lib/utils";
 import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
-import { ArchiveRestore, Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useDictionary } from "@/providers/dictionary-provider";
 
 interface TaskSidebarProps {
