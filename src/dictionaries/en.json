@@ -1,71 +1,79 @@
 {
-  "common": {
-    "loading": "Loading...",
-    "sign_out": "Sign out",
-    "app_name": "Focus App"
-  },
   "auth": {
-    "sign_in_google": "Sign in with Google",
-    "or_continue_with": "Or continue with",
+    "already_have_account": "Already have an account?",
+    "dont_have_account": "Don't have an account?",
     "email": "Email",
+    "or_continue_with": "Or continue with",
     "password": "Password",
     "sign_in": "Sign In",
+    "sign_in_google": "Sign in with Google",
     "sign_up": "Sign Up",
     "signing_in": "Signing in...",
-    "signing_up": "Signing up...",
-    "dont_have_account": "Don't have an account?",
-    "already_have_account": "Already have an account?"
+    "signing_up": "Signing up..."
   },
-  "sidebar": {
-    "pomodoro": "Pomodoro",
-    "priority_matrix": "Priority Matrix",
-    "interactive_matrix": "Interactive Matrix",
-    "expand": "Expand",
-    "collapse": "Collapse"
-  },
-  "pomodoro": {
-    "focus": "Focus",
-    "short_break": "Short Break",
-    "long_break": "Long Break",
-    "start": "Start",
-    "pause": "Pause",
-    "reset": "Reset",
-    "sessions_completed": "Sessions completed"
-  },
-  "matrix": {
-    "title": "Eisenhower Matrix",
-    "subtitle": "Prioritize tasks by urgency and importance",
-    "not_urgent": "Not Urgent",
-    "urgent": "Urgent",
-    "important": "Important",
-    "not_important": "Not Important",
-    "do": "DO",
-    "do_desc": "Urgent & Important",
-    "decide": "DECIDE",
-    "decide_desc": "Not Urgent & Important",
-    "delegate": "DELEGATE",
-    "delegate_desc": "Urgent & Not Important",
-    "eliminate": "ELIMINATE",
-    "eliminate_desc": "Not Urgent & Not Important",
-    "unassigned_tasks": "Unassigned Tasks",
-    "drag_instructions": "Drag tasks to the matrix to prioritize them"
+  "common": {
+    "app_name": "Focus App",
+    "loading": "Loading...",
+    "sign_out": "Sign out"
   },
   "interactive_matrix": {
-    "title": "Interactive Eisenhower Matrix",
-    "subtitle": "Drag tasks freely on the matrix to prioritize them",
-    "tasks": "Tasks for today",
-    "drag_to_matrix": "Drag tasks to the matrix",
     "all_tasks_in_matrix": "All tasks are in the matrix",
-    "remove_instructions": "Drag tasks back here to remove them from the matrix",
-    "hacer": "1 DO",
-    "hacer_desc": "Critical immediate actions",
     "decidir": "2 DECIDE",
     "decidir_desc": "Improvements requiring planning",
     "delegar": "3 DELEGATE",
     "delegar_desc": "Tasks others can do",
+    "drag_to_matrix": "Drag tasks to the matrix",
     "eliminar": "4 ELIMINATE",
     "eliminar_desc": "Activities providing no value",
+    "hacer": "1 DO",
+    "hacer_desc": "Critical immediate actions",
+    "more_important": "MORE IMPORTANT",
     "more_urgent": "MORE URGENT",
-    "more_important": "MORE IMPORTANT"
+    "remove_instructions": "Drag tasks back here to remove them from the matrix",
+    "subtitle": "Drag tasks freely on the matrix to prioritize them",
+    "tasks": "Tasks for today",
+    "title": "Interactive Eisenhower Matrix"
+  },
+  "matrix": {
+    "decide": "DECIDE",
+    "decide_desc": "Not Urgent & Important",
+    "delegate": "DELEGATE",
+    "delegate_desc": "Urgent & Not Important",
+    "do": "DO",
+    "do_desc": "Urgent & Important",
+    "drag_instructions": "Drag tasks to the matrix to prioritize them",
+    "eliminate": "ELIMINATE",
+    "eliminate_desc": "Not Urgent & Not Important",
+    "important": "Important",
+    "not_important": "Not Important",
+    "not_urgent": "Not Urgent",
+    "subtitle": "Prioritize tasks by urgency and importance",
+    "title": "Eisenhower Matrix",
+    "unassigned_tasks": "Unassigned Tasks",
+    "urgent": "Urgent"
+  },
+  "pomodoro": {
+    "focus": "Focus",
+    "long_break": "Long Break",
+    "pause": "Pause",
+    "reset": "Reset",
+    "sessions_completed": "Sessions completed",
+    "short_break": "Short Break",
+    "start": "Start"
+  },
+  "sidebar": {
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "interactive_matrix": "Interactive Matrix",
+    "pomodoro": "Pomodoro",
+    "priority_matrix": "Priority Matrix",
+    "analytics": "Analytics"
+  },
+  "analytics": {
+    "title": "Task Analytics",
+    "subtitle": "Track your completed tasks over time",
+    "timeline": "Timeline",
+    "no_tasks": "No completed tasks yet. Get some work done!",
+    "completed_on": "Completed on"
   }
 }

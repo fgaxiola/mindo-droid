@@ -79,6 +79,15 @@ export function useTaskMutations() {
       delete dbUpdates.matrixPosition;
       delete dbUpdates.coords;
 
+      // Handle completed_at timestamp
+      if (updates.is_completed !== undefined) {
+        if (updates.is_completed) {
+          dbUpdates.completed_at = new Date().toISOString();
+        } else {
+          dbUpdates.completed_at = null;
+        }
+      }
+
       const { data, error } = await supabase
         .from("tasks")
         .update(dbUpdates)

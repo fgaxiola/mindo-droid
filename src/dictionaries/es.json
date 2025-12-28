@@ -1,71 +1,79 @@
 {
-  "common": {
-    "loading": "Cargando...",
-    "sign_out": "Cerrar sesión",
-    "app_name": "App de Enfoque"
-  },
   "auth": {
-    "sign_in_google": "Iniciar sesión con Google",
-    "or_continue_with": "O continuar con",
+    "already_have_account": "¿Ya tienes una cuenta?",
+    "dont_have_account": "¿No tienes una cuenta?",
     "email": "Correo electrónico",
+    "or_continue_with": "O continuar con",
     "password": "Contraseña",
     "sign_in": "Iniciar Sesión",
+    "sign_in_google": "Iniciar sesión con Google",
     "sign_up": "Registrarse",
     "signing_in": "Iniciando sesión...",
-    "signing_up": "Registrándose...",
-    "dont_have_account": "¿No tienes una cuenta?",
-    "already_have_account": "¿Ya tienes una cuenta?"
+    "signing_up": "Registrándose..."
   },
-  "sidebar": {
-    "pomodoro": "Pomodoro",
-    "priority_matrix": "Matriz de Prioridad",
-    "interactive_matrix": "Matriz Interactiva",
-    "expand": "Expandir",
-    "collapse": "Colapsar"
-  },
-  "pomodoro": {
-    "focus": "Enfoque",
-    "short_break": "Descanso Corto",
-    "long_break": "Descanso Largo",
-    "start": "Iniciar",
-    "pause": "Pausar",
-    "reset": "Reiniciar",
-    "sessions_completed": "Sesiones completadas"
-  },
-  "matrix": {
-    "title": "Matriz de Eisenhower",
-    "subtitle": "Prioriza tareas por urgencia e importancia",
-    "not_urgent": "No Urgente",
-    "urgent": "Urgente",
-    "important": "Importante",
-    "not_important": "No Importante",
-    "do": "HACER",
-    "do_desc": "Urgente e Importante",
-    "decide": "DECIDIR",
-    "decide_desc": "No Urgente e Importante",
-    "delegate": "DELEGAR",
-    "delegate_desc": "Urgente y No Importante",
-    "eliminate": "ELIMINAR",
-    "eliminate_desc": "No Urgente y No Importante",
-    "unassigned_tasks": "Tareas Sin Asignar",
-    "drag_instructions": "Arrastra tareas a la matriz para priorizarlas"
+  "common": {
+    "app_name": "App de Enfoque",
+    "loading": "Cargando...",
+    "sign_out": "Cerrar sesión"
   },
   "interactive_matrix": {
-    "title": "Matriz de Eisenhower Interactiva",
-    "subtitle": "Arrastra las tareas libremente sobre la matriz para priorizarlas",
-    "tasks": "Tareas para hoy",
-    "drag_to_matrix": "Arrastra las tareas a la matriz",
     "all_tasks_in_matrix": "Todas las tareas están en la matriz",
-    "remove_instructions": "Arrastra tareas de vuelta aquí para removerlas de la matriz",
-    "hacer": "1 HACER",
-    "hacer_desc": "Acciones inmediatas críticas",
     "decidir": "2 DECIDIR",
     "decidir_desc": "Mejoras que requieren planificación",
     "delegar": "3 DELEGAR",
     "delegar_desc": "Tareas que otros pueden hacer",
+    "drag_to_matrix": "Arrastra las tareas a la matriz",
     "eliminar": "4 ELIMINAR",
     "eliminar_desc": "Actividades que no aportan valor",
+    "hacer": "1 HACER",
+    "hacer_desc": "Acciones inmediatas críticas",
+    "more_important": "MÁS IMPORTANTE",
     "more_urgent": "MÁS URGENTE",
-    "more_important": "MÁS IMPORTANTE"
+    "remove_instructions": "Arrastra tareas de vuelta aquí para removerlas de la matriz",
+    "subtitle": "Arrastra las tareas libremente sobre la matriz para priorizarlas",
+    "tasks": "Tareas para hoy",
+    "title": "Matriz de Eisenhower Interactiva"
+  },
+  "matrix": {
+    "decide": "DECIDIR",
+    "decide_desc": "No Urgente e Importante",
+    "delegate": "DELEGAR",
+    "delegate_desc": "Urgente y No Importante",
+    "do": "HACER",
+    "do_desc": "Urgente e Importante",
+    "drag_instructions": "Arrastra tareas a la matriz para priorizarlas",
+    "eliminate": "ELIMINAR",
+    "eliminate_desc": "No Urgente y No Importante",
+    "important": "Importante",
+    "not_important": "No Importante",
+    "not_urgent": "No Urgente",
+    "subtitle": "Prioriza tareas por urgencia e importancia",
+    "title": "Matriz de Eisenhower",
+    "unassigned_tasks": "Tareas Sin Asignar",
+    "urgent": "Urgente"
+  },
+  "pomodoro": {
+    "focus": "Enfoque",
+    "long_break": "Descanso Largo",
+    "pause": "Pausar",
+    "reset": "Reiniciar",
+    "sessions_completed": "Sesiones completadas",
+    "short_break": "Descanso Corto",
+    "start": "Iniciar"
+  },
+  "sidebar": {
+    "collapse": "Colapsar",
+    "expand": "Expandir",
+    "interactive_matrix": "Matriz Interactiva",
+    "pomodoro": "Pomodoro",
+    "priority_matrix": "Matriz de Prioridad",
+    "analytics": "Analíticas"
+  },
+  "analytics": {
+    "title": "Analíticas de Tareas",
+    "subtitle": "Rastrea tus tareas completadas en el tiempo",
+    "timeline": "Línea de tiempo",
+    "no_tasks": "Aún no hay tareas completadas. ¡Empieza a trabajar!",
+    "completed_on": "Completado el"
   }
 }

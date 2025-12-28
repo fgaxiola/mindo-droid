@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
-import { TimerIcon } from "lucide-react";
+import { TimerIcon, BarChart2 } from "lucide-react";
 
 interface NavItem {
   href: string;
@@ -144,6 +144,11 @@ export function Sidebar() {
       href: `/${currentLang}/interactive-matrix`,
       label: dictionary.sidebar.interactive_matrix,
       icon: <CrosshairIcon className="w-5 h-5" />,
+    },
+    {
+      href: `/${currentLang}/analytics`,
+      label: dictionary.sidebar.analytics,
+      icon: <BarChart2 className="w-5 h-5" />,
     },
   ];
 
