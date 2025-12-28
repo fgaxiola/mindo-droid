@@ -68,7 +68,7 @@ export function TaskDialog({
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -224,7 +224,7 @@ export function TaskDialog({
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isSubmitting}>
+                  <Button type="submit" disabled={isSubmitting || (task && !isDirty)}>
                     {task ? "Save Changes" : "Create Task"}
                   </Button>
                 </div>
