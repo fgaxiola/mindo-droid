@@ -42,39 +42,40 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
         {...listeners}
         {...attributes}
         className={cn(
-          "group p-3 cursor-grab active:cursor-grabbing select-none relative",
+          "group p-3 select-none relative",
           "border border-border bg-card hover:bg-accent/50 transition-colors",
-          isDragging && "opacity-0",
-          isOverlay && "shadow-lg rotate-3 cursor-grabbing"
+          !isDragging && !isOverlay && "cursor-default",
+          (isDragging || isOverlay) && "cursor-grabbing shadow-lg rotate-3",
+          isDragging && "opacity-0"
         )}
       >
-        <div className={cn(
-          "absolute top-2 right-2 transition-opacity z-10",
-          isAnyDragging && !isOverlay ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
-        )}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 bg-background/80 hover:bg-background shadow-sm"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent drag start
-              setIsEditOpen(true);
-            }}
-          >
-            <Pencil className="h-3 w-3" />
-          </Button>
-        </div>
         <div className="space-y-2">
           <div className="flex items-start gap-2 pr-6">
-            {task.is_completed ? (
-              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-            ) : (
-              <Circle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-            )}
-            <h4 className={cn(
-              "text-sm font-medium text-foreground line-clamp-2",
-              task.is_completed && "line-through text-muted-foreground"
-            )}>
+            <button
+              className="mt-0.5 shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                updateTask.mutate({ id: task.id, updates: { is_completed: !task.is_completed } });
+              }}
+              onPointerDown={(e) => e.stopPropagation()} // Prevent drag start
+            >
+              {task.is_completed ? (
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              ) : (
+                <Circle className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+            <h4 
+              className={cn(
+                "text-sm font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
+                task.is_completed && "line-through text-muted-foreground"
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditOpen(true);
+              }}
+              onPointerDown={(e) => e.stopPropagation()} // Prevent drag start
+            >
               {task.title}
             </h4>
           </div>
