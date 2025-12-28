@@ -6,7 +6,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Task } from "@/types/task";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Pencil } from "lucide-react";
+import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations, useTaskVersions, useRestoreTaskVersion } from "@/hooks/use-tasks";
@@ -65,9 +65,19 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
           </Button>
         </div>
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-foreground line-clamp-2 pr-6">
-            {task.title}
-          </h4>
+          <div className="flex items-start gap-2 pr-6">
+            {task.is_completed ? (
+              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+            ) : (
+              <Circle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            )}
+            <h4 className={cn(
+              "text-sm font-medium text-foreground line-clamp-2",
+              task.is_completed && "line-through text-muted-foreground"
+            )}>
+              {task.title}
+            </h4>
+          </div>
           {task.description && (
             <div className="text-xs text-muted-foreground line-clamp-2" dangerouslySetInnerHTML={{ __html: task.description }} />
           )}

@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Task } from "@/types/task"; // Assuming you update Task type to match DB
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,6 +37,7 @@ const taskSchema = z.object({
   description: z.string().max(1500).optional(),
   due_date: z.date().optional(),
   estimated_time: z.number().min(0).optional(),
+  is_completed: z.boolean().optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -74,6 +76,7 @@ export function TaskDialog({
       description: task?.description || "",
       due_date: task?.due_date ? new Date(task.due_date) : undefined,
       estimated_time: task?.estimated_time || 0,
+      is_completed: task?.is_completed || false,
     },
   });
 
@@ -85,6 +88,7 @@ export function TaskDialog({
         description: task?.description || "",
         due_date: task?.due_date ? new Date(task.due_date) : undefined,
         estimated_time: task?.estimated_time || 0,
+        is_completed: task?.is_completed || false,
       });
     }
   }, [task, open, reset]);
@@ -114,12 +118,26 @@ export function TaskDialog({
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
-                <Input 
-                  id="title" 
-                  {...register("title")} 
-                  placeholder="Task title"
-                  autoFocus 
-                />
+                <div className="flex items-center gap-3">
+                  <Controller
+                    control={control}
+                    name="is_completed"
+                    render={({ field }) => (
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-label="Mark as completed"
+                      />
+                    )}
+                  />
+                  <Input 
+                    id="title" 
+                    {...register("title")} 
+                    placeholder="Task title"
+                    autoFocus 
+                    className="flex-1"
+                  />
+                </div>
                 {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
               </div>
 

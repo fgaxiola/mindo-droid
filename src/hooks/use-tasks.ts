@@ -48,6 +48,7 @@ export function useTaskMutations() {
         description: taskData.description,
         due_date: taskData.due_date,
         estimated_time: taskData.estimated_time,
+        is_completed: taskData.is_completed || false,
         tags: [],
         matrix_position: taskData.matrixPosition || null, // For interactive matrix
         quadrant_coords: taskData.coords || { x: -1, y: -1 }, // For priority matrix

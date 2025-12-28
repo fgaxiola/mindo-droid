@@ -5,7 +5,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { cn } from "@/lib/utils";
-import { Pencil } from "lucide-react";
+import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations, useTaskVersions, useRestoreTaskVersion } from "@/hooks/use-tasks";
@@ -66,9 +66,19 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
             <Pencil className="h-2.5 w-2.5" />
           </Button>
         </div>
-        <h4 className="text-xs font-medium text-foreground line-clamp-2 pr-5">
-          {task.title}
-        </h4>
+        <div className="flex items-start gap-2 pr-5">
+          {task.is_completed ? (
+            <CheckCircle2 className="h-3 w-3 text-green-500 mt-0.5 shrink-0" />
+          ) : (
+            <Circle className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+          )}
+          <h4 className={cn(
+            "text-xs font-medium text-foreground line-clamp-2",
+            task.is_completed && "line-through text-muted-foreground"
+          )}>
+            {task.title}
+          </h4>
+        </div>
         {!isOnMatrix && task.description && (
           <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1" dangerouslySetInnerHTML={{ __html: task.description }} />
         )}
@@ -116,9 +126,19 @@ export function DraggableTaskOverlay({ task, isFromMatrix }: { task: PositionedT
         isFromMatrix ? "p-2 w-32" : "p-3 w-56"
       )}
     >
-      <h4 className="text-xs font-medium text-foreground line-clamp-2">
-        {task.title}
-      </h4>
+      <div className="flex items-start gap-2 pr-5">
+        {task.is_completed ? (
+          <CheckCircle2 className="h-3 w-3 text-green-500 mt-0.5 shrink-0" />
+        ) : (
+          <Circle className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
+        )}
+        <h4 className={cn(
+          "text-xs font-medium text-foreground line-clamp-2",
+          task.is_completed && "line-through text-muted-foreground"
+        )}>
+          {task.title}
+        </h4>
+      </div>
       {!isFromMatrix && task.description && (
         <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1" dangerouslySetInnerHTML={{ __html: task.description }} />
       )}

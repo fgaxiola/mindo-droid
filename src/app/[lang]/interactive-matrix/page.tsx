@@ -13,6 +13,7 @@ const DEMO_TASKS: Task[] = [
     status: "in_progress",
     tags: [{ id: "t1", name: "Bug", color: "#ef4444" }],
     projectId: "p1",
+    is_completed: false,
   },
   {
     id: "im-2",
@@ -22,6 +23,7 @@ const DEMO_TASKS: Task[] = [
     status: "pending",
     tags: [{ id: "t2", name: "Planning", color: "#3b82f6" }],
     projectId: "p1",
+    is_completed: false,
   },
   {
     id: "im-3",
@@ -31,6 +33,7 @@ const DEMO_TASKS: Task[] = [
     status: "pending",
     tags: [{ id: "t3", name: "Admin", color: "#f59e0b" }],
     projectId: "p1",
+    is_completed: false,
   },
   {
     id: "im-4",
@@ -40,6 +43,7 @@ const DEMO_TASKS: Task[] = [
     status: "pending",
     tags: [],
     projectId: "p1",
+    is_completed: false,
   },
   {
     id: "im-5",
@@ -49,6 +53,7 @@ const DEMO_TASKS: Task[] = [
     status: "pending",
     tags: [{ id: "t4", name: "Feature", color: "#22c55e" }],
     projectId: "p1",
+    is_completed: false,
   },
   {
     id: "im-6",
@@ -58,6 +63,7 @@ const DEMO_TASKS: Task[] = [
     status: "pending",
     tags: [{ id: "t5", name: "Docs", color: "#8b5cf6" }],
     projectId: "p1",
+    is_completed: false,
   },
   {
     id: "im-7",
@@ -67,6 +73,7 @@ const DEMO_TASKS: Task[] = [
     status: "pending",
     tags: [{ id: "t6", name: "Meeting", color: "#ec4899" }],
     projectId: "p1",
+    is_completed: false,
   },
   {
     id: "im-8",
@@ -76,6 +83,7 @@ const DEMO_TASKS: Task[] = [
     status: "pending",
     tags: [{ id: "t7", name: "Maintenance", color: "#06b6d4" }],
     projectId: "p1",
+    is_completed: false,
   },
 ];
 

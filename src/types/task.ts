@@ -22,6 +22,7 @@ export interface Task {
   due_date?: Date | string;
   estimated_time?: number;
   matrixPosition?: { x: number; y: number } | null;
+  is_completed: boolean;
   // DB specific fields
   user_id?: string;
   created_at?: string;
