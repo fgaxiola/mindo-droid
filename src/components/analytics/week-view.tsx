@@ -9,9 +9,10 @@ import { CheckCircle2 } from "lucide-react";
 interface WeekViewProps {
   tasks: Task[];
   locale: "en" | "es";
+  onTaskClick?: (task: Task) => void;
 }
 
-export function WeekView({ tasks, locale }: WeekViewProps) {
+export function WeekView({ tasks, locale, onTaskClick }: WeekViewProps) {
   const dictionary = useDictionary();
   const dateLocale = locale === "es" ? es : enUS;
   const today = new Date();
@@ -49,9 +50,13 @@ export function WeekView({ tasks, locale }: WeekViewProps) {
               {dayTasks.map((task) => (
                 <div key={task.id} className="flex items-start gap-2 p-2 bg-background rounded border border-border/50 text-xs">
                   <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0 mt-0.5" />
-                  <span className="line-through text-muted-foreground break-words line-clamp-2">
+                  <button
+                    onClick={() => onTaskClick?.(task)}
+                    className="line-through text-muted-foreground break-words line-clamp-2 hover:text-foreground hover:underline cursor-pointer text-left"
+                    title={task.title}
+                  >
                     {task.title}
-                  </span>
+                  </button>
                 </div>
               ))}
               {dayTasks.length === 0 && (

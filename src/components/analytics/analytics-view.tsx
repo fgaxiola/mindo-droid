@@ -8,6 +8,8 @@ import { TodayView } from "./today-view";
 import { WeekView } from "./week-view";
 import { MonthView } from "./month-view";
 import { StatsCard } from "./stats-card";
+import { TaskDialog } from "@/components/tasks/task-dialog";
+import { useTaskMutations, useTasks } from "@/hooks/use-tasks";
 import { subDays, isSameDay, isWeekend, subMonths, eachDayOfInterval } from "date-fns";
 
 interface AnalyticsViewProps {
@@ -18,6 +20,10 @@ interface AnalyticsViewProps {
 export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
   const dictionary = useDictionary();
   const [activeTab, setActiveTab] = useState("today");
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(true);
+
   const today = new Date();
 
   // Sort tasks by completed_at (most recent first)
@@ -26,6 +32,38 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
     if (!b.completed_at) return -1;
     return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
   });
+
+  const { data: latestTasks } = useTasks();
+  const { updateTask } = useTaskMutations();
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsViewMode(true);
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveTask = async (data: any) => {
+    if (!selectedTask) return;
+
+    await updateTask.mutateAsync({
+      id: selectedTask.id,
+      updates: {
+        title: data.title,
+        description: data.description,
+        due_date: data.due_date,
+        estimated_time: data.estimated_time,
+        is_completed: data.is_completed,
+      },
+    });
+  };
+
+  const handleDeleteTask = async () => {
+    // Delete functionality - implement if needed with useTaskMutations
+  };
+
+  const handleRestoreTask = async (version: any) => {
+    // Restore functionality - implement if needed
+  };
 
   // Calculation Helpers
   const getWorkingDays = (start: Date, end: Date) => {
@@ -105,16 +143,27 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
         </TabsList>
         <div className="mt-6">
           <TabsContent value="today">
-            <TodayView tasks={sortedTasks} locale={locale} />
+            <TodayView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} />
           </TabsContent>
           <TabsContent value="week">
-            <WeekView tasks={sortedTasks} locale={locale} />
+            <WeekView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} />
           </TabsContent>
           <TabsContent value="month">
-            <MonthView tasks={sortedTasks} locale={locale} />
+            <MonthView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} />
           </TabsContent>
         </div>
       </Tabs>
+
+      <TaskDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        task={selectedTask}
+        onSave={handleSaveTask}
+        onDelete={handleDeleteTask}
+        onRestore={handleRestoreTask}
+        versions={[]}
+        viewOnly={selectedTask?.is_completed}
+      />
     </div>
   );
 }

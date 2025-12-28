@@ -9,9 +9,10 @@ import { CheckCircle2 } from "lucide-react";
 interface TodayViewProps {
   tasks: Task[];
   locale: "en" | "es";
+  onTaskClick?: (task: Task) => void;
 }
 
-export function TodayView({ tasks, locale }: TodayViewProps) {
+export function TodayView({ tasks, locale, onTaskClick }: TodayViewProps) {
   const dictionary = useDictionary();
   const dateLocale = locale === "es" ? es : enUS;
   const today = new Date();
@@ -43,10 +44,14 @@ export function TodayView({ tasks, locale }: TodayViewProps) {
             {todayTasks.map((task) => (
               <div key={task.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-md border border-border/50">
                 <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-                <span className="text-sm font-medium line-through text-muted-foreground">
+                <button
+                  onClick={() => onTaskClick?.(task)}
+                  className="text-sm font-medium line-through text-muted-foreground hover:text-foreground hover:underline cursor-pointer truncate text-left flex-1"
+                  title={task.title}
+                >
                   {task.title}
-                </span>
-                <span className="ml-auto text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded">
+                </button>
+                <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded shrink-0">
                   {format(new Date(task.completed_at!), "HH:mm")}
                 </span>
               </div>

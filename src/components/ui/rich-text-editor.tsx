@@ -13,6 +13,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   maxLength?: number;
+  readOnly?: boolean;
 }
 
 export function RichTextEditor({
@@ -21,6 +22,7 @@ export function RichTextEditor({
   placeholder,
   className,
   maxLength,
+  readOnly = false,
 }: RichTextEditorProps) {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,10 +57,12 @@ export function RichTextEditor({
       }),
     ],
     content,
+    editable: !readOnly,
     editorProps: {
       attributes: {
         class: cn(
           "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px]",
+          readOnly && "pointer-events-none opacity-70",
           className
         ),
       },

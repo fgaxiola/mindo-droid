@@ -66,6 +66,7 @@ interface TaskDialogProps {
   onDelete?: () => Promise<void>;
   onRestore?: (version: any) => Promise<void>;
   versions?: any[];
+  viewOnly?: boolean;
 }
 
 export function TaskDialog({
@@ -76,6 +77,7 @@ export function TaskDialog({
   onDelete,
   onRestore,
   versions = [],
+  viewOnly = false,
 }: TaskDialogProps) {
   const dictionary = useDictionary();
   const [activeTab, setActiveTab] = useState("details");
@@ -88,6 +90,7 @@ export function TaskDialog({
     control,
     reset,
     watch,
+    setValue,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<TaskFormData>({
     resolver: zodResolver(createTaskSchema(dictionary)),
@@ -134,6 +137,10 @@ export function TaskDialog({
       setDescriptionLength(task?.description?.length || 0);
     }
   }, [task, open, reset]);
+
+  // Watch is_completed to determine if fields should be disabled in viewOnly mode
+  const isCompleted = watch("is_completed");
+  const fieldsDisabled = viewOnly && !!isCompleted;
 
   const onSubmit = async (data: TaskFormData) => {
     await onSave(data);
@@ -190,7 +197,8 @@ export function TaskDialog({
                     placeholder="Task title"
                     maxLength={MAX_TITLE_LENGTH}
                     autoFocus
-                    className="flex-1"
+                    className={cn("flex-1", fieldsDisabled && "pointer-events-none opacity-70")}
+                    disabled={fieldsDisabled}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground text-right">
@@ -214,9 +222,11 @@ export function TaskDialog({
                         <PopoverTrigger asChild>
                           <Button
                             variant={"outline"}
+                            disabled={fieldsDisabled}
                             className={cn(
                               "w-full justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
+                              fieldsDisabled && "opacity-70"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -249,7 +259,8 @@ export function TaskDialog({
                     <Input
                       id="estimated_time"
                       type="number"
-                      className="pl-9"
+                      disabled={fieldsDisabled}
+                      className={cn("pl-9", fieldsDisabled && "opacity-70")}
                       {...register("estimated_time", { valueAsNumber: true })}
                     />
                   </div>
@@ -272,6 +283,7 @@ export function TaskDialog({
                       }}
                       placeholder={dictionary.task_dialog?.task_details}
                       maxLength={MAX_DESCRIPTION_LENGTH}
+                      readOnly={fieldsDisabled}
                     />
                   )}
                 />

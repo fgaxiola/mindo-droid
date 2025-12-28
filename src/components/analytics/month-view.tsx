@@ -10,9 +10,10 @@ import { cn } from "@/lib/utils";
 interface MonthViewProps {
   tasks: Task[];
   locale: "en" | "es";
+  onTaskClick?: (task: Task) => void;
 }
 
-export function MonthView({ tasks, locale }: MonthViewProps) {
+export function MonthView({ tasks, locale, onTaskClick }: MonthViewProps) {
   const dictionary = useDictionary();
   const dateLocale = locale === "es" ? es : enUS;
   const today = new Date();
@@ -72,9 +73,13 @@ export function MonthView({ tasks, locale }: MonthViewProps) {
                 {dayTasks.map((task) => (
                   <div key={task.id} className="flex items-center gap-1.5 overflow-hidden">
                     <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
-                    <span className="text-[10px] line-through text-muted-foreground truncate">
+                    <button
+                      onClick={() => onTaskClick?.(task)}
+                      className="text-[10px] line-through text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer text-left"
+                      title={task.title}
+                    >
                       {task.title}
-                    </span>
+                    </button>
                   </div>
                 ))}
               </div>
