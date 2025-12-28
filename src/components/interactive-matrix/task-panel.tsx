@@ -26,7 +26,9 @@ export function TaskPanel({ tasks }: TaskPanelProps) {
     id: "task-panel",
   });
 
-  const unpositionedTasks = tasks.filter((t) => t.matrixPosition === null);
+  const unpositionedTasks = tasks.filter(
+    (t) => t.matrixPosition === null && !t.is_completed
+  );
 
   return (
     <div

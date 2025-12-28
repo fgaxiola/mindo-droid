@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
-import { TimerIcon, BarChart2, Archive } from "lucide-react";
+import { TimerIcon, BarChart2, CheckSquare } from "lucide-react";
 
 interface NavItem {
   href: string;
@@ -151,9 +151,9 @@ export function Sidebar() {
       icon: <BarChart2 className="w-5 h-5" />,
     },
     {
-      href: `/${currentLang}/archive`,
-      label: dictionary.sidebar.archive, // Assuming this key will be added
-      icon: <Archive className="w-5 h-5" />,
+      href: `/${currentLang}/completed`,
+      label: dictionary.sidebar.completed, 
+      icon: <CheckSquare className="w-5 h-5" />,
     },
   ];
 

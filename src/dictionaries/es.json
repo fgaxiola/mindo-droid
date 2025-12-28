@@ -68,14 +68,14 @@
     "pomodoro": "Pomodoro",
     "priority_matrix": "Matriz de Prioridad",
     "analytics": "Analíticas",
-    "archive": "Archivados"
+    "completed": "Terminados"
   },
-  "archive": {
-    "title": "Tareas Archivadas",
-    "subtitle": "Ve tus tareas completadas",
-    "no_archived_tasks": "Aún no hay tareas archivadas",
+  "completed": {
+    "title": "Tareas Terminadas",
+    "subtitle": "Ve tus tareas finalizadas",
+    "no_completed_tasks": "Aún no hay tareas terminadas",
     "restore": "Restaurar",
-    "view_archived": "Ver Archivados"
+    "view_completed": "Ver Terminados"
   },
   "analytics": {
     "title": "Analíticas de Tareas",

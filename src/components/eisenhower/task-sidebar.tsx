@@ -12,14 +12,7 @@ import { cn } from "@/lib/utils";
 import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
-import { ArchiveRestore, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useDictionary } from "@/providers/dictionary-provider";
 
 interface TaskSidebarProps {
@@ -28,7 +21,6 @@ interface TaskSidebarProps {
 
 export function TaskSidebar({ tasks }: TaskSidebarProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [showArchived, setShowArchived] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
   const { setNodeRef } = useDroppable({
@@ -40,7 +32,7 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
     (task) => 
       task.coords.x === -1 && 
       task.coords.y === -1 &&
-      (showArchived ? true : !task.is_completed)
+      !task.is_completed
   );
 
   return (
@@ -59,30 +51,7 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
             {dictionary.matrix.drag_instructions}
           </p>
         </div>
-        <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => setShowArchived(!showArchived)}
-                >
-                  {showArchived ? (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {dictionary.archive.view_archived}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="static opacity-100" />
-        </div>
+        <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="relative opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         <SortableContext

@@ -13,7 +13,7 @@ export function Matrix({ tasks }: MatrixProps) {
 
   const getTasksForQuadrant = (x: number, y: number) => {
     return tasks.filter(
-      (task) => task.coords.x === x && task.coords.y === y
+      (task) => task.coords.x === x && task.coords.y === y && !task.is_completed
     );
   };
 
