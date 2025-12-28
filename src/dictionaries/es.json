@@ -90,5 +90,28 @@
     "yesterday": "Ayer",
     "last_5_days": "Últimos 5 días laborales",
     "last_month": "Días laborales desde el mes pasado"
+  },
+  "task_dialog": {
+    "title": "Título",
+    "description": "Descripción",
+    "due_date": "Fecha de vencimiento",
+    "estimated_time": "Tiempo estimado",
+    "create_task": "Crear Tarea",
+    "save_changes": "Guardar Cambios",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "pick_a_date": "Seleccionar fecha",
+    "task_details": "Detalles de la tarea...",
+    "delete_confirm": "¿Estás seguro de que quieres eliminar esta tarea?",
+    "details": "Detalles",
+    "history": "Historial",
+    "no_history": "No hay historial disponible.",
+    "edit_task": "Editar Tarea",
+    "characters_remaining": "caracteres restantes",
+    "errors": {
+      "title_required": "El título es obligatorio",
+      "title_too_long": "El título debe tener menos de 150 caracteres",
+      "description_too_long": "La descripción debe tener menos de 1500 caracteres"
+    }
   }
 }

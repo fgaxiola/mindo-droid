@@ -13,17 +13,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -34,29 +33,28 @@ import { useDictionary } from "@/providers/dictionary-provider";
 const MAX_TITLE_LENGTH = 150;
 const MAX_DESCRIPTION_LENGTH = 1500;
 
-type TaskTranslations = {
-  task_dialog?: {
-    errors?: {
-      title_required: string;
-      title_too_long: string;
-      description_too_long: string;
-    };
-    characters_remaining: string;
-  };
-};
-
-// Schema will be created dynamically with translations
-const createTaskSchema = (t: TaskTranslations) => z.object({
-  title: z.string()
-    .min(1, t.task_dialog?.errors?.title_required || "Title is required")
-    .max(MAX_TITLE_LENGTH, t.task_dialog?.errors?.title_too_long || `Title must be less than ${MAX_TITLE_LENGTH} characters`),
-  description: z.string()
-    .max(MAX_DESCRIPTION_LENGTH, t.task_dialog?.errors?.description_too_long || `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`)
-    .optional(),
-  due_date: z.date().optional(),
-  estimated_time: z.number().min(0).optional(),
-  is_completed: z.boolean().optional(),
-});
+const createTaskSchema = (dict: any) =>
+  z.object({
+    title: z
+      .string()
+      .min(1, dict.task_dialog?.errors?.title_required || "Title is required")
+      .max(
+        MAX_TITLE_LENGTH,
+        dict.task_dialog?.errors?.title_too_long ||
+          `Title must be less than ${MAX_TITLE_LENGTH} characters`
+      ),
+    description: z
+      .string()
+      .max(
+        MAX_DESCRIPTION_LENGTH,
+        dict.task_dialog?.errors?.description_too_long ||
+          `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`
+      )
+      .optional(),
+    due_date: z.date().optional(),
+    estimated_time: z.number().min(0).optional(),
+    is_completed: z.boolean().optional(),
+  });
 
 type TaskFormData = z.infer<ReturnType<typeof createTaskSchema>>;
 
@@ -79,7 +77,7 @@ export function TaskDialog({
   onRestore,
   versions = [],
 }: TaskDialogProps) {
-  const t = useDictionary() as TaskTranslations;
+  const dictionary = useDictionary();
   const [activeTab, setActiveTab] = useState("details");
   const [titleLength, setTitleLength] = useState(0);
   const [descriptionLength, setDescriptionLength] = useState(0);
@@ -92,7 +90,7 @@ export function TaskDialog({
     watch,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<TaskFormData>({
-    resolver: zodResolver(createTaskSchema(t)),
+    resolver: zodResolver(createTaskSchema(dictionary)),
     defaultValues: {
       title: task?.title || "",
       description: task?.description || "",
@@ -106,7 +104,8 @@ export function TaskDialog({
   useEffect(() => {
     const subscription = watch((value, { name }) => {
       if (name === "title") {
-        setTitleLength((value.title || "").length);
+        const len = (value.title || "").length;
+        setTitleLength(len > MAX_TITLE_LENGTH ? MAX_TITLE_LENGTH : len);
       }
       if (name === "description") {
         setDescriptionLength((value.description || "").length);
@@ -114,7 +113,7 @@ export function TaskDialog({
     });
 
     // Initialize counters with initial values
-    setTitleLength(task?.title?.length || 0);
+    setTitleLength(Math.min(task?.title?.length || 0, MAX_TITLE_LENGTH));
     setDescriptionLength(task?.description?.length || 0);
 
     return () => subscription.unsubscribe();
@@ -131,7 +130,7 @@ export function TaskDialog({
         estimated_time: task?.estimated_time || 0,
         is_completed: task?.is_completed || false,
       });
-      setTitleLength(task?.title?.length || 0);
+      setTitleLength(Math.min(task?.title?.length || 0, MAX_TITLE_LENGTH));
       setDescriptionLength(task?.description?.length || 0);
     }
   }, [task, open, reset]);
@@ -147,20 +146,32 @@ export function TaskDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
-            {task ? `Edit Task: ${task.id}` : "Create New Task"}
+            {task
+              ? `${dictionary.task_dialog?.edit_task}: ${task.id}`
+              : `${dictionary.task_dialog?.create_task}`}
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex-1 flex flex-col overflow-hidden"
+        >
           <TabsList>
-            <TabsTrigger value="details">Details</TabsTrigger>
-            {task && <TabsTrigger value="history">History ({versions.length})</TabsTrigger>}
+            <TabsTrigger value="details">
+              {dictionary.task_dialog?.details}
+            </TabsTrigger>
+            {task && (
+              <TabsTrigger value="history">
+                {dictionary.task_dialog?.history} ({versions.length})
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="details" className="flex-1 overflow-y-auto p-1">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">{dictionary.task_dialog?.title}</Label>
                 <div className="flex items-center gap-3">
                   <Controller
                     control={control}
@@ -177,19 +188,24 @@ export function TaskDialog({
                     id="title"
                     {...register("title")}
                     placeholder="Task title"
+                    maxLength={MAX_TITLE_LENGTH}
                     autoFocus
                     className="flex-1"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH} {t.task_dialog?.characters_remaining}
+                <p className="text-xs text-muted-foreground text-right">
+                  {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
                 </p>
-                {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+                {errors.title && (
+                  <p className="text-sm text-destructive">
+                    {errors.title.message}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Due Date</Label>
+                  <Label>{dictionary.task_dialog?.due_date}</Label>
                   <Controller
                     control={control}
                     name="due_date"
@@ -204,7 +220,11 @@ export function TaskDialog({
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>{dictionary.task_dialog?.pick_a_date}</span>
+                            )}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
@@ -221,7 +241,9 @@ export function TaskDialog({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="estimated_time">Estimated Time (min)</Label>
+                  <Label htmlFor="estimated_time">
+                    {dictionary.task_dialog?.estimated_time} (min)
+                  </Label>
                   <div className="relative">
                     <Clock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -235,20 +257,27 @@ export function TaskDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{dictionary.task_dialog?.description}</Label>
                 <Controller
                   control={control}
                   name="description"
                   render={({ field }) => (
                     <RichTextEditor
                       content={field.value || ""}
-                      onChange={field.onChange}
-                      placeholder="Task details..."
+                      onChange={(html, length) => {
+                        field.onChange(html);
+                        if (length !== undefined) {
+                          setDescriptionLength(length);
+                        }
+                      }}
+                      placeholder={dictionary.task_dialog?.task_details}
+                      maxLength={MAX_DESCRIPTION_LENGTH}
                     />
                   )}
                 />
-                <p className="text-xs text-muted-foreground">
-                  {MAX_DESCRIPTION_LENGTH - descriptionLength} / {MAX_DESCRIPTION_LENGTH} {t.task_dialog?.characters_remaining}
+                <p className="text-xs text-muted-foreground text-right">
+                  {MAX_DESCRIPTION_LENGTH - descriptionLength} /{" "}
+                  {MAX_DESCRIPTION_LENGTH}
                 </p>
               </div>
 
@@ -259,49 +288,69 @@ export function TaskDialog({
                     variant="destructive"
                     size="sm"
                     onClick={async () => {
-                      if (confirm("Are you sure you want to delete this task?")) {
+                      if (confirm(dictionary.task_dialog?.delete_confirm)) {
                         await onDelete();
                         onOpenChange(false);
                       }
                     }}
                   >
                     <Trash className="h-4 w-4 mr-2" />
-                    Delete
+                    {dictionary.task_dialog?.delete}
                   </Button>
                 )}
                 <div className="flex gap-2 ml-auto">
-                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                    Cancel
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    {dictionary.task_dialog?.cancel}
                   </Button>
-                  <Button type="submit" disabled={isSubmitting || (task && !isDirty)}>
-                    {task ? "Save Changes" : "Create Task"}
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || (task && !isDirty)}
+                  >
+                    {task
+                      ? dictionary.task_dialog?.save_changes
+                      : dictionary.task_dialog?.create_task}
                   </Button>
                 </div>
               </div>
             </form>
           </TabsContent>
 
-          <TabsContent value="history" className="flex-1 overflow-hidden flex flex-col">
+          <TabsContent
+            value="history"
+            className="flex-1 overflow-hidden flex flex-col"
+          >
             <ScrollArea className="flex-1 h-[400px]">
               <div className="space-y-4 p-1">
                 {versions.map((version, index) => {
                   const snapshot = version.snapshot;
                   return (
-                    <div key={version.id} className="border rounded-md p-3 flex justify-between items-start">
+                    <div
+                      key={version.id}
+                      className="border rounded-md p-3 flex justify-between items-start"
+                    >
                       <div>
                         <p className="text-sm font-medium">
                           {format(new Date(version.created_at), "PPP p")}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Title: {snapshot.title}
+                          {dictionary.task_dialog?.title}: {snapshot.title}
                         </p>
-                        <div className="text-xs text-muted-foreground mt-1 line-clamp-2" dangerouslySetInnerHTML={{ __html: snapshot.description || "No description" }} />
+                        <div
+                          className="text-xs text-muted-foreground mt-1 line-clamp-2"
+                          dangerouslySetInnerHTML={{
+                            __html: snapshot.description || "",
+                          }}
+                        />
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => onRestore?.(version)}
-                        title="Restore this version"
+                        title={dictionary.task_dialog?.history}
                       >
                         <Undo className="h-4 w-4" />
                       </Button>
@@ -309,7 +358,9 @@ export function TaskDialog({
                   );
                 })}
                 {versions.length === 0 && (
-                  <p className="text-center text-muted-foreground py-8">No history available.</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    {dictionary.task_dialog?.no_history}
+                  </p>
                 )}
               </div>
             </ScrollArea>

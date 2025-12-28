@@ -105,11 +105,12 @@
     "details": "Details",
     "history": "History",
     "no_history": "No history available.",
+    "edit_task": "Edit Task",
+    "characters_remaining": "characters remaining",
     "errors": {
       "title_required": "Title is required",
       "title_too_long": "Title must be less than 150 characters",
       "description_too_long": "Description must be less than 1500 characters"
-    },
-    "characters_remaining": "characters remaining"
+    }
   }
 }

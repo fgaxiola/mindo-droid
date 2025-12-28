@@ -9,9 +9,10 @@ import { createBrowserClient } from "@supabase/ssr";
 
 interface RichTextEditorProps {
   content: string;
-  onChange: (html: string) => void;
+  onChange: (html: string, textLength?: number) => void;
   placeholder?: string;
   className?: string;
+  maxLength?: number;
 }
 
 export function RichTextEditor({
@@ -19,6 +20,7 @@ export function RichTextEditor({
   onChange,
   placeholder,
   className,
+  maxLength,
 }: RichTextEditorProps) {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,9 +55,6 @@ export function RichTextEditor({
       }),
     ],
     content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
     editorProps: {
       attributes: {
         class: cn(
@@ -78,6 +77,20 @@ export function RichTextEditor({
         }
         return false;
       },
+    },
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      const text = editor.getText();
+
+      // Truncate content if it exceeds maxLength
+      if (maxLength && text.length > maxLength) {
+        const truncated = text.slice(0, maxLength);
+        editor.commands.setContent(truncated, { emitUpdate: false });
+        onChange(editor.getHTML(), maxLength);
+        return;
+      }
+
+      onChange(html, text.length);
     },
   });
 
