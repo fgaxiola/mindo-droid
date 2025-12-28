@@ -24,9 +24,15 @@ export function WeekView({ tasks, locale }: WeekViewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
       {days.map((day) => {
-        const dayTasks = tasks.filter(
-          (task) => task.completed_at && isSameDay(new Date(task.completed_at), day)
-        );
+        const dayTasks = tasks
+          .filter(
+            (task) => task.completed_at && isSameDay(new Date(task.completed_at), day)
+          )
+          .sort((a, b) => {
+            const timeA = new Date(a.completed_at!).getTime();
+            const timeB = new Date(b.completed_at!).getTime();
+            return timeB - timeA;
+          });
 
         return (
           <div key={day.toISOString()} className="flex flex-col h-full bg-card border border-border rounded-lg overflow-hidden">

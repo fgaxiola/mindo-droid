@@ -162,8 +162,8 @@ export function Sidebar() {
       >
         <div
           className={cn(
-            "h-14 flex items-center border-b border-border px-4",
-            isCollapsed && "justify-center px-0"
+            "h-14 flex items-center justify-between border-b border-border px-4",
+            isCollapsed && "justify-center px-2"
           )}
         >
           {!isCollapsed && (
@@ -171,19 +171,14 @@ export function Sidebar() {
               {dictionary.common.app_name}
             </span>
           )}
-        </div>
 
-        <div className="p-2 border-t border-border">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggle}
-                className={cn(
-                  "w-full justify-center text-muted-foreground hover:text-foreground",
-                  !isCollapsed && "justify-end"
-                )}
+                className="text-muted-foreground hover:text-foreground p-2"
               >
                 {isCollapsed ? (
                   <ChevronRightIcon className="w-4 h-4" />

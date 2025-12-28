@@ -41,9 +41,15 @@ export function MonthView({ tasks, locale }: MonthViewProps) {
       <div className="grid grid-cols-7 auto-rows-fr">
         {days.map((day) => {
           const isCurrentMonth = day.getMonth() === today.getMonth();
-          const dayTasks = tasks.filter(
-            (task) => task.completed_at && isSameDay(new Date(task.completed_at), day)
-          );
+          const dayTasks = tasks
+            .filter(
+              (task) => task.completed_at && isSameDay(new Date(task.completed_at), day)
+            )
+            .sort((a, b) => {
+              const timeA = new Date(a.completed_at!).getTime();
+              const timeB = new Date(b.completed_at!).getTime();
+              return timeB - timeA;
+            });
 
           return (
             <div 

@@ -36,7 +36,7 @@ export function InteractiveMatrixBoard({
   const { data: tasks = initialTasks } = useTasks();
   const { updateTask } = useTaskMutations();
   const [activeTask, setActiveTask] = useState<PositionedTask | null>(null);
-  const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks);
+  const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks.filter(t => !t.is_completed));
   const matrixRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
@@ -50,17 +50,20 @@ export function InteractiveMatrixBoard({
   useEffect(() => {
     if (tasks) {
       setLocalTasks(prev => {
-        // Create a map of updated tasks for O(1) lookup
-        const tasksMap = new Map(tasks.map(t => [t.id, t]));
-        
-        // Keep existing order for tasks that are still in the list
+        // Filter out completed tasks before processing
+        const activeTasks = tasks.filter(t => !t.is_completed);
+
+        // Create a map of updated active tasks for O(1) lookup
+        const tasksMap = new Map(activeTasks.map(t => [t.id, t]));
+
+        // Keep existing order for active tasks that are still in the list
         const mergedTasks = prev.map(t => tasksMap.get(t.id) || t)
           .filter(t => tasksMap.has(t.id));
-          
-        // Add any new tasks that weren't in the previous state
+
+        // Add any new active tasks that weren't in the previous state
         const prevIds = new Set(prev.map(t => t.id));
-        const newTasks = tasks.filter(t => !prevIds.has(t.id));
-        
+        const newTasks = activeTasks.filter(t => !prevIds.has(t.id));
+
         return [...mergedTasks, ...newTasks];
       });
     }

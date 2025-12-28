@@ -16,10 +16,16 @@ export function TodayView({ tasks, locale }: TodayViewProps) {
   const dateLocale = locale === "es" ? es : enUS;
   const today = new Date();
 
-  // Filter tasks completed today
-  const todayTasks = tasks.filter((task) => 
-    task.completed_at && isSameDay(new Date(task.completed_at), today)
-  );
+  // Filter tasks completed today and sort by completed_at time (most recent first)
+  const todayTasks = tasks
+    .filter((task) =>
+      task.completed_at && isSameDay(new Date(task.completed_at), today)
+    )
+    .sort((a, b) => {
+      const timeA = new Date(a.completed_at!).getTime();
+      const timeB = new Date(b.completed_at!).getTime();
+      return timeB - timeA;
+    });
 
   return (
     <div className="space-y-6">
