@@ -9,7 +9,11 @@ import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
-import { useTaskMutations, useTaskVersions, useRestoreTaskVersion } from "@/hooks/use-tasks";
+import {
+  useTaskMutations,
+  useTaskVersions,
+  useRestoreTaskVersion,
+} from "@/hooks/use-tasks";
 
 interface SortableTaskProps {
   task: PositionedTask;
@@ -49,10 +53,14 @@ export function SortableTask({ task }: SortableTaskProps) {
           isDragging && "opacity-0"
         )}
       >
-        <div className={cn(
-          "absolute top-2 right-2 transition-opacity z-10",
-          isAnyDragging ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
-        )}>
+        <div
+          className={cn(
+            "absolute top-2 right-2 transition-opacity z-10",
+            isAnyDragging
+              ? "opacity-0 pointer-events-none"
+              : "opacity-0 group-hover:opacity-100"
+          )}
+        >
           <Button
             variant="ghost"
             size="icon"
@@ -65,12 +73,15 @@ export function SortableTask({ task }: SortableTaskProps) {
             <Pencil className="h-3 w-3" />
           </Button>
         </div>
-        <div className="flex items-start gap-2 pr-6">
+        <div className="flex items-start gap-2">
           <button
             className="mt-0.5 shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              updateTask.mutate({ id: task.id, updates: { is_completed: !task.is_completed } });
+              updateTask.mutate({
+                id: task.id,
+                updates: { is_completed: !task.is_completed },
+              });
             }}
           >
             {task.is_completed ? (
@@ -79,7 +90,7 @@ export function SortableTask({ task }: SortableTaskProps) {
               <Circle className="h-3 w-3 text-muted-foreground" />
             )}
           </button>
-          <h4 
+          <h4
             className={cn(
               "text-xs font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
               task.is_completed && "line-through text-muted-foreground"
@@ -93,7 +104,10 @@ export function SortableTask({ task }: SortableTaskProps) {
           </h4>
         </div>
         {task.description && (
-            <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1" dangerouslySetInnerHTML={{ __html: task.description }} />
+          <div
+            className="text-[10px] text-muted-foreground line-clamp-1 mt-1"
+            dangerouslySetInnerHTML={{ __html: task.description }}
+          />
         )}
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">

@@ -8,7 +8,11 @@ import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
-import { useTaskMutations, useTaskVersions, useRestoreTaskVersion } from "@/hooks/use-tasks";
+import {
+  useTaskMutations,
+  useTaskVersions,
+  useRestoreTaskVersion,
+} from "@/hooks/use-tasks";
 
 interface DraggableTaskProps {
   task: PositionedTask;
@@ -30,9 +34,11 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
 
   const dndTransform = transform ? CSS.Translate.toString(transform) : "";
   const styleTransform = style?.transform || "";
-  
-  const combinedTransform = dndTransform 
-    ? (styleTransform ? `${dndTransform} ${styleTransform}` : dndTransform)
+
+  const combinedTransform = dndTransform
+    ? styleTransform
+      ? `${dndTransform} ${styleTransform}`
+      : dndTransform
     : styleTransform;
 
   const dragStyle = {
@@ -53,25 +59,15 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
           isOnMatrix ? "absolute p-2 w-32" : "p-3"
         )}
       >
-        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-5 w-5 bg-background/80 hover:bg-background shadow-sm"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent drag start
-              setIsEditOpen(true);
-            }}
-          >
-            <Pencil className="h-2.5 w-2.5" />
-          </Button>
-        </div>
-        <div className="flex items-start gap-2 pr-5">
+        <div className="flex items-start gap-2">
           <button
             className="mt-0.5 shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              updateTask.mutate({ id: task.id, updates: { is_completed: !task.is_completed } });
+              updateTask.mutate({
+                id: task.id,
+                updates: { is_completed: !task.is_completed },
+              });
             }}
           >
             {task.is_completed ? (
@@ -80,7 +76,7 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
               <Circle className="h-3 w-3 text-muted-foreground" />
             )}
           </button>
-          <h4 
+          <h4
             className={cn(
               "text-xs font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
               task.is_completed && "line-through text-muted-foreground"
@@ -94,7 +90,10 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
           </h4>
         </div>
         {!isOnMatrix && task.description && (
-          <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1" dangerouslySetInnerHTML={{ __html: task.description }} />
+          <div
+            className="text-[10px] text-muted-foreground line-clamp-1 mt-1"
+            dangerouslySetInnerHTML={{ __html: task.description }}
+          />
         )}
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
@@ -131,9 +130,15 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
   );
 }
 
-export function DraggableTaskOverlay({ task, isFromMatrix }: { task: PositionedTask; isFromMatrix?: boolean }) {
+export function DraggableTaskOverlay({
+  task,
+  isFromMatrix,
+}: {
+  task: PositionedTask;
+  isFromMatrix?: boolean;
+}) {
   return (
-    <div 
+    <div
       style={isFromMatrix ? { transform: "translate(-50%, -50%)" } : undefined}
       className={cn(
         "bg-white border border-border rounded-lg shadow-xl rotate-3 cursor-grabbing",
@@ -146,15 +151,20 @@ export function DraggableTaskOverlay({ task, isFromMatrix }: { task: PositionedT
         ) : (
           <Circle className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
         )}
-        <h4 className={cn(
-          "text-xs font-medium text-foreground line-clamp-2",
-          task.is_completed && "line-through text-muted-foreground"
-        )}>
+        <h4
+          className={cn(
+            "text-xs font-medium text-foreground line-clamp-2",
+            task.is_completed && "line-through text-muted-foreground"
+          )}
+        >
           {task.title}
         </h4>
       </div>
       {!isFromMatrix && task.description && (
-        <div className="text-[10px] text-muted-foreground line-clamp-1 mt-1" dangerouslySetInnerHTML={{ __html: task.description }} />
+        <div
+          className="text-[10px] text-muted-foreground line-clamp-1 mt-1"
+          dangerouslySetInnerHTML={{ __html: task.description }}
+        />
       )}
       {task.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">

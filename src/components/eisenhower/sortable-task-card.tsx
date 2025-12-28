@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
-import { useTaskMutations, useTaskVersions, useRestoreTaskVersion } from "@/hooks/use-tasks";
+import {
+  useTaskMutations,
+  useTaskVersions,
+  useRestoreTaskVersion,
+} from "@/hooks/use-tasks";
 
 interface SortableTaskCardProps {
   task: Task;
@@ -53,12 +57,15 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
         )}
       >
         <div className="space-y-2">
-          <div className="flex items-start gap-2 pr-6">
+          <div className="flex items-start gap-2">
             <button
               className="mt-0.5 shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
-                updateTask.mutate({ id: task.id, updates: { is_completed: !task.is_completed } });
+                updateTask.mutate({
+                  id: task.id,
+                  updates: { is_completed: !task.is_completed },
+                });
               }}
             >
               {task.is_completed ? (
@@ -67,7 +74,7 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
                 <Circle className="h-4 w-4 text-muted-foreground" />
               )}
             </button>
-            <h4 
+            <h4
               className={cn(
                 "text-sm font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
                 task.is_completed && "line-through text-muted-foreground"
@@ -81,7 +88,10 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
             </h4>
           </div>
           {task.description && (
-            <div className="text-xs text-muted-foreground line-clamp-2" dangerouslySetInnerHTML={{ __html: task.description }} />
+            <div
+              className="text-xs text-muted-foreground line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: task.description }}
+            />
           )}
           {task.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
@@ -89,7 +99,10 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
                 <span
                   key={tag.id}
                   className="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
-                  style={{ backgroundColor: tag.color + "20", color: tag.color }}
+                  style={{
+                    backgroundColor: tag.color + "20",
+                    color: tag.color,
+                  }}
                 >
                   {tag.name}
                 </span>

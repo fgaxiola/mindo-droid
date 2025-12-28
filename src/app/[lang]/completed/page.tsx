@@ -38,39 +38,32 @@ export default function CompletedPage() {
               <p>{dictionary.completed.no_completed_tasks}</p>
             </div>
           ) : (
-            completedTasks.map((task) => (
-              <Card key={task.id} className="p-4 flex items-center justify-between group hover:shadow-md transition-all">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-medium text-foreground line-through text-muted-foreground">
-                      {task.title}
-                    </h3>
-                    {task.description && (
-                      <div 
-                        className="text-xs text-muted-foreground mt-1 line-clamp-1"
-                        dangerouslySetInnerHTML={{ __html: task.description }} 
-                      />
-                    )}
-                    {task.completed_at && (
-                      <p className="text-[10px] text-muted-foreground mt-1.5">
-                        {dictionary.analytics.completed_on} {format(new Date(task.completed_at), "PPP", { locale: dateLocale })}
-                      </p>
-                    )}
-                  </div>
+            <div className="space-y-3">
+              {completedTasks.map((task) => (
+                <div key={task.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-md border border-border/50 group hover:bg-muted/40 transition-colors">
+                  <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                  <span className="text-sm font-medium line-through text-muted-foreground truncate flex-1">
+                    {task.title}
+                  </span>
+                  
+                  {task.completed_at && (
+                    <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-1 rounded shrink-0">
+                      {format(new Date(task.completed_at), "HH:mm")}
+                    </span>
+                  )}
+
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity ml-2"
+                    title={dictionary.completed.restore}
+                    onClick={() => updateTask.mutate({ id: task.id, updates: { is_completed: false } })}
+                  >
+                    <ArchiveRestore className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                  </Button>
                 </div>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => updateTask.mutate({ id: task.id, updates: { is_completed: false } })}
-                >
-                  <ArchiveRestore className="w-4 h-4 mr-2" />
-                  {dictionary.completed.restore}
-                </Button>
-              </Card>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>
