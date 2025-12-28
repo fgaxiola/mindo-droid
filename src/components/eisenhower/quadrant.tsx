@@ -42,12 +42,15 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
           </h3>
           <p className="text-xs text-muted-foreground">{quadrant.description}</p>
         </div>
-        {!isDragging && (
-          <CreateTaskButton
-            onClick={() => setIsCreateOpen(true)}
-            className="relative opacity-0 group-hover:opacity-100 transition-opacity"
-          />
-        )}
+        <CreateTaskButton
+          onClick={() => setIsCreateOpen(true)}
+          className={cn(
+            "relative transition-opacity",
+            isDragging
+              ? "!opacity-0 pointer-events-none"
+              : "opacity-0 group-hover:opacity-100"
+          )}
+        />
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto">
         <SortableContext

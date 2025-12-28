@@ -56,14 +56,19 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
             {dictionary.interactive_matrix.drag_to_matrix}
           </p>
         </div>
-        {!isDragging && (
-          <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
-            <CreateTaskButton
-              onClick={() => setIsCreateOpen(true)}
-              className="static opacity-100"
-            />
-          </div>
-        )}
+        <div
+          className={cn(
+            "flex gap-1 relative transition-opacity",
+            isDragging
+              ? "opacity-0 pointer-events-none"
+              : "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <CreateTaskButton
+            onClick={() => setIsCreateOpen(true)}
+            className="static opacity-100"
+          />
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         <SortableContext
