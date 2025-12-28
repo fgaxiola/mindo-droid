@@ -67,15 +67,29 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
           </Button>
         </div>
         <div className="flex items-start gap-2 pr-5">
-          {task.is_completed ? (
-            <CheckCircle2 className="h-3 w-3 text-green-500 mt-0.5 shrink-0" />
-          ) : (
-            <Circle className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
-          )}
-          <h4 className={cn(
-            "text-xs font-medium text-foreground line-clamp-2",
-            task.is_completed && "line-through text-muted-foreground"
-          )}>
+          <button
+            className="mt-0.5 shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              updateTask.mutate({ id: task.id, updates: { is_completed: !task.is_completed } });
+            }}
+          >
+            {task.is_completed ? (
+              <CheckCircle2 className="h-3 w-3 text-green-500" />
+            ) : (
+              <Circle className="h-3 w-3 text-muted-foreground" />
+            )}
+          </button>
+          <h4 
+            className={cn(
+              "text-xs font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
+              task.is_completed && "line-through text-muted-foreground"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditOpen(true);
+            }}
+          >
             {task.title}
           </h4>
         </div>

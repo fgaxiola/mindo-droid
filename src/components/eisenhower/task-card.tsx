@@ -57,7 +57,6 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
                 e.stopPropagation();
                 updateTask.mutate({ id: task.id, updates: { is_completed: !task.is_completed } });
               }}
-              onPointerDown={(e) => e.stopPropagation()} // Prevent drag start
             >
               {task.is_completed ? (
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -74,7 +73,6 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
                 e.stopPropagation();
                 setIsEditOpen(true);
               }}
-              onPointerDown={(e) => e.stopPropagation()} // Prevent drag start
             >
               {task.title}
             </h4>
