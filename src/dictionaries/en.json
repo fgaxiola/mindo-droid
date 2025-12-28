@@ -74,6 +74,13 @@
     "subtitle": "Track your completed tasks over time",
     "timeline": "Timeline",
     "no_tasks": "No completed tasks yet. Get some work done!",
-    "completed_on": "Completed on"
+    "completed_on": "Completed on",
+    "today": "Today",
+    "week": "Week",
+    "month": "Month",
+    "tasks_per_day": "Tasks per day",
+    "yesterday": "Yesterday",
+    "last_5_days": "Last 5 working days",
+    "last_month": "Working days since last month"
   }
 }

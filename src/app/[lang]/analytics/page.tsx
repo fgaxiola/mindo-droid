@@ -1,7 +1,7 @@
 "use client";
 
 import { useTasks } from "@/hooks/use-tasks";
-import { Timeline } from "@/components/analytics/timeline";
+import { AnalyticsView } from "@/components/analytics/analytics-view";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { usePathname } from "next/navigation";
 
@@ -17,7 +17,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="h-full w-full overflow-y-auto bg-background">
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-8 max-w-6xl">
         <div className="mb-8 px-6">
           <h1 className="text-3xl font-bold text-foreground">
             {dictionary.analytics.title}
@@ -27,7 +27,9 @@ export default function AnalyticsPage() {
           </p>
         </div>
         
-        <Timeline tasks={completedTasks} locale={currentLang} />
+        <div className="px-6">
+          <AnalyticsView tasks={completedTasks} locale={currentLang} />
+        </div>
       </div>
     </div>
   );

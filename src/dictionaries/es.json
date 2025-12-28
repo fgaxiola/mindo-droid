@@ -74,6 +74,13 @@
     "subtitle": "Rastrea tus tareas completadas en el tiempo",
     "timeline": "Línea de tiempo",
     "no_tasks": "Aún no hay tareas completadas. ¡Empieza a trabajar!",
-    "completed_on": "Completado el"
+    "completed_on": "Completado el",
+    "today": "Hoy",
+    "week": "Semana",
+    "month": "Mes",
+    "tasks_per_day": "Tareas por día",
+    "yesterday": "Ayer",
+    "last_5_days": "Últimos 5 días laborales",
+    "last_month": "Días laborales desde el mes pasado"
   }
 }
