@@ -6,9 +6,10 @@ import { useDictionary } from "@/providers/dictionary-provider";
 
 interface MatrixProps {
   tasks: Task[];
+  isDragging?: boolean;
 }
 
-export function Matrix({ tasks }: MatrixProps) {
+export function Matrix({ tasks, isDragging }: MatrixProps) {
   const dictionary = useDictionary();
 
   const getTasksForQuadrant = (x: number, y: number) => {
@@ -36,22 +37,26 @@ export function Matrix({ tasks }: MatrixProps) {
       <Quadrant
         quadrant={getTranslatedQuadrant(QUADRANTS.find((q) => q.type === "schedule")!)}
         tasks={getTasksForQuadrant(0, 1)}
+        isDragging={isDragging}
       />
       {/* Do: Urgent & Important (x=1, y=1) */}
       <Quadrant
         quadrant={getTranslatedQuadrant(QUADRANTS.find((q) => q.type === "do")!)}
         tasks={getTasksForQuadrant(1, 1)}
+        isDragging={isDragging}
       />
       {/* Row 2: Not Important (y=0) */}
       {/* Eliminate: Not Urgent & Not Important (x=0, y=0) */}
       <Quadrant
         quadrant={getTranslatedQuadrant(QUADRANTS.find((q) => q.type === "eliminate")!)}
         tasks={getTasksForQuadrant(0, 0)}
+        isDragging={isDragging}
       />
       {/* Delegate: Urgent & Not Important (x=1, y=0) */}
       <Quadrant
         quadrant={getTranslatedQuadrant(QUADRANTS.find((q) => q.type === "delegate")!)}
         tasks={getTasksForQuadrant(1, 0)}
+        isDragging={isDragging}
       />
     </div>
   );

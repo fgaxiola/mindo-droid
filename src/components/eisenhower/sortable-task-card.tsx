@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
-import { useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Task } from "@/types/task";
 import { Card } from "@/components/ui/card";
@@ -25,8 +24,6 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
   const { updateTask, deleteTask } = useTaskMutations();
   const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
   const restoreTask = useRestoreTaskVersion();
-  const { active } = useDndContext();
-  const isAnyDragging = !!active;
 
   const {
     attributes,

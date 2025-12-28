@@ -16,9 +16,10 @@ import { useTaskMutations } from "@/hooks/use-tasks";
 interface QuadrantProps {
   quadrant: QuadrantType;
   tasks: Task[];
+  isDragging?: boolean;
 }
 
-export function Quadrant({ quadrant, tasks }: QuadrantProps) {
+export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { createTask } = useTaskMutations();
   const { setNodeRef } = useDroppable({
@@ -41,7 +42,12 @@ export function Quadrant({ quadrant, tasks }: QuadrantProps) {
           </h3>
           <p className="text-xs text-muted-foreground">{quadrant.description}</p>
         </div>
-        <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="relative opacity-0 group-hover:opacity-100 transition-opacity" />
+        {!isDragging && (
+          <CreateTaskButton
+            onClick={() => setIsCreateOpen(true)}
+            className="relative opacity-0 group-hover:opacity-100 transition-opacity"
+          />
+        )}
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto">
         <SortableContext

@@ -24,9 +24,10 @@ import {
 
 interface TaskPanelProps {
   tasks: PositionedTask[];
+  isDragging?: boolean;
 }
 
-export function TaskPanel({ tasks }: TaskPanelProps) {
+export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const { createTask } = useTaskMutations();
@@ -55,12 +56,14 @@ export function TaskPanel({ tasks }: TaskPanelProps) {
             {dictionary.interactive_matrix.drag_to_matrix}
           </p>
         </div>
-        <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
-          <CreateTaskButton
-            onClick={() => setIsCreateOpen(true)}
-            className="static opacity-100"
-          />
-        </div>
+        {!isDragging && (
+          <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
+            <CreateTaskButton
+              onClick={() => setIsCreateOpen(true)}
+              className="static opacity-100"
+            />
+          </div>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         <SortableContext

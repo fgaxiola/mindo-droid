@@ -199,7 +199,7 @@ export function InteractiveMatrixBoard({
             <MatrixCanvas tasks={localTasks as PositionedTask[]} />
           </div>
         </div>
-        <TaskPanel tasks={localTasks as PositionedTask[]} />
+        <TaskPanel tasks={localTasks as PositionedTask[]} isDragging={!!activeTask} />
       </div>
       <DragOverlay dropAnimation={null}>
         {activeTask ? (

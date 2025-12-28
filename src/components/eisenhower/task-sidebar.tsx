@@ -24,9 +24,10 @@ import { useDictionary } from "@/providers/dictionary-provider";
 
 interface TaskSidebarProps {
   tasks: Task[];
+  isDragging?: boolean;
 }
 
-export function TaskSidebar({ tasks }: TaskSidebarProps) {
+export function TaskSidebar({ tasks, isDragging }: TaskSidebarProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const { createTask } = useTaskMutations();
@@ -59,12 +60,14 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
             {dictionary.matrix.drag_instructions}
           </p>
         </div>
-        <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
-          <CreateTaskButton
-            onClick={() => setIsCreateOpen(true)}
-            className="static opacity-100"
-          />
-        </div>
+        {!isDragging && (
+          <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
+            <CreateTaskButton
+              onClick={() => setIsCreateOpen(true)}
+              className="static opacity-100"
+            />
+          </div>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         <SortableContext
