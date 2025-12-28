@@ -83,6 +83,7 @@ export function TaskDialog({
   // Reset form when task changes or dialog opens
   useEffect(() => {
     if (open) {
+      setActiveTab("details");
       reset({
         title: task?.title || "",
         description: task?.description || "",
