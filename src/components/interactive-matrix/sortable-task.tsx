@@ -103,12 +103,6 @@ export function SortableTask({ task }: SortableTaskProps) {
             {task.title}
           </h4>
         </div>
-        {task.description && (
-          <div
-            className="text-[10px] text-muted-foreground line-clamp-1 mt-1"
-            dangerouslySetInnerHTML={{ __html: task.description }}
-          />
-        )}
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {task.tags.slice(0, 2).map((tag) => (

@@ -89,12 +89,6 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
             {task.title}
           </h4>
         </div>
-        {!isOnMatrix && task.description && (
-          <div
-            className="text-[10px] text-muted-foreground line-clamp-1 mt-1"
-            dangerouslySetInnerHTML={{ __html: task.description }}
-          />
-        )}
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {task.tags.slice(0, 2).map((tag) => (
@@ -160,12 +154,6 @@ export function DraggableTaskOverlay({
           {task.title}
         </h4>
       </div>
-      {!isFromMatrix && task.description && (
-        <div
-          className="text-[10px] text-muted-foreground line-clamp-1 mt-1"
-          dangerouslySetInnerHTML={{ __html: task.description }}
-        />
-      )}
       {task.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">
           {task.tags.slice(0, 2).map((tag) => (

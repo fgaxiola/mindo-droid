@@ -150,11 +150,6 @@ export function Sidebar() {
       label: dictionary.sidebar.analytics,
       icon: <BarChart2 className="w-5 h-5" />,
     },
-    {
-      href: `/${currentLang}/completed`,
-      label: dictionary.sidebar.completed, 
-      icon: <CheckSquare className="w-5 h-5" />,
-    },
   ];
 
   return (

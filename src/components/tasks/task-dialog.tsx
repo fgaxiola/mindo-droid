@@ -12,7 +12,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Tabs,
@@ -28,28 +27,47 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { Task } from "@/types/task"; // Assuming you update Task type to match DB
+import { Task } from "@/types/task";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useDictionary } from "@/providers/dictionary-provider";
 
-// Schema matching your DB requirements
-const taskSchema = z.object({
-  title: z.string().min(1, "Title is required").max(150),
-  description: z.string().max(1500).optional(),
+const MAX_TITLE_LENGTH = 150;
+const MAX_DESCRIPTION_LENGTH = 1500;
+
+type TaskTranslations = {
+  task_dialog?: {
+    errors?: {
+      title_required: string;
+      title_too_long: string;
+      description_too_long: string;
+    };
+    characters_remaining: string;
+  };
+};
+
+// Schema will be created dynamically with translations
+const createTaskSchema = (t: TaskTranslations) => z.object({
+  title: z.string()
+    .min(1, t.task_dialog?.errors?.title_required || "Title is required")
+    .max(MAX_TITLE_LENGTH, t.task_dialog?.errors?.title_too_long || `Title must be less than ${MAX_TITLE_LENGTH} characters`),
+  description: z.string()
+    .max(MAX_DESCRIPTION_LENGTH, t.task_dialog?.errors?.description_too_long || `Description must be less than ${MAX_DESCRIPTION_LENGTH} characters`)
+    .optional(),
   due_date: z.date().optional(),
   estimated_time: z.number().min(0).optional(),
   is_completed: z.boolean().optional(),
 });
 
-type TaskFormData = z.infer<typeof taskSchema>;
+type TaskFormData = z.infer<ReturnType<typeof createTaskSchema>>;
 
 interface TaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  task?: Task; // If provided, edit mode
+  task?: Task;
   onSave: (data: TaskFormData) => Promise<void>;
   onDelete?: () => Promise<void>;
   onRestore?: (version: any) => Promise<void>;
-  versions?: any[]; // Array of task versions
+  versions?: any[];
 }
 
 export function TaskDialog({
@@ -61,16 +79,20 @@ export function TaskDialog({
   onRestore,
   versions = [],
 }: TaskDialogProps) {
+  const t = useDictionary() as TaskTranslations;
   const [activeTab, setActiveTab] = useState("details");
+  const [titleLength, setTitleLength] = useState(0);
+  const [descriptionLength, setDescriptionLength] = useState(0);
 
   const {
     register,
     handleSubmit,
     control,
     reset,
+    watch,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<TaskFormData>({
-    resolver: zodResolver(taskSchema),
+    resolver: zodResolver(createTaskSchema(t)),
     defaultValues: {
       title: task?.title || "",
       description: task?.description || "",
@@ -79,6 +101,24 @@ export function TaskDialog({
       is_completed: task?.is_completed || false,
     },
   });
+
+  // Watch values to update character counters
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === "title") {
+        setTitleLength((value.title || "").length);
+      }
+      if (name === "description") {
+        setDescriptionLength((value.description || "").length);
+      }
+    });
+
+    // Initialize counters with initial values
+    setTitleLength(task?.title?.length || 0);
+    setDescriptionLength(task?.description?.length || 0);
+
+    return () => subscription.unsubscribe();
+  }, [watch, task?.title, task?.description]);
 
   // Reset form when task changes or dialog opens
   useEffect(() => {
@@ -91,6 +131,8 @@ export function TaskDialog({
         estimated_time: task?.estimated_time || 0,
         is_completed: task?.is_completed || false,
       });
+      setTitleLength(task?.title?.length || 0);
+      setDescriptionLength(task?.description?.length || 0);
     }
   }, [task, open, reset]);
 
@@ -131,14 +173,17 @@ export function TaskDialog({
                       />
                     )}
                   />
-                  <Input 
-                    id="title" 
-                    {...register("title")} 
+                  <Input
+                    id="title"
+                    {...register("title")}
                     placeholder="Task title"
-                    autoFocus 
+                    autoFocus
                     className="flex-1"
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH} {t.task_dialog?.characters_remaining}
+                </p>
                 {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
               </div>
 
@@ -202,6 +247,9 @@ export function TaskDialog({
                     />
                   )}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {MAX_DESCRIPTION_LENGTH - descriptionLength} / {MAX_DESCRIPTION_LENGTH} {t.task_dialog?.characters_remaining}
+                </p>
               </div>
 
               <div className="flex justify-between pt-4">

@@ -13,6 +13,14 @@ import { useDictionary } from "@/providers/dictionary-provider";
 import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
+import { ArchiveRestore, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TaskPanelProps {
   tasks: PositionedTask[];
@@ -20,6 +28,7 @@ interface TaskPanelProps {
 
 export function TaskPanel({ tasks }: TaskPanelProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
   const { setNodeRef } = useDroppable({
@@ -27,7 +36,9 @@ export function TaskPanel({ tasks }: TaskPanelProps) {
   });
 
   const unpositionedTasks = tasks.filter(
-    (t) => t.matrixPosition === null && !t.is_completed
+    (t) => 
+      t.matrixPosition === null && 
+      (showArchived ? true : !t.is_completed)
   );
 
   return (
@@ -46,7 +57,30 @@ export function TaskPanel({ tasks }: TaskPanelProps) {
             {dictionary.interactive_matrix.drag_to_matrix}
           </p>
         </div>
-        <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="relative opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => setShowArchived(!showArchived)}
+                >
+                  {showArchived ? (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {showArchived ? "Hide Completed" : "View Completed"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="static opacity-100" />
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         <SortableContext

@@ -67,8 +67,7 @@
     "interactive_matrix": "Interactive Matrix",
     "pomodoro": "Pomodoro",
     "priority_matrix": "Priority Matrix",
-    "analytics": "Analytics",
-    "completed": "Completed"
+    "analytics": "Analytics"
   },
   "completed": {
     "title": "Completed Tasks",
@@ -90,5 +89,27 @@
     "yesterday": "Yesterday",
     "last_5_days": "Last 5 working days",
     "last_month": "Working days since last month"
+  },
+  "task_dialog": {
+    "title": "Title",
+    "description": "Description",
+    "due_date": "Due Date",
+    "estimated_time": "Estimated Time",
+    "create_task": "Create Task",
+    "save_changes": "Save Changes",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "pick_a_date": "Pick a date",
+    "task_details": "Task details...",
+    "delete_confirm": "Are you sure you want to delete this task?",
+    "details": "Details",
+    "history": "History",
+    "no_history": "No history available.",
+    "errors": {
+      "title_required": "Title is required",
+      "title_too_long": "Title must be less than 150 characters",
+      "description_too_long": "Description must be less than 1500 characters"
+    },
+    "characters_remaining": "characters remaining"
   }
 }

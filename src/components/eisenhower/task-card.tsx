@@ -84,12 +84,6 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
               {task.title}
             </h4>
           </div>
-          {task.description && (
-            <div
-              className="text-xs text-muted-foreground line-clamp-2"
-              dangerouslySetInnerHTML={{ __html: task.description }}
-            />
-          )}
           {task.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {task.tags.slice(0, 3).map((tag) => (
