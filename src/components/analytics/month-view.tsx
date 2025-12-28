@@ -6,14 +6,16 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOf
 import { enUS, es } from "date-fns/locale";
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MonthViewProps {
   tasks: Task[];
   locale: "en" | "es";
   onTaskClick?: (task: Task) => void;
+  onTaskToggle?: (taskId: string) => void;
 }
 
-export function MonthView({ tasks, locale, onTaskClick }: MonthViewProps) {
+export function MonthView({ tasks, locale, onTaskClick, onTaskToggle }: MonthViewProps) {
   const dictionary = useDictionary();
   const dateLocale = locale === "es" ? es : enUS;
   const today = new Date();
@@ -72,7 +74,22 @@ export function MonthView({ tasks, locale, onTaskClick }: MonthViewProps) {
               <div className="space-y-1">
                 {dayTasks.map((task) => (
                   <div key={task.id} className="flex items-center gap-1.5 overflow-hidden">
-                    <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onTaskToggle?.(task.id);
+                          }}
+                          className="shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-3 h-3 text-green-500" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={5}>
+                        {dictionary.analytics.mark_as_incomplete}
+                      </TooltipContent>
+                    </Tooltip>
                     <button
                       onClick={() => onTaskClick?.(task)}
                       className="text-[10px] line-through text-muted-foreground truncate hover:text-foreground hover:underline cursor-pointer text-left"

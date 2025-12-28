@@ -5,14 +5,16 @@ import { Task } from "@/types/task";
 import { format, isSameDay, subDays } from "date-fns";
 import { enUS, es } from "date-fns/locale";
 import { CheckCircle2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TodayViewProps {
   tasks: Task[];
   locale: "en" | "es";
   onTaskClick?: (task: Task) => void;
+  onTaskToggle?: (taskId: string) => void;
 }
 
-export function TodayView({ tasks, locale, onTaskClick }: TodayViewProps) {
+export function TodayView({ tasks, locale, onTaskClick, onTaskToggle }: TodayViewProps) {
   const dictionary = useDictionary();
   const dateLocale = locale === "es" ? es : enUS;
   const today = new Date();
@@ -43,7 +45,22 @@ export function TodayView({ tasks, locale, onTaskClick }: TodayViewProps) {
           <div className="space-y-3">
             {todayTasks.map((task) => (
               <div key={task.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-md border border-border/50">
-                <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTaskToggle?.(task.id);
+                      }}
+                      className="shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={5}>
+                    {dictionary.analytics.mark_as_incomplete}
+                  </TooltipContent>
+                </Tooltip>
                 <button
                   onClick={() => onTaskClick?.(task)}
                   className="text-sm font-medium line-through text-muted-foreground hover:text-foreground hover:underline cursor-pointer truncate text-left flex-1"

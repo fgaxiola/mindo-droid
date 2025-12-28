@@ -89,7 +89,8 @@
     "tasks_per_day": "Tareas por día",
     "yesterday": "Ayer",
     "last_5_days": "Últimos 5 días laborales",
-    "last_month": "Días laborales desde el mes pasado"
+    "last_month": "Días laborales desde el mes pasado",
+    "mark_as_incomplete": "Marcar como incompleta"
   },
   "task_dialog": {
     "title": "Título",

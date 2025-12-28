@@ -65,6 +65,16 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
     // Restore functionality - implement if needed
   };
 
+  const handleToggleTask = async (taskId: string) => {
+    const task = sortedTasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    await updateTask.mutateAsync({
+      id: taskId,
+      updates: { is_completed: !task.is_completed },
+    });
+  };
+
   // Calculation Helpers
   const getWorkingDays = (start: Date, end: Date) => {
     const days = eachDayOfInterval({ start, end });
@@ -143,13 +153,13 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
         </TabsList>
         <div className="mt-6">
           <TabsContent value="today">
-            <TodayView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} />
+            <TodayView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} onTaskToggle={handleToggleTask} />
           </TabsContent>
           <TabsContent value="week">
-            <WeekView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} />
+            <WeekView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} onTaskToggle={handleToggleTask} />
           </TabsContent>
           <TabsContent value="month">
-            <MonthView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} />
+            <MonthView tasks={sortedTasks} locale={locale} onTaskClick={handleTaskClick} onTaskToggle={handleToggleTask} />
           </TabsContent>
         </div>
       </Tabs>
