@@ -37,8 +37,8 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
   });
 
   const unassignedTasks = tasks.filter(
-    (task) => 
-      task.coords.x === -1 && 
+    (task) =>
+      task.coords.x === -1 &&
       task.coords.y === -1 &&
       (showArchived ? true : !task.is_completed)
   );
@@ -60,29 +60,10 @@ export function TaskSidebar({ tasks }: TaskSidebarProps) {
           </p>
         </div>
         <div className="flex gap-1 relative opacity-0 group-hover:opacity-100 transition-opacity">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => setShowArchived(!showArchived)}
-                >
-                  {showArchived ? (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {/* Fallback text since dictionary key was removed */}
-                {showArchived ? "Hide Completed" : "View Completed"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <CreateTaskButton onClick={() => setIsCreateOpen(true)} className="static opacity-100" />
+          <CreateTaskButton
+            onClick={() => setIsCreateOpen(true)}
+            className="static opacity-100"
+          />
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2">

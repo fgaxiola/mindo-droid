@@ -156,11 +156,14 @@ export function TaskDialog({
   const isSubmitDisabled = isSubmitting || (task && !isDirty);
 
   // Handle keyboard shortcuts (CMD+ENTER to submit)
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent | KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
+      if ('stopPropagation' in e) {
+        e.stopPropagation();
+      }
       if (!isSubmitDisabled) {
-        handleSubmit(onSubmit)(e);
+        handleSubmit(onSubmit)(e as React.FormEvent);
       }
     }
   };
@@ -316,6 +319,7 @@ export function TaskDialog({
                       placeholder={dictionary.task_dialog?.task_details}
                       maxLength={MAX_DESCRIPTION_LENGTH}
                       readOnly={fieldsDisabled}
+                      onKeyDown={handleKeyDown as (e: KeyboardEvent) => void}
                     />
                   )}
                 />

@@ -14,6 +14,7 @@ interface RichTextEditorProps {
   className?: string;
   maxLength?: number;
   readOnly?: boolean;
+  onKeyDown?: (e: KeyboardEvent) => void;
 }
 
 export function RichTextEditor({
@@ -23,6 +24,7 @@ export function RichTextEditor({
   className,
   maxLength,
   readOnly = false,
+  onKeyDown,
 }: RichTextEditorProps) {
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -65,6 +67,12 @@ export function RichTextEditor({
           readOnly && "pointer-events-none opacity-70",
           className
         ),
+      },
+      handleKeyDown: (view, event) => {
+        if (onKeyDown) {
+          onKeyDown(event as KeyboardEvent);
+        }
+        return false;
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
