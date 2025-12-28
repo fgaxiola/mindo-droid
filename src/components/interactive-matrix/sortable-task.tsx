@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
+import { useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,8 @@ export function SortableTask({ task }: SortableTaskProps) {
   const { updateTask, deleteTask } = useTaskMutations();
   const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
   const restoreTask = useRestoreTaskVersion();
+  const { active } = useDndContext();
+  const isAnyDragging = !!active;
 
   const {
     attributes,
@@ -46,7 +49,10 @@ export function SortableTask({ task }: SortableTaskProps) {
           isDragging && "opacity-0"
         )}
       >
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className={cn(
+          "absolute top-2 right-2 transition-opacity z-10",
+          isAnyDragging ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
+        )}>
           <Button
             variant="ghost"
             size="icon"

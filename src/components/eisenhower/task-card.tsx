@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDraggable } from "@dnd-kit/core";
+import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Task } from "@/types/task";
 import { Card } from "@/components/ui/card";
@@ -21,6 +21,8 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
   const { updateTask, deleteTask } = useTaskMutations();
   const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
   const restoreTask = useRestoreTaskVersion();
+  const { active } = useDndContext();
+  const isAnyDragging = !!active;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -46,7 +48,10 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
           isOverlay && "shadow-lg rotate-3 cursor-grabbing"
         )}
       >
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className={cn(
+          "absolute top-2 right-2 transition-opacity z-10",
+          isAnyDragging && !isOverlay ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
+        )}>
           <Button
             variant="ghost"
             size="icon"
