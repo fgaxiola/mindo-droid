@@ -67,7 +67,15 @@
     "interactive_matrix": "Interactive Matrix",
     "pomodoro": "Pomodoro",
     "priority_matrix": "Priority Matrix",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "archive": "Archive"
+  },
+  "archive": {
+    "title": "Archived Tasks",
+    "subtitle": "View your completed tasks",
+    "no_archived_tasks": "No archived tasks yet",
+    "restore": "Restore",
+    "view_archived": "View Archived"
   },
   "analytics": {
     "title": "Task Analytics",
