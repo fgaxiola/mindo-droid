@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { DraggableTask } from "./draggable-task";
@@ -27,7 +27,25 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
     id: "matrix-canvas",
   });
 
-  const positionedTasks = tasks.filter((t) => t.matrixPosition != null);
+  const positionedTasks = useMemo(
+    () => tasks.filter((t) => t.matrixPosition != null),
+    [tasks]
+  );
+
+  // Memoize task styles to prevent unnecessary re-renders
+  // Only recalculate when tasks or lastMovedTaskId changes
+  const taskStylesMap = useMemo(() => {
+    const stylesMap = new Map<string, React.CSSProperties>();
+    positionedTasks.forEach((task) => {
+      stylesMap.set(task.id, {
+        left: `${task.matrixPosition!.x}%`,
+        top: `${task.matrixPosition!.y}%`,
+        transform: "translate(-50%, -50%)",
+        zIndex: lastMovedTaskId === task.id ? 10 : 1,
+      });
+    });
+    return stylesMap;
+  }, [positionedTasks, lastMovedTaskId]);
 
   return (
     <div
@@ -168,12 +186,7 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
           key={task.id}
           task={task}
           isOnMatrix
-          style={{
-            left: `${task.matrixPosition!.x}%`,
-            top: `${task.matrixPosition!.y}%`,
-            transform: "translate(-50%, -50%)",
-            zIndex: lastMovedTaskId === task.id ? 10 : 1,
-          }}
+          style={taskStylesMap.get(task.id)}
         />
       ))}
 
