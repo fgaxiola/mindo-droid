@@ -12,6 +12,9 @@ import { cn } from "@/lib/utils";
 import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface QuadrantProps {
   quadrant: QuadrantType;
@@ -22,6 +25,7 @@ interface QuadrantProps {
 export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { createTask } = useTaskMutations();
+  const dictionary = useDictionary();
 
   // Memoize droppable data to prevent infinite re-renders
   const droppableData = useMemo(() => ({ coords: quadrant.coords }), [quadrant.coords]);
@@ -59,7 +63,7 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
           )}
         />
       </div>
-      <div className="flex-1 space-y-2 overflow-y-auto">
+      <div className="flex-1 space-y-2 overflow-y-auto relative">
         <SortableContext
           items={taskIds}
           strategy={verticalListSortingStrategy}
@@ -68,10 +72,54 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
             <SortableTaskCard key={task.id} task={task} />
           ))}
         </SortableContext>
-        {tasks.length === 0 && (
-          <div className="flex items-center justify-center h-full min-h-[100px] text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md">
-            Drop tasks here
+        {/* Create button - appears on hover, right after tasks (only when there are tasks) */}
+        {tasks.length > 0 && (
+          <div
+            className={cn(
+              "pt-2 transition-all duration-200",
+              isDragging
+                ? "opacity-0 pointer-events-none"
+                : "opacity-0 group-hover:opacity-100"
+            )}
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCreateOpen(true)}
+              className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-dashed border-border/50 rounded-md"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="text-sm">{dictionary.task_dialog?.create_new || "Create New"}</span>
+            </Button>
           </div>
+        )}
+        {tasks.length === 0 && (
+          <>
+            <div className="flex items-center justify-center min-h-[100px] text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md">
+              Drop tasks here
+            </div>
+            {/* Create button - appears on hover, below empty message */}
+            <div
+              className={cn(
+                "pt-2 transition-all duration-200",
+                isDragging
+                  ? "opacity-0 pointer-events-none"
+                  : "opacity-0 group-hover:opacity-100"
+              )}
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsCreateOpen(true)}
+                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-dashed border-border/50 rounded-md"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                <span className="text-sm">{dictionary.task_dialog?.create_new || "Create New"}</span>
+              </Button>
+            </div>
+          </>
         )}
       </div>
 

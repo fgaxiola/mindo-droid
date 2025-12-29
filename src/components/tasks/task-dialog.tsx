@@ -13,6 +13,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,7 +96,19 @@ export function TaskDialog({
   const [titleLength, setTitleLength] = useState(0);
   const [descriptionLength, setDescriptionLength] = useState(0);
   const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const estimatedTimeRef = useRef<HTMLInputElement>(null);
+  const deleteConfirmButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Focus delete button when dialog opens
+  useEffect(() => {
+    if (isDeleteConfirmOpen && deleteConfirmButtonRef.current) {
+      // Small delay to ensure dialog is fully rendered
+      setTimeout(() => {
+        deleteConfirmButtonRef.current?.focus();
+      }, 100);
+    }
+  }, [isDeleteConfirmOpen]);
 
   // Check if history button should be visible
   const showHistoryButton = task && !task.is_completed && versions.length > 0;
@@ -183,6 +197,25 @@ export function TaskDialog({
       if (!isSubmitDisabled) {
         handleSubmit(onSubmit)(e as React.FormEvent);
       }
+    }
+  };
+
+  const handleDeleteConfirmKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      handleDeleteConfirm();
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setIsDeleteConfirmOpen(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (onDelete) {
+      await onDelete();
+      setIsDeleteConfirmOpen(false);
+      onOpenChange(false);
     }
   };
 
@@ -450,20 +483,56 @@ export function TaskDialog({
         <div className="border-t pt-4 mt-4 shrink-0">
           <div className="flex justify-between">
             {task && onDelete && (
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={async () => {
-                  if (confirm(dictionary.task_dialog?.delete_confirm)) {
-                    await onDelete();
-                    onOpenChange(false);
-                  }
-                }}
-              >
-                <Trash className="h-4 w-4 mr-2" />
-                {dictionary.task_dialog?.delete}
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setIsDeleteConfirmOpen(true)}
+                >
+                  <Trash className="h-4 w-4 mr-2" />
+                  {dictionary.task_dialog?.delete}
+                </Button>
+                <Dialog
+                  open={isDeleteConfirmOpen}
+                  onOpenChange={setIsDeleteConfirmOpen}
+                >
+                  <DialogContent
+                    className="max-w-md"
+                    onKeyDown={handleDeleteConfirmKeyDown}
+                    onOpenAutoFocus={(e) => {
+                      e.preventDefault();
+                      deleteConfirmButtonRef.current?.focus();
+                    }}
+                  >
+                    <DialogHeader>
+                      <DialogTitle>
+                        {dictionary.task_dialog?.delete}
+                      </DialogTitle>
+                      <DialogDescription>
+                        {dictionary.task_dialog?.delete_confirm}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsDeleteConfirmOpen(false)}
+                      >
+                        {dictionary.task_dialog?.cancel || "Cancel"}
+                      </Button>
+                      <Button
+                        ref={deleteConfirmButtonRef}
+                        type="button"
+                        variant="destructive"
+                        onClick={handleDeleteConfirm}
+                      >
+                        {dictionary.task_dialog?.delete}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
             <div className="flex gap-2 ml-auto">
               <Button

@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
@@ -189,6 +191,25 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
           style={taskStylesMap.get(task.id)}
         />
       ))}
+
+      {/* Create button - appears on hover over canvas */}
+      <div
+        className={cn(
+          "absolute bottom-4 right-4 transition-all duration-200 z-10",
+          "opacity-0 group-hover:opacity-100"
+        )}
+      >
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          onClick={() => setIsCreateOpen(true)}
+          className="shadow-lg hover:shadow-xl transition-shadow"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          <span>{dictionary.task_dialog?.create_new || "Create New"}</span>
+        </Button>
+      </div>
 
       <TaskDialog
         open={isCreateOpen}
