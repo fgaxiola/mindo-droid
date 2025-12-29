@@ -145,3 +145,31 @@
 button {
   @apply !cursor-pointer;
 }
+
+/* Transparent scrollbar */
+.scrollbar-transparent {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.scrollbar-transparent::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-transparent::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.scrollbar-transparent::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark .scrollbar-transparent::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

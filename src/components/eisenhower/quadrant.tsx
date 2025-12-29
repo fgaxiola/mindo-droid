@@ -42,11 +42,12 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col p-4 rounded-lg border-2 transition-all h-full group relative overflow-hidden",
+        "flex flex-col rounded-lg border-2 transition-all h-full group relative overflow-hidden",
         quadrant.color
       )}
     >
-      <div className="mb-3 flex justify-between items-start">
+      {/* Fixed Header */}
+      <div className="shrink-0 p-4 pb-3 flex justify-between items-start border-b border-border/50">
         <div>
           <h3 className="text-sm font-semibold text-foreground">
             {quadrant.label}
@@ -63,7 +64,9 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
           )}
         />
       </div>
-      <div className="flex-1 space-y-2 overflow-y-auto relative">
+      
+      {/* Scrollable Tasks Area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-0 scrollbar-transparent">
         <SortableContext
           items={taskIds}
           strategy={verticalListSortingStrategy}
@@ -72,55 +75,34 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
             <SortableTaskCard key={task.id} task={task} />
           ))}
         </SortableContext>
-        {/* Create button - appears on hover, right after tasks (only when there are tasks) */}
-        {tasks.length > 0 && (
-          <div
-            className={cn(
-              "pt-2 transition-all duration-200",
-              isDragging
-                ? "opacity-0 pointer-events-none"
-                : "opacity-0 group-hover:opacity-100"
-            )}
-          >
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsCreateOpen(true)}
-              className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-dashed border-border/50 rounded-md"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="text-sm">{dictionary.task_dialog?.create_new || "Create New"}</span>
-            </Button>
+        {tasks.length === 0 && (
+          <div className="flex items-center justify-center min-h-[100px] text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md">
+            Drop tasks here
           </div>
         )}
-        {tasks.length === 0 && (
-          <>
-            <div className="flex items-center justify-center min-h-[100px] text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md">
-              Drop tasks here
-            </div>
-            {/* Create button - appears on hover, below empty message */}
-            <div
-              className={cn(
-                "pt-2 transition-all duration-200",
-                isDragging
-                  ? "opacity-0 pointer-events-none"
-                  : "opacity-0 group-hover:opacity-100"
-              )}
-            >
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsCreateOpen(true)}
-                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-dashed border-border/50 rounded-md"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="text-sm">{dictionary.task_dialog?.create_new || "Create New"}</span>
-              </Button>
-            </div>
-          </>
-        )}
+      </div>
+
+      {/* Fixed Create Button at Bottom */}
+      <div className="shrink-0 px-4 pt-4 pb-4">
+        <div
+          className={cn(
+            "transition-all duration-200",
+            isDragging
+              ? "opacity-0 pointer-events-none"
+              : "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsCreateOpen(true)}
+            className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-transparent border border-dashed border-border/50 rounded-md"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="text-sm">{dictionary.task_dialog?.create_new || "Create New"}</span>
+          </Button>
+        </div>
       </div>
 
       <TaskDialog

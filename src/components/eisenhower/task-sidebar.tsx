@@ -92,7 +92,7 @@ export function TaskSidebar({ tasks, isDragging }: TaskSidebarProps) {
               variant="ghost"
               size="sm"
               onClick={() => setIsCreateOpen(true)}
-              className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-dashed border-border/50 rounded-md"
+              className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-transparent border border-dashed border-border/50 rounded-md"
             >
               <Plus className="h-4 w-4 mr-2" />
               <span className="text-sm">{dictionary.task_dialog?.create_new || "Create New"}</span>

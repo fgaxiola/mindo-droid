@@ -103,7 +103,7 @@ export function Matrix({ tasks, isDragging }: MatrixProps) {
   };
 
   return (
-    <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-4 p-4">
+    <div className="grid grid-cols-2 grid-rows-2 gap-4 p-4 h-full">
       {/* Row 1: Important (y=1) */}
       {/* Schedule: Not Urgent & Important (x=0, y=1) */}
       <Quadrant

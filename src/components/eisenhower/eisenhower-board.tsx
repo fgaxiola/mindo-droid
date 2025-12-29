@@ -294,7 +294,7 @@ export function EisenhowerBoard({
               </div>
             </div>
           </div>
-          <div className="flex-1 flex">
+          <div className="flex-1 flex overflow-hidden">
             <div className="flex flex-col justify-center px-2 text-xs text-muted-foreground"></div>
             <Matrix tasks={localTasks} isDragging={!!activeTask} />
           </div>
