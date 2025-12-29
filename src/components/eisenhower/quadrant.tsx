@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -22,9 +22,13 @@ interface QuadrantProps {
 export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const { createTask } = useTaskMutations();
+
+  // Memoize droppable data to prevent infinite re-renders
+  const droppableData = useMemo(() => ({ coords: quadrant.coords }), [quadrant.coords]);
+
   const { setNodeRef } = useDroppable({
     id: `quadrant-${quadrant.type}`,
-    data: { coords: quadrant.coords },
+    data: droppableData,
   });
 
   return (

@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -37,41 +38,43 @@ export function AppLayout({ children }: AppLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-background">
-          <Dialog open={showPomodoro} onOpenChange={setShowPomodoro}>
-            <DialogTrigger asChild>
+    <TooltipProvider>
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-background">
+            <Dialog open={showPomodoro} onOpenChange={setShowPomodoro}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <TimerIcon className="w-4 h-4 mr-1" />
+                  {dictionary.sidebar.pomo}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="p-0 max-w-md border-0">
+                <DialogTitle className="sr-only">Pomodoro Timer</DialogTitle>
+                <PomodoroTimer />
+              </DialogContent>
+            </Dialog>
+            <div className="flex items-center gap-3">
+              <LanguageSwitcher />
+              <span className="text-sm text-muted-foreground">{user.email}</span>
               <Button
+                onClick={signOut}
                 variant="ghost"
                 size="sm"
-                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                className="text-sm text-muted-foreground hover:text-foreground"
               >
-                <TimerIcon className="w-4 h-4 mr-1" />
-                {dictionary.sidebar.pomo}
+                {dictionary.common.sign_out}
               </Button>
-            </DialogTrigger>
-            <DialogContent className="p-0 max-w-md border-0">
-              <DialogTitle className="sr-only">Pomodoro Timer</DialogTitle>
-              <PomodoroTimer />
-            </DialogContent>
-          </Dialog>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            <span className="text-sm text-muted-foreground">{user.email}</span>
-            <Button
-              onClick={signOut}
-              variant="ghost"
-              size="sm"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {dictionary.common.sign_out}
-            </Button>
-          </div>
-        </header>
-        <main className="flex-1 overflow-auto">{children}</main>
+            </div>
+          </header>
+          <main className="flex-1 overflow-auto">{children}</main>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

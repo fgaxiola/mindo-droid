@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useDraggable } from "@dnd-kit/core";
+import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   useTaskMutations,
   useTaskVersions,
@@ -20,11 +21,19 @@ interface DraggableTaskProps {
   style?: React.CSSProperties;
 }
 
+function getTooltipDelay() {
+  return parseInt(process.env.NEXT_PUBLIC_TOOLTIP_HOVER_DELAY_MS || "1000", 10);
+}
+
 export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const tooltipDelay = getTooltipDelay();
   const { updateTask, deleteTask } = useTaskMutations();
   const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
   const restoreTask = useRestoreTaskVersion();
+  const { active } = useDndContext();
+  const isAnyDragging = !!active;
+  const shouldShowTooltip = !isAnyDragging;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -76,18 +85,40 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
               <Circle className="h-3 w-3 text-muted-foreground" />
             )}
           </button>
-          <h4
-            className={cn(
-              "text-xs font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
-              task.is_completed && "line-through text-muted-foreground"
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditOpen(true);
-            }}
-          >
-            {task.title}
-          </h4>
+          {shouldShowTooltip ? (
+            <Tooltip delayDuration={tooltipDelay}>
+              <TooltipTrigger asChild>
+                <h4
+                  className={cn(
+                    "text-xs font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
+                    task.is_completed && "line-through text-muted-foreground"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsEditOpen(true);
+                  }}
+                >
+                  {task.title}
+                </h4>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{task.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <h4
+              className={cn(
+                "text-xs font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
+                task.is_completed && "line-through text-muted-foreground"
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditOpen(true);
+              }}
+            >
+              {task.title}
+            </h4>
+          )}
         </div>
         {task.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">

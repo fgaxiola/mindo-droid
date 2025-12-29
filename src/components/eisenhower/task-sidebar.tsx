@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -24,9 +24,13 @@ export function TaskSidebar({ tasks, isDragging }: TaskSidebarProps) {
   const [showArchived, setShowArchived] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
+
+  // Memoize droppable data to prevent infinite re-renders
+  const droppableData = useMemo(() => ({ coords: { x: -1, y: -1 } }), []);
+
   const { setNodeRef } = useDroppable({
     id: "sidebar",
-    data: { coords: { x: -1, y: -1 } },
+    data: droppableData,
   });
 
   const unassignedTasks = tasks.filter(
