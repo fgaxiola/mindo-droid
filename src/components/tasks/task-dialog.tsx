@@ -27,7 +27,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Task } from "@/types/task";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDictionary } from "@/providers/dictionary-provider";
 import {
   Tooltip,
@@ -260,11 +259,17 @@ export function TaskDialog({
                       {versions.map((version) => {
                         const snapshot = version.snapshot;
                         return (
-                          <div
+                          <button
                             key={version.id}
-                            className="border rounded-md p-3 hover:bg-accent/50 transition-colors group"
+                            type="button"
+                            className="w-full text-left border rounded-md p-3 hover:bg-accent/50 transition-colors group"
+                            onClick={() => {
+                              onRestore?.(version);
+                              setIsHistoryPopoverOpen(false);
+                            }}
                           >
-                            <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-2">
+                              <Undo className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0 group-hover:text-primary transition-colors" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-medium text-muted-foreground">
                                   {format(
@@ -272,7 +277,7 @@ export function TaskDialog({
                                     "PPP p"
                                   )}
                                 </p>
-                                <p className="text-sm font-medium mt-1 line-clamp-1">
+                                <p className="text-sm font-medium mt-1 line-clamp-1 group-hover:text-primary transition-colors">
                                   {snapshot.title}
                                 </p>
                                 {snapshot.description && (
@@ -284,22 +289,8 @@ export function TaskDialog({
                                   />
                                 )}
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                                onClick={() => {
-                                  onRestore?.(version);
-                                  setIsHistoryPopoverOpen(false);
-                                }}
-                              >
-                                <Undo className="h-4 w-4 mr-1.5" />
-                                <span className="text-xs">
-                                  {dictionary.task_dialog?.restore}
-                                </span>
-                              </Button>
                             </div>
-                          </div>
+                          </button>
                         );
                       })}
                       {versions.length === 0 && (
