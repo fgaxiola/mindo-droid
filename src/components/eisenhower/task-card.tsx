@@ -15,6 +15,7 @@ import {
   useTaskVersions,
   useRestoreTaskVersion,
 } from "@/hooks/use-tasks";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TaskCardProps {
   task: Task;
@@ -31,9 +32,17 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
   const { updateTask, deleteTask } = useTaskMutations();
   const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
   const restoreTask = useRestoreTaskVersion();
+  const queryClient = useQueryClient();
   const { active } = useDndContext();
   const isAnyDragging = !!active;
   const shouldShowTooltip = !isAnyDragging;
+
+  // Get the latest task from React Query cache when modal opens
+  // This ensures we always show the most recent data
+  const latestTask = isEditOpen ? (() => {
+    const tasks = queryClient.getQueryData<Task[]>(["tasks"]);
+    return tasks?.find(t => t.id === task.id) || task;
+  })() : task;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
@@ -135,7 +144,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
       <TaskDialog
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
-        task={task}
+        task={latestTask}
         onSave={async (data) => {
           await updateTask.mutateAsync({ id: task.id, updates: data });
         }}

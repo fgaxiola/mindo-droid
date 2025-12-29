@@ -10,6 +10,7 @@ import { MonthView } from "./month-view";
 import { StatsCard } from "./stats-card";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
+import { useQueryClient } from "@tanstack/react-query";
 import { subDays, isSameDay, isWeekend, subMonths, eachDayOfInterval } from "date-fns";
 
 interface AnalyticsViewProps {
@@ -22,8 +23,16 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
   const [activeTab, setActiveTab] = useState("today");
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const today = new Date();
+
+  // Get the latest task from React Query cache when modal opens
+  // This ensures we always show the most recent data
+  const latestTask = isDialogOpen && selectedTask ? (() => {
+    const cachedTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+    return cachedTasks?.find(t => t.id === selectedTask.id) || selectedTask;
+  })() : selectedTask;
 
   // Sort tasks by completed_at (most recent first)
   const sortedTasks = [...tasks].sort((a, b) => {
@@ -166,12 +175,12 @@ export function AnalyticsView({ tasks, locale }: AnalyticsViewProps) {
       <TaskDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        task={selectedTask}
+        task={latestTask}
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
         onRestore={handleRestoreTask}
         versions={[]}
-        viewOnly={selectedTask?.is_completed}
+        viewOnly={latestTask?.is_completed}
       />
     </div>
   );

@@ -14,6 +14,8 @@ import {
   useTaskVersions,
   useRestoreTaskVersion,
 } from "@/hooks/use-tasks";
+import { useQueryClient } from "@tanstack/react-query";
+import { Task } from "@/types/task";
 
 interface SortableTaskProps {
   task: PositionedTask;
@@ -139,12 +141,20 @@ function SortableTaskDialogWrapper({
   const { updateTask, deleteTask } = useTaskMutations();
   const { data: versions } = useTaskVersions(task.id);
   const restoreTask = useRestoreTaskVersion();
+  const queryClient = useQueryClient();
+
+  // Get the latest task from React Query cache when modal opens
+  // This ensures we always show the most recent data
+  const latestTask = open ? (() => {
+    const tasks = queryClient.getQueryData<Task[]>(["tasks"]);
+    return tasks?.find(t => t.id === task.id) || task;
+  })() : task;
 
   return (
     <TaskDialog
       open={open}
       onOpenChange={onOpenChange}
-      task={task}
+      task={latestTask}
       onSave={async (data) => {
         await updateTask.mutateAsync({ id: task.id, updates: data });
       }}

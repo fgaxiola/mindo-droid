@@ -134,6 +134,7 @@ export function TaskDialog({
   // Reset form when task changes or dialog opens
   useEffect(() => {
     if (open) {
+      // If task is completed, always show details tab (history is not available for completed tasks)
       setActiveTab("details");
       reset({
         title: task?.title || "",
@@ -150,6 +151,13 @@ export function TaskDialog({
   // Watch is_completed to determine if fields should be disabled in viewOnly mode
   const isCompleted = watch("is_completed");
   const fieldsDisabled = viewOnly && !!isCompleted;
+
+  // If task becomes completed while on history tab, switch to details tab
+  useEffect(() => {
+    if (isCompleted && activeTab === "history") {
+      setActiveTab("details");
+    }
+  }, [isCompleted, activeTab]);
 
   const onSubmit = async (data: TaskFormData) => {
     await onSave(data);
@@ -202,7 +210,7 @@ export function TaskDialog({
             <TabsTrigger value="details">
               {dictionary.task_dialog?.details}
             </TabsTrigger>
-            {task && (
+            {task && !task.is_completed && (
               <TabsTrigger value="history">
                 {dictionary.task_dialog?.history} ({versions.length})
               </TabsTrigger>
