@@ -301,8 +301,12 @@ export function TaskDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-1">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-1 min-h-0">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-4"
+            id="task-form"
+          >
             <div className="space-y-2">
               <Label htmlFor="title">{dictionary.task_dialog?.title}</Label>
               <Input
@@ -440,33 +444,39 @@ export function TaskDialog({
                 </Label>
               </div>
             )}
-
-            <div className="flex justify-between pt-4">
-              {task && onDelete && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={async () => {
-                    if (confirm(dictionary.task_dialog?.delete_confirm)) {
-                      await onDelete();
-                      onOpenChange(false);
-                    }
-                  }}
-                >
-                  <Trash className="h-4 w-4 mr-2" />
-                  {dictionary.task_dialog?.delete}
-                </Button>
-              )}
-              <div className="flex gap-2 ml-auto">
-                <Button type="submit" disabled={isSubmitDisabled}>
-                  {task
-                    ? dictionary.task_dialog?.save_changes
-                    : dictionary.task_dialog?.create_task}
-                </Button>
-              </div>
-            </div>
           </form>
+        </div>
+
+        <div className="border-t pt-4 mt-4 shrink-0">
+          <div className="flex justify-between">
+            {task && onDelete && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={async () => {
+                  if (confirm(dictionary.task_dialog?.delete_confirm)) {
+                    await onDelete();
+                    onOpenChange(false);
+                  }
+                }}
+              >
+                <Trash className="h-4 w-4 mr-2" />
+                {dictionary.task_dialog?.delete}
+              </Button>
+            )}
+            <div className="flex gap-2 ml-auto">
+              <Button
+                type="submit"
+                form="task-form"
+                disabled={isSubmitDisabled}
+              >
+                {task
+                  ? dictionary.task_dialog?.save_changes
+                  : dictionary.task_dialog?.create_task}
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
