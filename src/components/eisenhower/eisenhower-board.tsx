@@ -43,7 +43,11 @@ export function EisenhowerBoard({
   );
 
   useEffect(() => {
+    // Skip updates if dragging to prevent conflicts
+    if (activeTask) return;
+
     if (tasks) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalTasks((prev) => {
         // Create a map of updated tasks for O(1) lookup
         const tasksMap = new Map(tasks.map((t) => [t.id, t]));
@@ -60,7 +64,7 @@ export function EisenhowerBoard({
         return [...mergedTasks, ...newTasks];
       });
     }
-  }, [tasks]);
+  }, [tasks, activeTask]);
 
   const moveTaskLocally = (activeId: string, overId: string) => {
     setLocalTasks((prev) => {
@@ -223,7 +227,7 @@ export function EisenhowerBoard({
         : [`${targetCoords.x},${targetCoords.y}`];
 
       // Update ALL tasks in affected quadrants with their new positions
-      const updatePromises: Promise<any>[] = [];
+      const updatePromises: Promise<unknown>[] = [];
 
       for (const quadrantKey of quadrantsToUpdate) {
         const tasksInQuadrant = updatedTasks.filter(

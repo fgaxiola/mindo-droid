@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -28,9 +28,11 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
     id: "task-panel",
   });
 
-  const unpositionedTasks = tasks.filter(
+  const unpositionedTasks = useMemo(() => tasks.filter(
     (t) => t.matrixPosition === null && (showArchived ? true : !t.is_completed)
-  );
+  ), [tasks, showArchived]);
+
+  const taskIds = useMemo(() => unpositionedTasks.map((t) => t.id), [unpositionedTasks]);
 
   return (
     <div
@@ -64,7 +66,7 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         <SortableContext
-          items={unpositionedTasks.map((t) => t.id)}
+          items={taskIds}
           strategy={verticalListSortingStrategy}
         >
           {unpositionedTasks.map((task) => (

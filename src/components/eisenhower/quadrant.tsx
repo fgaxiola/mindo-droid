@@ -31,6 +31,9 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
     data: droppableData,
   });
 
+  // Memoize task IDs to prevent SortableContext from triggering unnecessary updates
+  const taskIds = useMemo(() => tasks.map((t) => t.id), [tasks]);
+
   return (
     <div
       ref={setNodeRef}
@@ -58,7 +61,7 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
       </div>
       <div className="flex-1 space-y-2 overflow-y-auto">
         <SortableContext
-          items={tasks.map((t) => t.id)}
+          items={taskIds}
           strategy={verticalListSortingStrategy}
         >
           {tasks.map((task) => (

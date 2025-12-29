@@ -48,7 +48,11 @@ export function InteractiveMatrixBoard({
   );
 
   useEffect(() => {
+    // Skip updates if dragging to prevent conflicts
+    if (activeTask) return;
+
     if (tasks) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalTasks(prev => {
         // Filter out completed tasks before processing
         const activeTasks = tasks.filter(t => !t.is_completed);
@@ -67,7 +71,7 @@ export function InteractiveMatrixBoard({
         return [...mergedTasks, ...newTasks];
       });
     }
-  }, [tasks]);
+  }, [tasks, activeTask]);
 
   const moveTaskLocally = (activeId: string, overId: string) => {
       setLocalTasks((prev) => {
