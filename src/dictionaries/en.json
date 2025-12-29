@@ -97,7 +97,7 @@
     "description": "Description",
     "due_date": "Due Date",
     "estimated_time": "Estimated Time",
-    "create_task": "Create Task",
+    "create_task": "New Task",
     "save_changes": "Save Changes",
     "cancel": "Cancel",
     "delete": "Delete",

@@ -20,10 +20,11 @@ export function useTasks() {
       const { data, error } = await supabase
         .from("tasks")
         .select("*")
+        .order("position", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      
+
       return data.map((item: any) => ({
         ...item,
         matrixPosition: item.matrix_position,
@@ -41,6 +42,9 @@ export function useTaskMutations() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      // Set initial position for new task (will be ordered by position, so defaults to end)
+      const newPosition = Date.now();
+
       const newTask = {
         id: generateTaskId(),
         user_id: user.id,
@@ -52,6 +56,7 @@ export function useTaskMutations() {
         tags: [],
         matrix_position: taskData.matrixPosition || null, // For interactive matrix
         quadrant_coords: taskData.coords || { x: -1, y: -1 }, // For priority matrix
+        position: newPosition,
       };
 
       const { data, error } = await supabase

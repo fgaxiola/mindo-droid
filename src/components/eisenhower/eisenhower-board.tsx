@@ -154,6 +154,33 @@ export function EisenhowerBoard({
     }
   };
 
+  const updatePositions = (tasks: Task[]) => {
+    // Calculate new positions for all tasks based on their current order in the array
+    // Group tasks by quadrant and assign positions within each quadrant
+    const quadrantTasks = new Map<string, Task[]>();
+    
+    tasks.forEach(task => {
+      const key = `${task.coords.x},${task.coords.y}`;
+      if (!quadrantTasks.has(key)) {
+        quadrantTasks.set(key, []);
+      }
+      quadrantTasks.get(key)!.push(task);
+    });
+
+    // Update positions for each task based on its index within the quadrant
+    const updatedTasks = tasks.map(task => {
+      const key = `${task.coords.x},${task.coords.y}`;
+      const quadrantList = quadrantTasks.get(key)!;
+      const position = quadrantList.findIndex(t => t.id === task.id);
+      
+      // Use index * 100 to allow inserting between tasks later
+      return { ...task, position: position * 100 };
+    });
+
+    setLocalTasks(updatedTasks);
+    return updatedTasks;
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
@@ -175,10 +202,58 @@ export function EisenhowerBoard({
     }
 
     if (targetCoords) {
-      await updateTask.mutateAsync({
-        id: taskId,
-        updates: { coords: targetCoords },
-      });
+      // Update positions based on current order in localTasks
+      const updatedTasks = updatePositions(localTasks);
+
+      // Find the task that was moved
+      const taskToSave = updatedTasks.find((t) => t.id === taskId);
+      if (!taskToSave) return;
+
+      // Determine the quadrant key for all tasks that need position updates
+      // If moving to a different quadrant, update positions in BOTH quadrants
+      const activeTask = localTasks.find((t) => t.id === taskId);
+      if (!activeTask) return;
+
+      const oldQuadrantKey = `${activeTask.coords.x},${activeTask.coords.y}`;
+      const isNewQuadrant = oldQuadrantKey !== `${targetCoords.x},${targetCoords.y}`;
+
+      // Get all unique quadrants that need position updates
+      const quadrantsToUpdate = isNewQuadrant
+        ? [oldQuadrantKey, `${targetCoords.x},${targetCoords.y}`]
+        : [`${targetCoords.x},${targetCoords.y}`];
+
+      // Update ALL tasks in affected quadrants with their new positions
+      const updatePromises: Promise<any>[] = [];
+
+      for (const quadrantKey of quadrantsToUpdate) {
+        const tasksInQuadrant = updatedTasks.filter(
+          (t) => `${t.coords.x},${t.coords.y}` === quadrantKey
+        );
+
+        for (const task of tasksInQuadrant) {
+          if (task.position !== undefined) {
+            updatePromises.push(
+              updateTask.mutateAsync({
+                id: task.id,
+                updates: { position: task.position },
+              })
+            );
+          }
+        }
+      }
+
+      // Also update coords for the moved task if quadrant changed
+      if (isNewQuadrant) {
+        updatePromises.push(
+          updateTask.mutateAsync({
+            id: taskId,
+            updates: { coords: targetCoords },
+          })
+        );
+      }
+
+      // Execute all updates in parallel
+      await Promise.all(updatePromises);
     }
   };
 

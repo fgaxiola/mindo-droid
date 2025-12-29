@@ -98,7 +98,7 @@
     "description": "Descripción",
     "due_date": "Fecha de vencimiento",
     "estimated_time": "Tiempo estimado",
-    "create_task": "Crear Tarea",
+    "create_task": "Nueva Tarea",
     "save_changes": "Guardar Cambios",
     "cancel": "Cancelar",
     "delete": "Eliminar",
