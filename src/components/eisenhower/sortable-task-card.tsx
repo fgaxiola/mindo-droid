@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   useTaskMutations,
   useTaskVersions,
@@ -39,10 +43,10 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
   // Use useTasks hook to subscribe to cache changes
   // This ensures the component re-renders when the cache updates
   const { data: allTasks } = useTasks();
-  
+
   // Get the latest task from React Query cache to ensure we always show the most recent data
   // This is important because the parent component may have stale local state
-  const latestTask = allTasks?.find(t => t.id === task.id) || task;
+  const latestTask = allTasks?.find((t) => t.id === task.id) || task;
 
   const {
     attributes,
@@ -96,7 +100,8 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
                   <h4
                     className={cn(
                       "text-sm font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
-                      latestTask.is_completed && "line-through text-muted-foreground"
+                      latestTask.is_completed &&
+                        "line-through text-muted-foreground"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -114,7 +119,8 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
               <h4
                 className={cn(
                   "text-sm font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
-                  latestTask.is_completed && "line-through text-muted-foreground"
+                  latestTask.is_completed &&
+                    "line-through text-muted-foreground"
                 )}
                 onClick={(e) => {
                   e.stopPropagation();
