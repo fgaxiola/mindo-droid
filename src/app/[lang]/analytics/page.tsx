@@ -1,9 +1,15 @@
 "use client";
 
 import { useTasks } from "@/hooks/use-tasks";
-import { AnalyticsView } from "@/components/analytics/analytics-view";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { usePathname } from "next/navigation";
+import { lazy, Suspense } from "react";
+
+const AnalyticsView = lazy(() =>
+  import("@/components/analytics/analytics-view").then((module) => ({
+    default: module.AnalyticsView,
+  }))
+);
 
 export default function AnalyticsPage() {
   const { data: tasks = [] } = useTasks();
@@ -28,7 +34,9 @@ export default function AnalyticsPage() {
         </div>
         
         <div className="px-6">
-          <AnalyticsView tasks={completedTasks} locale={currentLang} />
+          <Suspense fallback={<div className="animate-pulse space-y-4"><div className="h-32 bg-muted rounded" /><div className="h-64 bg-muted rounded" /></div>}>
+            <AnalyticsView tasks={completedTasks} locale={currentLang} />
+          </Suspense>
         </div>
       </div>
     </div>

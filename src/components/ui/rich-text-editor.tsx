@@ -5,7 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { cn } from "@/lib/utils";
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/client";
 
 interface RichTextEditorProps {
   content: string;
@@ -26,10 +26,7 @@ export function RichTextEditor({
   readOnly = false,
   onKeyDown,
 }: RichTextEditorProps) {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient();
 
   const handleImageUpload = async (file: File): Promise<string> => {
     const filename = `${Date.now()}-${file.name}`;

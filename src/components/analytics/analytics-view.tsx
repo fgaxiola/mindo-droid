@@ -11,7 +11,11 @@ import { StatsCard } from "./stats-card";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
 import { useQueryClient } from "@tanstack/react-query";
-import { subDays, isSameDay, isWeekend, subMonths, eachDayOfInterval } from "date-fns";
+import { subDays } from "date-fns/subDays";
+import { isSameDay } from "date-fns/isSameDay";
+import { isWeekend } from "date-fns/isWeekend";
+import { subMonths } from "date-fns/subMonths";
+import { eachDayOfInterval } from "date-fns/eachDayOfInterval";
 
 interface AnalyticsViewProps {
   tasks: Task[];

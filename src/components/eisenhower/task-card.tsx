@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Task } from "@/types/task";
@@ -30,7 +30,7 @@ function getTooltipDelay() {
   return parseInt(process.env.NEXT_PUBLIC_TOOLTIP_HOVER_DELAY_MS || "1000", 10);
 }
 
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
+export const TaskCard = memo(function TaskCard({ task, isOverlay }: TaskCardProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const tooltipDelay = getTooltipDelay();
   const { updateTask, deleteTask } = useTaskMutations();
@@ -165,4 +165,15 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
       />
     </>
   );
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if task data actually changed
+  return (
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.title === nextProps.task.title &&
+    prevProps.task.description === nextProps.task.description &&
+    prevProps.task.is_completed === nextProps.task.is_completed &&
+    prevProps.task.coords.x === nextProps.task.coords.x &&
+    prevProps.task.coords.y === nextProps.task.coords.y &&
+    prevProps.isOverlay === nextProps.isOverlay
+  );
+});

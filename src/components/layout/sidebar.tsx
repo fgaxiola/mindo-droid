@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { memo, useMemo } from "react";
 import { useSidebarStore } from "@/stores/sidebar-store";
 import { Button } from "@/components/ui/button";
 import {
@@ -103,29 +104,32 @@ function ChevronRightIcon({ className }: { className?: string }) {
   );
 }
 
-export function Sidebar() {
+export const Sidebar = memo(function Sidebar() {
   const pathname = usePathname();
   const { isCollapsed, toggle } = useSidebarStore();
   const dictionary = useDictionary();
   const currentLang = pathname.split("/")[1] || "en";
 
-  const NAV_ITEMS: NavItem[] = [
-    {
-      href: `/${currentLang}/matrix`,
-      label: dictionary.sidebar.priority_matrix,
-      icon: <GridIcon className="w-5 h-5" />,
-    },
-    {
-      href: `/${currentLang}/interactive-matrix`,
-      label: dictionary.sidebar.interactive_matrix,
-      icon: <CrosshairIcon className="w-5 h-5" />,
-    },
-    {
-      href: `/${currentLang}/analytics`,
-      label: dictionary.sidebar.analytics,
-      icon: <BarChart2 className="w-5 h-5" />,
-    },
-  ];
+  const NAV_ITEMS: NavItem[] = useMemo(
+    () => [
+      {
+        href: `/${currentLang}/matrix`,
+        label: dictionary.sidebar.priority_matrix,
+        icon: <GridIcon className="w-5 h-5" />,
+      },
+      {
+        href: `/${currentLang}/interactive-matrix`,
+        label: dictionary.sidebar.interactive_matrix,
+        icon: <CrosshairIcon className="w-5 h-5" />,
+      },
+      {
+        href: `/${currentLang}/analytics`,
+        label: dictionary.sidebar.analytics,
+        icon: <BarChart2 className="w-5 h-5" />,
+      },
+    ],
+    [currentLang, dictionary.sidebar]
+  );
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -210,4 +214,4 @@ export function Sidebar() {
       </aside>
     </TooltipProvider>
   );
-}
+});

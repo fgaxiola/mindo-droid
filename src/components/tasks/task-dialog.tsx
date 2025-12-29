@@ -1,11 +1,11 @@
 "use client";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { format } from "date-fns";
+import { format } from "date-fns/format";
 import { CalendarIcon, Clock, Trash, Undo, History } from "lucide-react";
 
 import {
@@ -19,7 +19,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
+const RichTextEditor = lazy(() =>
+  import("@/components/ui/rich-text-editor").then((module) => ({
+    default: module.RichTextEditor,
+  }))
+);
 import {
   Popover,
   PopoverContent,
@@ -431,19 +435,21 @@ export function TaskDialog({
                 control={control}
                 name="description"
                 render={({ field }) => (
-                  <RichTextEditor
-                    content={field.value || ""}
-                    onChange={(html, length) => {
-                      field.onChange(html);
-                      if (length !== undefined) {
-                        setDescriptionLength(length);
-                      }
-                    }}
-                    placeholder={dictionary.task_dialog?.task_details}
-                    maxLength={MAX_DESCRIPTION_LENGTH}
-                    readOnly={fieldsDisabled}
-                    onKeyDown={handleKeyDown as (e: KeyboardEvent) => void}
-                  />
+                  <Suspense fallback={<div className="h-[150px] border border-input rounded-md p-3 animate-pulse bg-muted" />}>
+                    <RichTextEditor
+                      content={field.value || ""}
+                      onChange={(html, length) => {
+                        field.onChange(html);
+                        if (length !== undefined) {
+                          setDescriptionLength(length);
+                        }
+                      }}
+                      placeholder={dictionary.task_dialog?.task_details}
+                      maxLength={MAX_DESCRIPTION_LENGTH}
+                      readOnly={fieldsDisabled}
+                      onKeyDown={handleKeyDown as (e: KeyboardEvent) => void}
+                    />
+                  </Suspense>
                 )}
               />
               <p className="text-xs text-muted-foreground text-right">
