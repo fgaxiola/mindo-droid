@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createBrowserClient } from "@supabase/ssr";
-import { Task, TaskCoords } from "@/types/task";
-import { MatrixPosition } from "@/stores/interactive-matrix-store";
+import { Task, TaskCoords, MatrixPosition } from "@/types/task";
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

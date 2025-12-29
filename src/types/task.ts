@@ -9,6 +9,15 @@ export interface TaskCoords {
   y: number; // 0 = not important, 1 = important
 }
 
+export interface MatrixPosition {
+  x: number; // percentage 0-100
+  y: number; // percentage 0-100
+}
+
+export interface PositionedTask extends Task {
+  matrixPosition: MatrixPosition | null; // null = in sidebar
+}
+
 export type TaskStatus = "pending" | "in_progress" | "completed";
 
 export interface Task {

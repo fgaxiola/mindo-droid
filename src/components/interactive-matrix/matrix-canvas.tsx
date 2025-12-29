@@ -2,7 +2,7 @@
 
 import { useRef, useState, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
-import { PositionedTask } from "@/stores/interactive-matrix-store";
+import { PositionedTask } from "@/types/task";
 import { DraggableTask } from "./draggable-task";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";

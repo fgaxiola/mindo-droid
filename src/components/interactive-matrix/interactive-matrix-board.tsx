@@ -12,10 +12,7 @@ import {
   useSensors,
   pointerWithin,
 } from "@dnd-kit/core";
-import {
-  PositionedTask,
-  MatrixPosition,
-} from "@/stores/interactive-matrix-store";
+import { PositionedTask, MatrixPosition } from "@/types/task";
 import { MatrixCanvas } from "./matrix-canvas";
 import { TaskPanel } from "./task-panel";
 import { DraggableTaskOverlay } from "./draggable-task";

@@ -6,7 +6,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { PositionedTask } from "@/stores/interactive-matrix-store";
+import { PositionedTask } from "@/types/task";
 import { SortableTaskCard } from "@/components/eisenhower/sortable-task-card";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";

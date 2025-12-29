@@ -1,7 +1,7 @@
 "use client";
 
 import { InteractiveMatrixBoard } from "@/components/interactive-matrix";
-import { MatrixPosition } from "@/stores/interactive-matrix-store";
+import { MatrixPosition } from "@/types/task";
 
 export default function InteractiveMatrixPage() {
   const handlePositionChange = (taskId: string, position: MatrixPosition | null) => {

@@ -1,15 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Task } from "@/types/task";
-
-export interface MatrixPosition {
-  x: number; // percentage 0-100
-  y: number; // percentage 0-100
-}
-
-export interface PositionedTask extends Task {
-  matrixPosition: MatrixPosition | null; // null = in sidebar
-}
+import { PositionedTask, MatrixPosition } from "@/types/task";
 
 interface InteractiveMatrixState {
   tasks: PositionedTask[];

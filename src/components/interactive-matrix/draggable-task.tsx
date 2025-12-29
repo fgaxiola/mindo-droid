@@ -3,7 +3,7 @@
 import { useState, memo } from "react";
 import { useDraggable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { PositionedTask } from "@/stores/interactive-matrix-store";
+import { PositionedTask } from "@/types/task";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
