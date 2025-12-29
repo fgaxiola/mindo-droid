@@ -18,49 +18,12 @@ const nextConfig: NextConfig = {
       "date-fns",
     ],
   },
-  // Optimize bundle splitting
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk for large libraries
-            vendor: {
-              name: "vendor",
-              chunks: "all",
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Separate chunk for TipTap (heavy library)
-            tiptap: {
-              name: "tiptap",
-              test: /[\\/]node_modules[\\/]@tiptap[\\/]/,
-              chunks: "all",
-              priority: 30,
-            },
-            // Separate chunk for dnd-kit
-            dndkit: {
-              name: "dndkit",
-              test: /[\\/]node_modules[\\/]@dnd-kit[\\/]/,
-              chunks: "all",
-              priority: 30,
-            },
-            // Separate chunk for Radix UI
-            radix: {
-              name: "radix",
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-              chunks: "all",
-              priority: 30,
-            },
-          },
-        },
-      };
-    }
-    return config;
+  // Turbopack handles bundle splitting automatically and more efficiently than webpack
+  // No need for manual webpack config - Turbopack optimizes chunks automatically
+  // For production builds, Turbopack will still use webpack internally if needed
+  turbopack: {
+    // Turbopack automatically optimizes bundle splitting
+    // It's faster and more efficient than manual webpack configuration
   },
 };
 
