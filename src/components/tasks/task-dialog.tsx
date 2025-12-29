@@ -319,31 +319,17 @@ export function TaskDialog({
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">{dictionary.task_dialog?.title}</Label>
-              <div className="flex items-center gap-3">
-                <Controller
-                  control={control}
-                  name="is_completed"
-                  render={({ field }) => (
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      aria-label="Mark as completed"
-                    />
-                  )}
-                />
-                <Input
-                  id="title"
-                  {...register("title")}
-                  placeholder="Task title"
-                  maxLength={MAX_TITLE_LENGTH}
-                  autoFocus
-                  className={cn(
-                    "flex-1",
-                    fieldsDisabled && "pointer-events-none opacity-70"
-                  )}
-                  disabled={fieldsDisabled}
-                />
-              </div>
+              <Input
+                id="title"
+                {...register("title")}
+                placeholder="Task title"
+                maxLength={MAX_TITLE_LENGTH}
+                autoFocus
+                className={cn(
+                  fieldsDisabled && "pointer-events-none opacity-70"
+                )}
+                disabled={fieldsDisabled}
+              />
               <p className="text-xs text-muted-foreground text-right">
                 {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
               </p>
@@ -442,6 +428,32 @@ export function TaskDialog({
                 {MAX_DESCRIPTION_LENGTH}
               </p>
             </div>
+
+            {task && (
+              <div className="flex items-center space-x-2 pt-2">
+                <Controller
+                  control={control}
+                  name="is_completed"
+                  render={({ field }) => (
+                    <Checkbox
+                      id="is_completed"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={fieldsDisabled}
+                    />
+                  )}
+                />
+                <Label
+                  htmlFor="is_completed"
+                  className={cn(
+                    "text-sm font-normal cursor-pointer",
+                    fieldsDisabled && "opacity-70 cursor-not-allowed"
+                  )}
+                >
+                  {dictionary.task_dialog?.mark_as_completed}
+                </Label>
+              </div>
+            )}
 
             <div className="flex justify-between pt-4">
               {task && onDelete && (

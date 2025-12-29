@@ -109,6 +109,7 @@
     "no_history": "No history available.",
     "restore_version": "Restore version",
     "restore": "Restore",
+    "mark_as_completed": "Mark as completed",
     "characters_remaining": "characters remaining",
     "errors": {
       "title_required": "Title is required",

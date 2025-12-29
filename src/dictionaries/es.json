@@ -110,6 +110,7 @@
     "no_history": "No hay historial disponible.",
     "restore_version": "Restaurar versión",
     "restore": "Restaurar",
+    "mark_as_completed": "Marcar como completada",
     "characters_remaining": "caracteres restantes",
     "errors": {
       "title_required": "El título es obligatorio",
