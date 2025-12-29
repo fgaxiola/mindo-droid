@@ -201,109 +201,104 @@ export function TaskDialog({
         className="max-w-2xl max-h-[90vh] flex flex-col"
         onKeyDown={handleKeyDown}
       >
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>
-              {task ? null : `${dictionary.task_dialog?.create_task}`}
-            </DialogTitle>
-            {showHistoryButton && (
-              <Popover
-                open={isHistoryPopoverOpen}
-                onOpenChange={setIsHistoryPopoverOpen}
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className={cn(
-                          "h-8 w-8",
-                          isHistoryPopoverOpen && "bg-accent"
-                        )}
-                      >
-                        <History className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{dictionary.task_dialog?.restore_version}</p>
-                  </TooltipContent>
-                </Tooltip>
-                <PopoverContent
-                  className="w-96 p-0"
-                  align="end"
-                  side="bottom"
-                  onWheel={(e) => {
-                    // Prevent scroll from propagating to the dialog
-                    e.stopPropagation();
-                  }}
-                >
-                  <div className="p-3 border-b">
-                    <h4 className="text-sm font-semibold">
-                      {dictionary.task_dialog?.history} ({versions.length})
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {dictionary.task_dialog?.restore_version}
-                    </p>
-                  </div>
-                  <div
-                    className="h-[400px] overflow-y-auto"
-                    onWheel={(e) => {
-                      // Prevent scroll from propagating to the dialog
-                      e.stopPropagation();
-                    }}
+        {showHistoryButton && (
+          <Popover
+            open={isHistoryPopoverOpen}
+            onOpenChange={setIsHistoryPopoverOpen}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "absolute top-2 right-8 h-8 w-8",
+                      isHistoryPopoverOpen && "bg-accent"
+                    )}
                   >
-                    <div className="p-3 space-y-2">
-                      {versions.map((version) => {
-                        const snapshot = version.snapshot;
-                        return (
-                          <button
-                            key={version.id}
-                            type="button"
-                            className="w-full text-left border rounded-md p-3 hover:bg-accent/50 transition-colors group"
-                            onClick={() => {
-                              onRestore?.(version);
-                              setIsHistoryPopoverOpen(false);
-                            }}
-                          >
-                            <div className="flex items-start gap-2">
-                              <Undo className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0 group-hover:text-primary transition-colors" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-muted-foreground">
-                                  {format(
-                                    new Date(version.created_at),
-                                    "PPP p"
-                                  )}
-                                </p>
-                                <p className="text-sm font-medium mt-1 line-clamp-1 group-hover:text-primary transition-colors">
-                                  {snapshot.title}
-                                </p>
-                                {snapshot.description && (
-                                  <div
-                                    className="text-xs text-muted-foreground mt-1 line-clamp-2"
-                                    dangerouslySetInnerHTML={{
-                                      __html: snapshot.description,
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                      {versions.length === 0 && (
-                        <p className="text-center text-muted-foreground py-8 text-sm">
-                          {dictionary.task_dialog?.no_history}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
-          </div>
+                    <History className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{dictionary.task_dialog?.restore_version}</p>
+              </TooltipContent>
+            </Tooltip>
+            <PopoverContent
+              className="w-96 p-0"
+              align="end"
+              side="bottom"
+              onWheel={(e) => {
+                // Prevent scroll from propagating to the dialog
+                e.stopPropagation();
+              }}
+            >
+              <div className="p-3 border-b">
+                <h4 className="text-sm font-semibold">
+                  {dictionary.task_dialog?.history} ({versions.length})
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {dictionary.task_dialog?.restore_version}
+                </p>
+              </div>
+              <div
+                className="h-[400px] overflow-y-auto"
+                onWheel={(e) => {
+                  // Prevent scroll from propagating to the dialog
+                  e.stopPropagation();
+                }}
+              >
+                <div className="p-3 space-y-2">
+                  {versions.map((version) => {
+                    const snapshot = version.snapshot;
+                    return (
+                      <button
+                        key={version.id}
+                        type="button"
+                        className="w-full text-left border rounded-md p-3 hover:bg-accent/50 transition-colors group"
+                        onClick={() => {
+                          onRestore?.(version);
+                          setIsHistoryPopoverOpen(false);
+                        }}
+                      >
+                        <div className="flex items-start gap-2">
+                          <Undo className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0 group-hover:text-primary transition-colors" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {format(new Date(version.created_at), "PPP p")}
+                            </p>
+                            <p className="text-sm font-medium mt-1 line-clamp-1 group-hover:text-primary transition-colors">
+                              {snapshot.title}
+                            </p>
+                            {snapshot.description && (
+                              <div
+                                className="text-xs text-muted-foreground mt-1 line-clamp-2"
+                                dangerouslySetInnerHTML={{
+                                  __html: snapshot.description,
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                  {versions.length === 0 && (
+                    <p className="text-center text-muted-foreground py-8 text-sm">
+                      {dictionary.task_dialog?.no_history}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+        <DialogHeader>
+          <DialogTitle>
+            {task ? null : `${dictionary.task_dialog?.create_task}`}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-1">
@@ -464,13 +459,6 @@ export function TaskDialog({
                 </Button>
               )}
               <div className="flex gap-2 ml-auto">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  {dictionary.task_dialog?.cancel}
-                </Button>
                 <Button type="submit" disabled={isSubmitDisabled}>
                   {task
                     ? dictionary.task_dialog?.save_changes
