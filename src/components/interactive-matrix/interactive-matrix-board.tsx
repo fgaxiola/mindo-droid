@@ -38,6 +38,7 @@ export function InteractiveMatrixBoard({
   const [activeTask, setActiveTask] = useState<PositionedTask | null>(null);
   const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks.filter(t => !t.is_completed));
   const matrixRef = useRef<HTMLDivElement>(null);
+  const justFinishedDragRef = useRef<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -56,13 +57,22 @@ export function InteractiveMatrixBoard({
       setLocalTasks(prev => {
         // Filter out completed tasks before processing
         const activeTasks = tasks.filter(t => !t.is_completed);
-
-        // Create a map of updated active tasks for O(1) lookup
         const tasksMap = new Map(activeTasks.map(t => [t.id, t]));
 
+        // If we just finished dragging a task, preserve its local position
+        // to prevent glitch where it briefly shows old position
+        const recentlyMovedTaskId = justFinishedDragRef.current;
+
         // Keep existing order for active tasks that are still in the list
-        const mergedTasks = prev.map(t => tasksMap.get(t.id) || t)
-          .filter(t => tasksMap.has(t.id));
+        const mergedTasks = prev.map(t => {
+          // Preserve the local position for the task we just moved
+          if (recentlyMovedTaskId && t.id === recentlyMovedTaskId) {
+            const serverVersion = tasksMap.get(t.id);
+            // Keep local position but merge other updates from server
+            return serverVersion ? { ...serverVersion, matrixPosition: t.matrixPosition } : t;
+          }
+          return tasksMap.get(t.id) || t;
+        }).filter(t => tasksMap.has(t.id) || (recentlyMovedTaskId && t.id === recentlyMovedTaskId));
 
         // Add any new active tasks that weren't in the previous state
         const prevIds = new Set(prev.map(t => t.id));
@@ -135,11 +145,10 @@ export function InteractiveMatrixBoard({
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+    const taskId = active.id as string;
     setActiveTask(null);
 
     if (!over) return;
-
-    const taskId = active.id as string;
 
     // Check if dropped into the matrix area
     if (over.id === "matrix-canvas" && matrixRef.current) {
@@ -162,8 +171,20 @@ export function InteractiveMatrixBoard({
         const updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: position } : t);
         setLocalTasks(updated);
 
-        await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: position } });
-        onTaskPositionChange?.(taskId, position);
+        // Mark that we just finished dragging this task to prevent glitch
+        // This prevents the useEffect from overwriting the local position with stale server data
+        justFinishedDragRef.current = taskId;
+        
+        try {
+          await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: position } });
+          onTaskPositionChange?.(taskId, position);
+        } finally {
+          // Clear the ref after mutation completes to allow normal sync
+          // Use a small delay to ensure server response has been processed
+          setTimeout(() => {
+            justFinishedDragRef.current = null;
+          }, 200);
+        }
       }
     } else {
       // Check if dropped into the sidebar (task-panel or onto another task in the list)
@@ -175,8 +196,20 @@ export function InteractiveMatrixBoard({
         const updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: null } : t);
         setLocalTasks(updated);
 
-        await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: null } });
-        onTaskPositionChange?.(taskId, null);
+        // Mark that we just finished dragging this task to prevent glitch
+        // This prevents the useEffect from overwriting the local position with stale server data
+        justFinishedDragRef.current = taskId;
+
+        try {
+          await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: null } });
+          onTaskPositionChange?.(taskId, null);
+        } finally {
+          // Clear the ref after mutation completes to allow normal sync
+          // Use a small delay to ensure server response has been processed
+          setTimeout(() => {
+            justFinishedDragRef.current = null;
+          }, 200);
+        }
       }
     }
   };
