@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./language-switcher";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { TimerIcon } from "lucide-react";
-import { useState } from "react";
-import { PomodoroTimer } from "@/components/pomodoro-timer";
+import { useState, lazy, Suspense } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +14,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
+const PomodoroTimer = lazy(() =>
+  import("@/components/pomodoro-timer").then((module) => ({
+    default: module.PomodoroTimer,
+  }))
+);
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -56,12 +61,16 @@ export function AppLayout({ children }: AppLayoutProps) {
               </DialogTrigger>
               <DialogContent className="p-0 max-w-md border-0">
                 <DialogTitle className="sr-only">Pomodoro Timer</DialogTitle>
-                <PomodoroTimer />
+                <Suspense fallback={null}>
+                  <PomodoroTimer />
+                </Suspense>
               </DialogContent>
             </Dialog>
             <div className="flex items-center gap-3">
               <LanguageSwitcher />
-              <span className="text-sm text-muted-foreground">{user.email}</span>
+              <span className="text-sm text-muted-foreground">
+                {user.email}
+              </span>
               <Button
                 onClick={signOut}
                 variant="ghost"

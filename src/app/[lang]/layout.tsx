@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter_Tight } from "next/font/google";
+import { Inter_Tight } from "next/font/google";
 import "../globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { QueryProvider } from "@/providers/query-provider";
@@ -7,19 +7,10 @@ import { AppLayout } from "@/components/layout";
 import { getDictionary } from "@/lib/dictionaries";
 import { DictionaryProvider } from "@/providers/dictionary-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 const interTight = Inter_Tight({
   variable: "--font-inter-tight",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -44,7 +35,7 @@ export default async function RootLayout({
   return (
     <html lang={lang} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${interTight.variable} antialiased`}
+        className={`${interTight.variable} antialiased`}
       >
         <DictionaryProvider dictionary={dictionary}>
           <QueryProvider>
