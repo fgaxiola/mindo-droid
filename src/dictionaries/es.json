@@ -108,6 +108,8 @@
     "details": "Detalles",
     "history": "Historial",
     "no_history": "No hay historial disponible.",
+    "restore_version": "Restaurar versión",
+    "restore": "Restaurar",
     "characters_remaining": "caracteres restantes",
     "errors": {
       "title_required": "El título es obligatorio",
