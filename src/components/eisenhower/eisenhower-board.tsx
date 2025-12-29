@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -30,9 +30,10 @@ export function EisenhowerBoard({
 }: EisenhowerBoardProps) {
   const dictionary = useDictionary();
   const { data: tasks = initialTasks } = useTasks();
-  const { updateTask } = useTaskMutations();
+  const { updateTasks } = useTaskMutations();
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks);
+  const lastSyncedTasksRef = useRef<Task[]>(initialTasks);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -46,7 +47,8 @@ export function EisenhowerBoard({
     // Skip updates if dragging to prevent conflicts
     if (activeTask) return;
 
-    if (tasks) {
+    if (tasks && tasks !== lastSyncedTasksRef.current) {
+      lastSyncedTasksRef.current = tasks;
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalTasks((prev) => {
         // Create a map of updated tasks for O(1) lookup
@@ -71,6 +73,9 @@ export function EisenhowerBoard({
       const oldIndex = prev.findIndex((t) => t.id === activeId);
       const newIndex = prev.findIndex((t) => t.id === overId);
       if (oldIndex === -1 || newIndex === -1) return prev;
+      // Prevent redundant updates if indices are the same
+      if (oldIndex === newIndex) return prev;
+
       const newTasks = [...prev];
       const [removed] = newTasks.splice(oldIndex, 1);
       newTasks.splice(newIndex, 0, removed);
@@ -127,9 +132,15 @@ export function EisenhowerBoard({
           const newIndex = updated.findIndex((t) => t.id === overId);
 
           if (oldIndex !== -1 && newIndex !== -1) {
+            let insertionIndex = newIndex;
+            // Adjust insertion index to ensure "Insert Before" behavior
+            // because removing the item from a lower index shifts the target index down
+            if (oldIndex < newIndex) {
+              insertionIndex -= 1;
+            }
+
             const [movedTask] = updated.splice(oldIndex, 1);
-            // Insert at new index (swapping basically)
-            updated.splice(newIndex, 0, movedTask);
+            updated.splice(insertionIndex, 0, movedTask);
           }
         } else {
           // If dropped on container (empty space), move to end of array to be safe,
@@ -187,9 +198,11 @@ export function EisenhowerBoard({
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveTask(null);
 
-    if (!over) return;
+    if (!over) {
+      setActiveTask(null);
+      return;
+    }
 
     const taskId = active.id as string;
 
@@ -226,8 +239,8 @@ export function EisenhowerBoard({
         ? [oldQuadrantKey, `${targetCoords.x},${targetCoords.y}`]
         : [`${targetCoords.x},${targetCoords.y}`];
 
-      // Update ALL tasks in affected quadrants with their new positions
-      const updatePromises: Promise<unknown>[] = [];
+      const tasksToUpdate: Partial<Task>[] = [];
+      const tasksMap = new Map(tasks.map(t => [t.id, t]));
 
       for (const quadrantKey of quadrantsToUpdate) {
         const tasksInQuadrant = updatedTasks.filter(
@@ -236,29 +249,27 @@ export function EisenhowerBoard({
 
         for (const task of tasksInQuadrant) {
           if (task.position !== undefined) {
-            updatePromises.push(
-              updateTask.mutateAsync({
-                id: task.id,
-                updates: { position: task.position },
-              })
-            );
+             const originalTask = tasksMap.get(task.id);
+             // Only update if position or coords changed
+             if (!originalTask || originalTask.position !== task.position || 
+                 originalTask.coords.x !== task.coords.x || originalTask.coords.y !== task.coords.y) {
+                tasksToUpdate.push({
+                  id: task.id,
+                  position: task.position,
+                  // Ensure coords are also updated if changed (e.g. moved task)
+                  coords: task.coords 
+                });
+             }
           }
         }
       }
 
-      // Also update coords for the moved task if quadrant changed
-      if (isNewQuadrant) {
-        updatePromises.push(
-          updateTask.mutateAsync({
-            id: taskId,
-            updates: { coords: targetCoords },
-          })
-        );
+      if (tasksToUpdate.length > 0) {
+        await updateTasks.mutateAsync(tasksToUpdate);
       }
-
-      // Execute all updates in parallel
-      await Promise.all(updatePromises);
     }
+    
+    setActiveTask(null);
   };
 
   return (

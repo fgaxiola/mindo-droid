@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { Task, QUADRANTS, Quadrant as QuadrantType } from "@/types/task";
+import { useMemo, useRef } from "react";
+import { Task, QUADRANTS } from "@/types/task";
 import { Quadrant } from "./quadrant";
 import { useDictionary } from "@/providers/dictionary-provider";
 
@@ -10,28 +10,63 @@ interface MatrixProps {
   isDragging?: boolean;
 }
 
+// Helper to check if two task arrays are effectively the same (ids and coords)
+const areTaskArraysEqual = (prev: Task[], next: Task[]) => {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    // We only care about ID for list order stability.
+    // Coords are implicit by being in this array.
+    if (prev[i].id !== next[i].id) return false;
+  }
+  return true;
+};
+
 export function Matrix({ tasks, isDragging }: MatrixProps) {
   const dictionary = useDictionary();
+  
+  // Refs to hold the last stable array for each quadrant
+  const prevQuadrantsRef = useRef({
+    do: [] as Task[],
+    schedule: [] as Task[],
+    delegate: [] as Task[],
+    eliminate: [] as Task[],
+  });
 
-  // Memoize task filtering to prevent creating new arrays on every render
+  // Memoize task filtering
   const tasksByQuadrant = useMemo(() => {
-    const quadrants = {
-      do: [] as Task[], // (1, 1)
-      schedule: [] as Task[], // (0, 1)
-      delegate: [] as Task[], // (1, 0)
-      eliminate: [] as Task[], // (0, 0)
+    const current = {
+      do: [] as Task[],
+      schedule: [] as Task[],
+      delegate: [] as Task[],
+      eliminate: [] as Task[],
     };
 
+    // First pass: distribute tasks
     tasks.forEach((task) => {
       if (task.is_completed) return;
-      if (task.coords.x === 1 && task.coords.y === 1) quadrants.do.push(task);
-      else if (task.coords.x === 0 && task.coords.y === 1) quadrants.schedule.push(task);
-      else if (task.coords.x === 1 && task.coords.y === 0) quadrants.delegate.push(task);
-      else if (task.coords.x === 0 && task.coords.y === 0) quadrants.eliminate.push(task);
+      if (task.coords.x === 1 && task.coords.y === 1) current.do.push(task);
+      else if (task.coords.x === 0 && task.coords.y === 1) current.schedule.push(task);
+      else if (task.coords.x === 1 && task.coords.y === 0) current.delegate.push(task);
+      else if (task.coords.x === 0 && task.coords.y === 0) current.eliminate.push(task);
     });
 
-    return quadrants;
+    // Second pass: check against previous refs to return stable arrays
+    const stable = { ...current };
+    const prev = prevQuadrantsRef.current;
+
+    // eslint-disable-next-line react-hooks/refs
+    (Object.keys(current) as Array<keyof typeof current>).forEach((key) => {
+      if (areTaskArraysEqual(prev[key], current[key])) {
+        stable[key] = prev[key];
+      } else {
+        prev[key] = current[key]; // Update ref
+      }
+    });
+
+    return stable;
   }, [tasks]);
+
 
   // Memoize translated quadrants to prevent unnecessary re-renders
   const translatedQuadrants = useMemo(() => {

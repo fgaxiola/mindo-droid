@@ -103,7 +103,33 @@ export function useTaskMutations() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (_, variables) => {
+    onMutate: async ({ id, updates }) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+      // Snapshot the previous value
+      const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+
+      // Optimistically update to the new value
+      if (previousTasks) {
+        queryClient.setQueryData<Task[]>(["tasks"], (old) => {
+          return old?.map((task) =>
+            task.id === id ? { ...task, ...updates } : task
+          );
+        });
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousTasks };
+    },
+    onError: (err, newTodo, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousTasks) {
+        queryClient.setQueryData(["tasks"], context.previousTasks);
+      }
+    },
+    onSettled: (data, error, variables) => {
+      // Always refetch after error or success:
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["task_versions", variables.id] });
     },
@@ -119,7 +145,86 @@ export function useTaskMutations() {
     },
   });
 
-  return { createTask, updateTask, deleteTask };
+  const updateTasks = useMutation({
+    mutationFn: async (updates: Partial<Task>[]) => {
+      // Get current cached tasks to ensure we have full objects for UPSERT
+      // This prevents "NOT NULL" constraint violations for fields we aren't updating (e.g. title)
+      const currentTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+      if (!currentTasks) throw new Error("No tasks found in cache to merge updates");
+
+      const updateMap = new Map(updates.map((u) => [u.id, u]));
+
+      // Filter and map: only include tasks that are being updated
+      const dbUpserts = currentTasks
+        .filter((t) => updateMap.has(t.id))
+        .map((t) => {
+          const update = updateMap.get(t.id)!;
+          
+          // Start with the existing task from cache (contains all DB fields)
+          const dbObj: any = { ...t };
+
+          // Apply updates
+          if (update.position !== undefined) dbObj.position = update.position;
+          
+          // Map frontend props back to DB columns
+          if (update.coords) {
+            dbObj.quadrant_coords = update.coords;
+          }
+          if (update.matrixPosition !== undefined) {
+            dbObj.matrix_position = update.matrixPosition;
+          }
+
+          // Cleanup: Remove frontend-only properties that shouldn't be sent to DB
+          delete dbObj.coords;
+          delete dbObj.matrixPosition;
+          
+          // Ensure user_id is present (it should be in the cached object)
+          // If for some reason it's missing, the upsert might fail RLS if not caught here
+          if (!dbObj.user_id) {
+             console.error("Missing user_id for task", t.id);
+          }
+
+          return dbObj;
+        });
+
+      if (dbUpserts.length === 0) return [];
+
+      const { data, error } = await supabase
+        .from("tasks")
+        .upsert(dbUpserts)
+        .select();
+
+      if (error) throw error;
+      return data;
+    },
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ["tasks"] });
+      const previousTasks = queryClient.getQueryData<Task[]>(["tasks"]);
+
+      if (previousTasks) {
+        queryClient.setQueryData<Task[]>(["tasks"], (old) => {
+          if (!old) return [];
+          const updateMap = new Map(updates.map((u) => [u.id, u]));
+          return old.map((task) => {
+            const update = updateMap.get(task.id);
+            return update ? { ...task, ...update } : task;
+          });
+        });
+      }
+
+      return { previousTasks };
+    },
+    onError: (err, newTodo, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(["tasks"], context.previousTasks);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
+
+  return { createTask, updateTask, updateTasks, deleteTask };
 }
 
 export function useTaskVersions(taskId?: string) {
