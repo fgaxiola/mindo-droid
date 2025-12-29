@@ -11,9 +11,10 @@ import { useTaskMutations } from "@/hooks/use-tasks";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
+  lastMovedTaskId?: string | null;
 }
 
-export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
+export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createPosition, setCreatePosition] = useState<{
     x: number;
@@ -171,6 +172,7 @@ export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
             left: `${task.matrixPosition!.x}%`,
             top: `${task.matrixPosition!.y}%`,
             transform: "translate(-50%, -50%)",
+            zIndex: lastMovedTaskId === task.id ? 10 : 1,
           }}
         />
       ))}

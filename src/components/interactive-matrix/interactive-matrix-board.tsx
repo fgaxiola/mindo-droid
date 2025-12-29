@@ -39,6 +39,7 @@ export function InteractiveMatrixBoard({
   const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks.filter(t => !t.is_completed));
   const matrixRef = useRef<HTMLDivElement>(null);
   const justFinishedDragRef = useRef<string | null>(null);
+  const [lastMovedTaskId, setLastMovedTaskId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -175,6 +176,9 @@ export function InteractiveMatrixBoard({
         // This prevents the useEffect from overwriting the local position with stale server data
         justFinishedDragRef.current = taskId;
         
+        // Set this task as the last moved to give it higher z-index
+        setLastMovedTaskId(taskId);
+        
         try {
           await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: position } });
           onTaskPositionChange?.(taskId, position);
@@ -199,6 +203,9 @@ export function InteractiveMatrixBoard({
         // Mark that we just finished dragging this task to prevent glitch
         // This prevents the useEffect from overwriting the local position with stale server data
         justFinishedDragRef.current = taskId;
+        
+        // Set this task as the last moved to give it higher z-index
+        setLastMovedTaskId(taskId);
 
         try {
           await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: null } });
@@ -233,7 +240,7 @@ export function InteractiveMatrixBoard({
             </p>
           </div>
           <div ref={matrixRef} className="flex-1 flex">
-            <MatrixCanvas tasks={localTasks as PositionedTask[]} />
+            <MatrixCanvas tasks={localTasks as PositionedTask[]} lastMovedTaskId={lastMovedTaskId} />
           </div>
         </div>
         <TaskPanel tasks={localTasks as PositionedTask[]} isDragging={!!activeTask} />
