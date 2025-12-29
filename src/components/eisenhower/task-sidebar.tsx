@@ -21,7 +21,6 @@ interface TaskSidebarProps {
 
 export function TaskSidebar({ tasks, isDragging }: TaskSidebarProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [showArchived, setShowArchived] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
 
@@ -34,10 +33,7 @@ export function TaskSidebar({ tasks, isDragging }: TaskSidebarProps) {
   });
 
   const unassignedTasks = tasks.filter(
-    (task) =>
-      task.coords.x === -1 &&
-      task.coords.y === -1 &&
-      (showArchived ? true : !task.is_completed)
+    (task) => task.coords.x === -1 && task.coords.y === -1 && !task.is_completed
   );
 
   return (

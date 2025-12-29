@@ -7,12 +7,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { PositionedTask } from "@/stores/interactive-matrix-store";
-import { SortableTask } from "./sortable-task";
+import { SortableTaskCard } from "@/components/eisenhower/sortable-task-card";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { TaskDialog } from "@/components/tasks/task-dialog";
 import { useTaskMutations } from "@/hooks/use-tasks";
+import { Task } from "@/types/task";
 
 interface TaskPanelProps {
   tasks: PositionedTask[];
@@ -21,24 +22,39 @@ interface TaskPanelProps {
 
 export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [showArchived, setShowArchived] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
   const { setNodeRef } = useDroppable({
     id: "task-panel",
   });
 
-  const unpositionedTasks = useMemo(() => tasks.filter(
-    (t) => t.matrixPosition === null && (showArchived ? true : !t.is_completed)
-  ), [tasks, showArchived]);
+  const unpositionedTasks = useMemo(
+    () => tasks.filter((t) => t.matrixPosition === null && !t.is_completed),
+    [tasks]
+  );
 
-  const taskIds = useMemo(() => unpositionedTasks.map((t) => t.id), [unpositionedTasks]);
+  // Convert PositionedTask to Task format for SortableTaskCard
+  const tasksAsTaskType = useMemo(
+    () =>
+      unpositionedTasks.map(
+        (t): Task => ({
+          ...t,
+          coords: { x: -1, y: -1 }, // SortableTaskCard expects coords, not matrixPosition
+        })
+      ),
+    [unpositionedTasks]
+  );
+
+  const taskIds = useMemo(
+    () => unpositionedTasks.map((t) => t.id),
+    [unpositionedTasks]
+  );
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "w-64 border-l border-border bg-muted/30 flex flex-col group relative"
+        "w-72 border-l border-border bg-muted/30 flex flex-col group relative"
       )}
     >
       <div className="p-4 border-b border-border flex justify-between items-start">
@@ -64,13 +80,10 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
           />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        <SortableContext
-          items={taskIds}
-          strategy={verticalListSortingStrategy}
-        >
-          {unpositionedTasks.map((task) => (
-            <SortableTask key={task.id} task={task} />
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+          {tasksAsTaskType.map((task) => (
+            <SortableTaskCard key={task.id} task={task} />
           ))}
         </SortableContext>
         {unpositionedTasks.length === 0 && (
@@ -78,11 +91,6 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
             {dictionary.interactive_matrix.all_tasks_in_matrix}
           </div>
         )}
-      </div>
-      <div className="p-3 border-t border-border">
-        <p className="text-[10px] text-muted-foreground text-center">
-          {dictionary.interactive_matrix.remove_instructions}
-        </p>
       </div>
 
       <TaskDialog

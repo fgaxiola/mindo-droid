@@ -14,8 +14,8 @@ import {
   useTaskMutations,
   useTaskVersions,
   useRestoreTaskVersion,
+  useTasks,
 } from "@/hooks/use-tasks";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface TaskCardProps {
   task: Task;
@@ -32,22 +32,22 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
   const { updateTask, deleteTask } = useTaskMutations();
   const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
   const restoreTask = useRestoreTaskVersion();
-  const queryClient = useQueryClient();
   const { active } = useDndContext();
   const isAnyDragging = !!active;
   const shouldShowTooltip = !isAnyDragging;
 
-  // Get the latest task from React Query cache when modal opens
-  // This ensures we always show the most recent data
-  const latestTask = isEditOpen ? (() => {
-    const tasks = queryClient.getQueryData<Task[]>(["tasks"]);
-    return tasks?.find(t => t.id === task.id) || task;
-  })() : task;
+  // Use useTasks hook to subscribe to cache changes
+  // This ensures the component re-renders when the cache updates
+  const { data: allTasks } = useTasks();
+  
+  // Get the latest task from React Query cache to ensure we always show the most recent data
+  // This is important because the parent component may have stale local state
+  const latestTask = allTasks?.find(t => t.id === task.id) || task;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
-      id: task.id,
-      data: { task },
+      id: latestTask.id,
+      data: { task: latestTask },
     });
 
   const style = {
@@ -76,12 +76,12 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
               onClick={(e) => {
                 e.stopPropagation();
                 updateTask.mutate({
-                  id: task.id,
-                  updates: { is_completed: !task.is_completed },
+                  id: latestTask.id,
+                  updates: { is_completed: !latestTask.is_completed },
                 });
               }}
             >
-              {task.is_completed ? (
+              {latestTask.is_completed ? (
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
               ) : (
                 <Circle className="h-4 w-4 text-muted-foreground" />
@@ -93,38 +93,38 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
                   <h4
                     className={cn(
                       "text-sm font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
-                      task.is_completed && "line-through text-muted-foreground"
+                      latestTask.is_completed && "line-through text-muted-foreground"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsEditOpen(true);
                     }}
                   >
-                    {task.title}
+                    {latestTask.title}
                   </h4>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{task.title}</p>
+                  <p>{latestTask.title}</p>
                 </TooltipContent>
               </Tooltip>
             ) : (
               <h4
                 className={cn(
                   "text-sm font-medium text-foreground line-clamp-2 cursor-pointer hover:underline decoration-primary/50 underline-offset-2",
-                  task.is_completed && "line-through text-muted-foreground"
+                  latestTask.is_completed && "line-through text-muted-foreground"
                 )}
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditOpen(true);
                 }}
               >
-                {task.title}
+                {latestTask.title}
               </h4>
             )}
           </div>
-          {task.tags.length > 0 && (
+          {latestTask.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {task.tags.slice(0, 3).map((tag) => (
+              {latestTask.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag.id}
                   className="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
@@ -146,10 +146,10 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
         onOpenChange={setIsEditOpen}
         task={latestTask}
         onSave={async (data) => {
-          await updateTask.mutateAsync({ id: task.id, updates: data });
+          await updateTask.mutateAsync({ id: latestTask.id, updates: data });
         }}
         onDelete={async () => {
-          await deleteTask.mutateAsync(task.id);
+          await deleteTask.mutateAsync(latestTask.id);
         }}
         onRestore={async (version) => {
           await restoreTask.mutateAsync(version);

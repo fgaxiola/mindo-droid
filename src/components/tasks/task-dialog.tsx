@@ -210,7 +210,7 @@ export function TaskDialog({
             <TabsTrigger value="details">
               {dictionary.task_dialog?.details}
             </TabsTrigger>
-            {task && !task.is_completed && (
+            {task && !task.is_completed && versions.length > 0 && (
               <TabsTrigger value="history">
                 {dictionary.task_dialog?.history} ({versions.length})
               </TabsTrigger>

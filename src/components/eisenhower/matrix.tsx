@@ -10,14 +10,26 @@ interface MatrixProps {
   isDragging?: boolean;
 }
 
-// Helper to check if two task arrays are effectively the same (ids and coords)
+// Helper to check if two task arrays are effectively the same (ids, coords, and content)
 const areTaskArraysEqual = (prev: Task[], next: Task[]) => {
   if (prev === next) return true;
   if (prev.length !== next.length) return false;
   for (let i = 0; i < prev.length; i++) {
-    // We only care about ID for list order stability.
-    // Coords are implicit by being in this array.
-    if (prev[i].id !== next[i].id) return false;
+    const prevTask = prev[i];
+    const nextTask = next[i];
+    // Compare ID, coords, and key content fields to detect changes
+    if (
+      prevTask.id !== nextTask.id ||
+      prevTask.coords.x !== nextTask.coords.x ||
+      prevTask.coords.y !== nextTask.coords.y ||
+      prevTask.title !== nextTask.title ||
+      prevTask.description !== nextTask.description ||
+      prevTask.is_completed !== nextTask.is_completed ||
+      prevTask.due_date !== nextTask.due_date ||
+      prevTask.estimated_time !== nextTask.estimated_time
+    ) {
+      return false;
+    }
   }
   return true;
 };
