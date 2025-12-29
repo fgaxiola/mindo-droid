@@ -18,7 +18,7 @@ function getLocale(request: NextRequest) {
   return match(languages, locales, defaultLocale);
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip if internal paths or static files (already mostly covered by config matcher)
@@ -50,3 +50,4 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.webp|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
+

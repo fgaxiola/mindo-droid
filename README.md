@@ -13,9 +13,11 @@ Una aplicación de productividad construida con Next.js que combina un temporiza
 
 ## Requisitos
 
-- Node.js 18+
-- npm 9+
+- **Bun** 1.0+ (recomendado para desarrollo) o Node.js 18+
+- **npm** (necesario para build - instala módulos nativos correctamente)
 - Cuenta de Supabase
+
+> **Nota**: Este proyecto está optimizado para Bun runtime en desarrollo y producción. Ver [BUN_MIGRATION.md](./BUN_MIGRATION.md) para más detalles.
 
 ## Instalación
 
@@ -25,12 +27,19 @@ Una aplicación de productividad construida con Next.js que combina un temporiza
    cd droid-test
    ```
 
-2. **Instalar dependencias**
+2. **Instalar Bun** (si no lo tienes)
    ```bash
-   npm install
+   curl -fsSL https://bun.sh/install | bash
    ```
 
-3. **Configurar variables de entorno**
+3. **Instalar dependencias con Bun**
+   ```bash
+   bun install
+   ```
+   
+   > **Nota**: Bun instala dependencias mucho más rápido que npm (~10-30x más rápido). El script `postinstall` se ejecutará automáticamente para instalar módulos nativos.
+
+4. **Configurar variables de entorno**
    
    Crear archivo `.env.local` en la raíz del proyecto:
    ```env
@@ -58,7 +67,9 @@ Una aplicación de productividad construida con Next.js que combina un temporiza
 
 5. **Ejecutar en desarrollo**
    ```bash
-   npm run dev
+   bun run dev
+   # O simplemente:
+   bun dev
    ```
    
    La aplicación estará disponible en `http://localhost:3000`
@@ -67,10 +78,64 @@ Una aplicación de productividad construida con Next.js que combina un temporiza
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm run dev` | Inicia el servidor de desarrollo con Turbopack |
-| `npm run build` | Genera build de producción |
-| `npm run start` | Inicia el servidor de producción |
-| `npm run lint` | Ejecuta ESLint |
+| `bun dev` | Inicia el servidor de desarrollo con Bun runtime (más rápido) |
+| `npm rebuild lightningcss` | Reinstala módulos nativos de lightningcss (necesario antes de build) |
+| `npm run build` | Genera build de producción (usa Node.js para compatibilidad) |
+| `bun start` | Inicia el servidor de producción con Bun runtime |
+| `bun lint` | Ejecuta ESLint |
+
+## Flujo de trabajo recomendado
+
+### Desarrollo
+```bash
+# 1. Instalar dependencias (solo la primera vez o después de cambios en package.json)
+bun install
+
+# 2. Iniciar servidor de desarrollo
+bun run dev
+```
+
+### Build para producción
+```bash
+# 1. Asegurar que las dependencias estén instaladas
+bun install
+
+# 2. Reinstalar módulos nativos de lightningcss (importante!)
+npm rebuild lightningcss
+
+# 3. Generar build de producción
+npm run build
+```
+
+### Producción
+```bash
+# Después del build, iniciar servidor de producción
+bun start
+```
+
+## ¿Por qué este flujo?
+
+- **Desarrollo con Bun**: Más rápido startup y hot reload (~60-70% más rápido)
+- **Build con npm**: Asegura que los módulos nativos (como `lightningcss`) se instalen correctamente
+- **Producción con Bun**: Mejor performance del servidor (~75% más rápido startup)
+
+## Scripts automáticos
+
+El proyecto incluye scripts automáticos que se ejecutan después de `bun install`:
+
+- `postinstall`: Se ejecuta automáticamente después de `bun install` o `npm install`
+- `install:natives`: Reinstala módulos nativos de lightningcss
+
+**¿Necesitas ejecutarlos manualmente?**
+
+- ❌ **No necesitas ejecutarlos manualmente** - `postinstall` se ejecuta automáticamente después de `bun install` o `npm install`
+- ✅ **Pero es recomendable** ejecutar `npm rebuild lightningcss` antes de hacer build para asegurar que los módulos nativos estén correctamente instalados
+
+Si tienes problemas con el build, ejecuta manualmente:
+```bash
+npm rebuild lightningcss
+npm run build
+```
 
 ## Estructura del proyecto
 
@@ -101,11 +166,12 @@ src/
 │   └── task-store.ts       # Estado de tareas
 ├── types/
 │   └── task.ts             # Tipos de Task, Tag, Quadrant
-└── middleware.ts           # Middleware de autenticación
+└── proxy.ts                # Proxy de autenticación (Next.js 16+)
 ```
 
 ## Tecnologías
 
+- **Runtime**: Bun 1.0+ (optimizado para máximo rendimiento)
 - **Framework**: Next.js 16 (App Router)
 - **Estilos**: Tailwind CSS v4
 - **Componentes UI**: shadcn/ui

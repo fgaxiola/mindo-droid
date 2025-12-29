@@ -24,7 +24,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     // Turbopack automatically optimizes bundle splitting
     // It's faster and more efficient than manual webpack configuration
+    // Bun runtime works seamlessly with Turbopack
   },
+  // SWC minification is enabled by default in Next.js 16
+  // No need to specify swcMinify - it's automatic
 };
 
 export default nextConfig;

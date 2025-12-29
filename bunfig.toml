@@ -1,0 +1,27 @@
+# Bun configuration file
+# Optimized for Next.js development and production
+
+[install]
+# Use Bun's fast package manager
+auto = true
+# Cache packages for faster installs
+cache = true
+# Prefer online mode for latest packages
+prefer = "online"
+# Install optional dependencies (Next.js and Tailwind handle these automatically)
+# Bun will install them but won't fail if some are missing
+optional = true
+
+[test]
+# Use Bun's built-in test runner (if you add tests later)
+preload = []
+
+[run]
+# Use Bun runtime for scripts
+bun = true
+
+# Environment variables
+[env]
+# Bun-specific optimizations
+NODE_ENV = "development"
+
