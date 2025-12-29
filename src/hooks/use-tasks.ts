@@ -219,9 +219,37 @@ export function useTaskMutations() {
         queryClient.setQueryData(["tasks"], context.previousTasks);
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    onSuccess: (data) => {
+      // Update cache with the actual returned data from server to confirm consistency
+      // This avoids a full refetch (GET) of the tasks list
+      if (data) {
+        queryClient.setQueryData<Task[]>(["tasks"], (old) => {
+          if (!old) return data.map((item: any) => ({
+            ...item,
+            matrixPosition: item.matrix_position,
+            coords: item.quadrant_coords,
+          })) as Task[];
+
+          const updateMap = new Map(data.map((u: any) => [u.id, u]));
+          return old.map((task) => {
+            const update = updateMap.get(task.id);
+            if (update) {
+              return {
+                ...task,
+                ...update,
+                matrixPosition: update.matrix_position,
+                coords: update.quadrant_coords,
+              };
+            }
+            return task;
+          });
+        });
+      }
     },
+    // No need to invalidate queries immediately if we trust the upsert response
+    // onSettled: () => {
+    //   queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    // },
   });
 
   return { createTask, updateTask, updateTasks, deleteTask };

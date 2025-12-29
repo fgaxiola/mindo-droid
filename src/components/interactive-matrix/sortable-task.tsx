@@ -21,9 +21,7 @@ interface SortableTaskProps {
 
 export function SortableTask({ task }: SortableTaskProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const { updateTask, deleteTask } = useTaskMutations();
-  const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
-  const restoreTask = useRestoreTaskVersion();
+  const { updateTask } = useTaskMutations();
   const { active } = useDndContext();
   const isAnyDragging = !!active;
 
@@ -118,22 +116,46 @@ export function SortableTask({ task }: SortableTaskProps) {
         )}
       </div>
 
-      <TaskDialog
-        open={isEditOpen}
-        onOpenChange={setIsEditOpen}
-        task={task}
-        onSave={async (data) => {
-          await updateTask.mutateAsync({ id: task.id, updates: data });
-        }}
-        onDelete={async () => {
-          await deleteTask.mutateAsync(task.id);
-        }}
-        onRestore={async (version) => {
-          await restoreTask.mutateAsync(version);
-          setIsEditOpen(false);
-        }}
-        versions={versions}
-      />
+      {isEditOpen && (
+        <SortableTaskDialogWrapper 
+          task={task} 
+          open={isEditOpen} 
+          onOpenChange={setIsEditOpen} 
+        />
+      )}
     </>
+  );
+}
+
+function SortableTaskDialogWrapper({ 
+  task, 
+  open, 
+  onOpenChange 
+}: { 
+  task: PositionedTask, 
+  open: boolean, 
+  onOpenChange: (open: boolean) => void 
+}) {
+  const { updateTask, deleteTask } = useTaskMutations();
+  const { data: versions } = useTaskVersions(task.id);
+  const restoreTask = useRestoreTaskVersion();
+
+  return (
+    <TaskDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      task={task}
+      onSave={async (data) => {
+        await updateTask.mutateAsync({ id: task.id, updates: data });
+      }}
+      onDelete={async () => {
+        await deleteTask.mutateAsync(task.id);
+      }}
+      onRestore={async (version) => {
+        await restoreTask.mutateAsync(version);
+        onOpenChange(false);
+      }}
+      versions={versions}
+    />
   );
 }

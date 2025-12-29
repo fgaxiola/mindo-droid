@@ -28,9 +28,7 @@ function getTooltipDelay() {
 export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const tooltipDelay = getTooltipDelay();
-  const { updateTask, deleteTask } = useTaskMutations();
-  const { data: versions } = useTaskVersions(isEditOpen ? task.id : undefined);
-  const restoreTask = useRestoreTaskVersion();
+  const { updateTask } = useTaskMutations();
   const { active } = useDndContext();
   const isAnyDragging = !!active;
   const shouldShowTooltip = !isAnyDragging;
@@ -135,23 +133,47 @@ export function DraggableTask({ task, isOnMatrix, style }: DraggableTaskProps) {
         )}
       </div>
 
-      <TaskDialog
-        open={isEditOpen}
-        onOpenChange={setIsEditOpen}
-        task={task}
-        onSave={async (data) => {
-          await updateTask.mutateAsync({ id: task.id, updates: data });
-        }}
-        onDelete={async () => {
-          await deleteTask.mutateAsync(task.id);
-        }}
-        onRestore={async (version) => {
-          await restoreTask.mutateAsync(version);
-          setIsEditOpen(false);
-        }}
-        versions={versions}
-      />
+      {isEditOpen && (
+        <DraggableTaskDialogWrapper 
+          task={task} 
+          open={isEditOpen} 
+          onOpenChange={setIsEditOpen} 
+        />
+      )}
     </>
+  );
+}
+
+function DraggableTaskDialogWrapper({ 
+  task, 
+  open, 
+  onOpenChange 
+}: { 
+  task: PositionedTask, 
+  open: boolean, 
+  onOpenChange: (open: boolean) => void 
+}) {
+  const { updateTask, deleteTask } = useTaskMutations();
+  const { data: versions } = useTaskVersions(task.id);
+  const restoreTask = useRestoreTaskVersion();
+
+  return (
+    <TaskDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      task={task}
+      onSave={async (data) => {
+        await updateTask.mutateAsync({ id: task.id, updates: data });
+      }}
+      onDelete={async () => {
+        await deleteTask.mutateAsync(task.id);
+      }}
+      onRestore={async (version) => {
+        await restoreTask.mutateAsync(version);
+        onOpenChange(false);
+      }}
+      versions={versions}
+    />
   );
 }
 
