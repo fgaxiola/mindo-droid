@@ -12,7 +12,7 @@
     "signing_up": "Signing up..."
   },
   "common": {
-    "app_name": "Focus App",
+    "app_name": "Mindo",
     "loading": "Loading...",
     "sign_out": "Sign out"
   },
@@ -67,7 +67,8 @@
     "interactive_matrix": "Interactive Matrix",
     "pomodoro": "Pomodoro",
     "priority_matrix": "Priority Matrix",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "pomo": "Pomo"
   },
   "completed": {
     "title": "Completed Tasks",
@@ -106,7 +107,6 @@
     "details": "Details",
     "history": "History",
     "no_history": "No history available.",
-    "edit_task": "Edit Task",
     "characters_remaining": "characters remaining",
     "errors": {
       "title_required": "Title is required",

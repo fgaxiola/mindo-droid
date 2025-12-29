@@ -67,7 +67,11 @@ interface TaskDialogProps {
   task?: Task;
   onSave: (data: TaskFormData) => Promise<void>;
   onDelete?: () => Promise<void>;
-  onRestore?: (version: { id: string; created_at: string; snapshot: Task }) => Promise<void>;
+  onRestore?: (version: {
+    id: string;
+    created_at: string;
+    snapshot: Task;
+  }) => Promise<void>;
   versions?: Array<{ id: string; created_at: string; snapshot: Task }>;
   viewOnly?: boolean;
 }
@@ -159,7 +163,7 @@ export function TaskDialog({
   const handleKeyDown = (e: React.KeyboardEvent | KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
-      if ('stopPropagation' in e) {
+      if ("stopPropagation" in e) {
         e.stopPropagation();
       }
       if (!isSubmitDisabled) {
@@ -180,14 +184,12 @@ export function TaskDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-          className="max-w-2xl max-h-[90vh] flex flex-col"
-          onKeyDown={handleKeyDown}
-        >
+        className="max-w-2xl max-h-[90vh] flex flex-col"
+        onKeyDown={handleKeyDown}
+      >
         <DialogHeader>
           <DialogTitle>
-            {task
-              ? `${dictionary.task_dialog?.edit_task}: ${task.id}`
-              : `${dictionary.task_dialog?.create_task}`}
+            {task ? null : `${dictionary.task_dialog?.create_task}`}
           </DialogTitle>
         </DialogHeader>
 
@@ -229,7 +231,10 @@ export function TaskDialog({
                     placeholder="Task title"
                     maxLength={MAX_TITLE_LENGTH}
                     autoFocus
-                    className={cn("flex-1", fieldsDisabled && "pointer-events-none opacity-70")}
+                    className={cn(
+                      "flex-1",
+                      fieldsDisabled && "pointer-events-none opacity-70"
+                    )}
                     disabled={fieldsDisabled}
                   />
                 </div>
@@ -250,7 +255,10 @@ export function TaskDialog({
                     control={control}
                     name="due_date"
                     render={({ field }) => (
-                      <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
+                      <Popover
+                        open={isDatePopoverOpen}
+                        onOpenChange={setIsDatePopoverOpen}
+                      >
                         <PopoverTrigger asChild>
                           <Button
                             variant={"outline"}
@@ -354,10 +362,7 @@ export function TaskDialog({
                   >
                     {dictionary.task_dialog?.cancel}
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitDisabled}
-                  >
+                  <Button type="submit" disabled={isSubmitDisabled}>
                     {task
                       ? dictionary.task_dialog?.save_changes
                       : dictionary.task_dialog?.create_task}

@@ -12,7 +12,7 @@
     "signing_up": "Registrándose..."
   },
   "common": {
-    "app_name": "App de Enfoque",
+    "app_name": "Mindo",
     "loading": "Cargando...",
     "sign_out": "Cerrar sesión"
   },
@@ -68,7 +68,8 @@
     "pomodoro": "Pomodoro",
     "priority_matrix": "Matriz de Prioridad",
     "analytics": "Analíticas",
-    "completed": "Terminados"
+    "completed": "Terminados",
+    "pomo": "Pomo"
   },
   "completed": {
     "title": "Tareas Terminadas",
@@ -107,7 +108,6 @@
     "details": "Detalles",
     "history": "Historial",
     "no_history": "No hay historial disponible.",
-    "edit_task": "Editar Tarea",
     "characters_remaining": "caracteres restantes",
     "errors": {
       "title_required": "El título es obligatorio",
