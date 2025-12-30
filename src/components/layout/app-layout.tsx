@@ -5,6 +5,7 @@ import { Sidebar } from "./sidebar";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./language-switcher";
 import { useDictionary } from "@/providers/dictionary-provider";
+import { useFocusMode } from "@/providers/focus-mode-provider";
 import { TimerIcon } from "lucide-react";
 import { useState, lazy, Suspense } from "react";
 import {
@@ -28,6 +29,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { user, signOut, loading } = useAuth();
   const dictionary = useDictionary();
+  const { focusMode } = useFocusMode();
   const [showPomodoro, setShowPomodoro] = useState(false);
 
   if (loading) {
@@ -40,6 +42,17 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   if (!user) {
     return <>{children}</>;
+  }
+
+  // In focus mode, hide sidebar and header
+  if (focusMode) {
+    return (
+      <TooltipProvider>
+        <div className="h-screen overflow-hidden">
+          <main className="h-full overflow-auto">{children}</main>
+        </div>
+      </TooltipProvider>
+    );
   }
 
   return (

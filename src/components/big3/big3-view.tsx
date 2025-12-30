@@ -25,8 +25,9 @@ import { QuickTaskCard } from "@/components/tasks/quick-task-card";
 import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { useTaskMutations } from "@/hooks/use-tasks";
 import { useDictionary } from "@/providers/dictionary-provider";
+import { useFocusMode } from "@/providers/focus-mode-provider";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 const RichTextEditor = lazy(() =>
   import("@/components/ui/rich-text-editor").then((module) => ({
@@ -41,6 +42,7 @@ interface Big3ViewProps {
 
 export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
   const dictionary = useDictionary();
+  const { setFocusMode } = useFocusMode();
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const { createTask, updateTasks } = useTaskMutations();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -201,43 +203,70 @@ export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
     setActiveTask(null);
   };
 
-  // Focus mode: show only the first task centered
+  // Focus mode: show only the first task centered, full screen
   if (focusMode) {
     if (localTasks.length === 0) {
       return (
-        <div className="flex flex-col min-h-[600px]">
-          <div className="flex-1 flex items-center justify-center py-8">
-            <p className="text-muted-foreground text-center">
-              {dictionary.big3.no_tasks}
-            </p>
-          </div>
+        <div className="h-screen w-full flex items-center justify-center bg-background">
+          <p className="text-muted-foreground text-center">
+            {dictionary.big3.no_tasks}
+          </p>
         </div>
       );
     }
 
     const firstTask = localTasks[0];
     return (
-      <div className="flex flex-col min-h-[600px] w-full">
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-6 max-w-3xl">
-            {firstTask.title}
-          </h2>
-          {firstTask.description && (
-            <div className="max-w-3xl w-full">
-              <Suspense
-                fallback={
-                  <div className="h-[200px] border border-input rounded-md p-3 animate-pulse bg-muted" />
-                }
-              >
-                <RichTextEditor
-                  content={firstTask.description}
-                  onChange={() => {}}
-                  readOnly={true}
-                  className="text-lg"
-                />
-              </Suspense>
-            </div>
-          )}
+      <div className="h-screen w-full flex flex-col bg-background relative overflow-hidden">
+        {/* Exit focus mode button - top right */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setFocusMode(false)}
+          className="fixed top-4 right-4 h-9 w-9 z-50 text-muted-foreground hover:text-foreground bg-background/80 backdrop-blur-sm"
+        >
+          <X className="h-5 w-5" />
+        </Button>
+
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto pb-24">
+          <div className="flex flex-col items-center justify-center text-center max-w-4xl w-full mx-auto py-8 px-8 min-h-full">
+            <p className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider">
+              {dictionary.big3?.the_one_thing || "The One Thing"}
+            </p>
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8">
+              {firstTask.title}
+            </h2>
+            {firstTask.description && (
+              <div className="w-full max-w-3xl">
+                <Suspense
+                  fallback={
+                    <div className="h-[200px] border border-input rounded-md p-3 animate-pulse bg-muted" />
+                  }
+                >
+                  <RichTextEditor
+                    content={firstTask.description}
+                    onChange={() => {}}
+                    readOnly={true}
+                    className="text-lg"
+                  />
+                </Suspense>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Exit focus mode button - bottom fixed */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t border-border z-50">
+          <div className="max-w-4xl mx-auto flex justify-center">
+            <Button
+              variant="outline"
+              onClick={() => setFocusMode(false)}
+              className="rounded-full px-6"
+            >
+              {dictionary.big3?.exit_focus_mode || "Exit Focus Mode"}
+            </Button>
+          </div>
         </div>
       </div>
     );

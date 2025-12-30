@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useTasks } from "@/hooks/use-tasks";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { Big3View } from "@/components/big3/big3-view";
@@ -12,17 +11,23 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useFocusMode } from "@/providers/focus-mode-provider";
 
 export default function Big3Page() {
   const { data: tasks = [] } = useTasks();
   const dictionary = useDictionary();
-  const [focusMode, setFocusMode] = useState(false);
+  const { focusMode, setFocusMode } = useFocusMode();
 
   // Get only tasks marked as "the_one", excluding completed tasks
   // Tasks are already ordered by position from useTasks(), so we just filter
   const theOneTasks = tasks.filter(
     (task) => task.the_one && !task.is_completed
   );
+
+  // In focus mode, show full screen content without container
+  if (focusMode) {
+    return <Big3View tasks={theOneTasks} focusMode={focusMode} />;
+  }
 
   return (
     <div className="h-full w-full overflow-y-auto bg-background">

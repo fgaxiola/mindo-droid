@@ -100,7 +100,8 @@
     "quadrant_subtitle": "Lo único que hace que todo lo demás sea más fácil o innecesario por hoy",
     "no_tasks": "No tasks yet. Create your first task to get started!",
     "focus_mode": "Focus Mode",
-    "exit_focus_mode": "Exit Focus Mode"
+    "exit_focus_mode": "Exit Focus Mode",
+    "the_one_thing": "The One Thing"
   },
   "task_dialog": {
     "title": "Title",

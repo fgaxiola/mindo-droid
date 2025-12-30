@@ -6,6 +6,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { AppLayout } from "@/components/layout";
 import { getDictionary } from "@/lib/dictionaries";
 import { DictionaryProvider } from "@/providers/dictionary-provider";
+import { FocusModeProvider } from "@/providers/focus-mode-provider";
 
 const interTight = Inter_Tight({
   variable: "--font-inter-tight",
@@ -40,7 +41,9 @@ export default async function RootLayout({
         <DictionaryProvider dictionary={dictionary}>
           <QueryProvider>
             <AuthProvider>
-              <AppLayout>{children}</AppLayout>
+              <FocusModeProvider>
+                <AppLayout>{children}</AppLayout>
+              </FocusModeProvider>
             </AuthProvider>
           </QueryProvider>
         </DictionaryProvider>
