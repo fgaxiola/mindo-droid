@@ -14,7 +14,7 @@ interface RichTextEditorProps {
   className?: string;
   maxLength?: number;
   readOnly?: boolean;
-  onKeyDown?: (e: KeyboardEvent) => void;
+  onKeyDown?: (e: KeyboardEvent) => boolean | void;
 }
 
 export function RichTextEditor({
@@ -71,9 +71,10 @@ export function RichTextEditor({
         if (onKeyDown) {
           const result = onKeyDown(event as KeyboardEvent);
           // If handler returns true, prevent default behavior
-          if (result === true) {
+          if (result !== undefined && result === true) {
             return true;
           }
+          // If handler returns void/undefined, continue with default behavior
         }
         return false;
       },

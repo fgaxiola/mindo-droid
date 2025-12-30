@@ -24,7 +24,7 @@ interface QuickTaskCardProps {
   onCancel?: () => void;
   placeholder?: string;
   className?: string;
-  scrollContainerRef?: React.RefObject<HTMLDivElement>;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export function QuickTaskCard({
