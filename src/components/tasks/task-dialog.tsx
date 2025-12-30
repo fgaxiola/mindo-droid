@@ -174,7 +174,10 @@ export function TaskDialog({
 
   // Watch is_completed to determine if fields should be disabled in viewOnly mode
   const isCompleted = watch("is_completed");
+  // Disable fields (except status checkbox) when in viewOnly mode and task is completed
   const fieldsDisabled = viewOnly && !!isCompleted;
+  // Status checkbox should always be enabled to allow unchecking if user made a mistake
+  const statusCheckboxDisabled = false;
 
   // Close history popover if task becomes completed
   useEffect(() => {
@@ -468,7 +471,7 @@ export function TaskDialog({
                       id="is_completed"
                       checked={field.value}
                       onCheckedChange={field.onChange}
-                      disabled={fieldsDisabled}
+                      disabled={statusCheckboxDisabled}
                     />
                   )}
                 />
@@ -476,7 +479,7 @@ export function TaskDialog({
                   htmlFor="is_completed"
                   className={cn(
                     "text-sm font-normal cursor-pointer",
-                    fieldsDisabled && "opacity-70 cursor-not-allowed"
+                    statusCheckboxDisabled && "opacity-70 cursor-not-allowed"
                   )}
                 >
                   {dictionary.task_dialog?.mark_as_completed}
