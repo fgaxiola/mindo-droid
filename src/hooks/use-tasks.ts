@@ -7,7 +7,7 @@ import { mapDbTasksToTasks, mapDbTaskToTask } from "@/lib/task-mapper";
 const supabase = createClient();
 
 // Fields needed from database - optimize query by selecting only what we need
-const TASK_FIELDS = "id,title,description,due_date,estimated_time,is_completed,completed_at,tags,matrix_position,matrix_z_index,quadrant_coords,position,user_id,created_at,updated_at";
+const TASK_FIELDS = "id,title,description,due_date,estimated_time,is_completed,completed_at,tags,matrix_position,matrix_z_index,quadrant_coords,position,the_one,the_one_date,user_id,created_at,updated_at";
 
 function generateTaskId() {
   const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -58,6 +58,8 @@ export function useTaskMutations() {
         matrix_position: taskData.matrixPosition || null, // For interactive matrix
         quadrant_coords: taskData.coords || { x: -1, y: -1 }, // For priority matrix
         position: newPosition,
+        the_one: taskData.the_one || false,
+        the_one_date: taskData.the_one ? new Date().toISOString() : null,
       };
 
       const { data, error } = await supabase
@@ -103,6 +105,15 @@ export function useTaskMutations() {
           dbUpdates.completed_at = new Date().toISOString();
         } else {
           dbUpdates.completed_at = null;
+        }
+      }
+
+      // Handle the_one and the_one_date
+      if (updates.the_one !== undefined) {
+        if (updates.the_one) {
+          dbUpdates.the_one_date = new Date().toISOString();
+        } else {
+          dbUpdates.the_one_date = null;
         }
       }
 
@@ -195,6 +206,8 @@ export function useTaskMutations() {
             is_completed: t.is_completed ?? false,
             completed_at: t.completed_at ?? null,
             position: t.position ?? null,
+            the_one: t.the_one ?? false,
+            the_one_date: t.the_one_date ?? null,
             created_at: t.created_at,
             updated_at: t.updated_at,
           };
@@ -213,6 +226,15 @@ export function useTaskMutations() {
           }
           if (update.matrix_z_index !== undefined) {
             dbObj.matrix_z_index = update.matrix_z_index;
+          }
+          if (update.the_one !== undefined) {
+            dbObj.the_one = update.the_one;
+            // Update the_one_date when the_one changes
+            if (update.the_one) {
+              dbObj.the_one_date = new Date().toISOString();
+            } else {
+              dbObj.the_one_date = null;
+            }
           }
 
           return dbObj;

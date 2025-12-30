@@ -20,6 +20,7 @@ import {
 } from "@/hooks/use-tasks";
 import { useQueryClient } from "@tanstack/react-query";
 import { Task } from "@/types/task";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface DraggableTaskProps {
   task: PositionedTask;
@@ -39,6 +40,7 @@ export const DraggableTask = memo(
     const { active } = useDndContext();
     const isAnyDragging = !!active;
     const shouldShowTooltip = !isAnyDragging;
+    const dictionary = useDictionary();
 
     const { attributes, listeners, setNodeRef, transform, isDragging } =
       useDraggable({
@@ -125,9 +127,21 @@ export const DraggableTask = memo(
               </h4>
             )}
           </div>
-          {task.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1.5">
-              {task.tags.slice(0, 2).map((tag) => (
+          <div className="flex flex-wrap items-center gap-1 mt-1.5">
+            {task.the_one && (
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <span className="px-1 py-0.5 text-[8px] font-medium rounded bg-yellow-500/20 text-yellow-600 dark:text-yellow-500">
+                    Big 3
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{dictionary.task_dialog?.the_one_tooltip || "Tarea más importante de hoy"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {task.tags.length > 0 &&
+              task.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag.id}
                   className="px-1 py-0.5 text-[8px] font-medium rounded"
@@ -139,8 +153,7 @@ export const DraggableTask = memo(
                   {tag.name}
                 </span>
               ))}
-            </div>
-          )}
+          </div>
         </div>
 
         {isEditOpen && (
@@ -169,6 +182,7 @@ export const DraggableTask = memo(
     if (prevProps.task.title !== nextProps.task.title) return false;
     if (prevProps.task.is_completed !== nextProps.task.is_completed)
       return false;
+    if (prevProps.task.the_one !== nextProps.task.the_one) return false;
     if (prevProps.task.matrixPosition?.x !== nextProps.task.matrixPosition?.x)
       return false;
     if (prevProps.task.matrixPosition?.y !== nextProps.task.matrixPosition?.y)
@@ -255,9 +269,14 @@ export function DraggableTaskOverlay({
           {task.title}
         </h4>
       </div>
-      {task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-1.5">
-          {task.tags.slice(0, 2).map((tag) => (
+      <div className="flex flex-wrap items-center gap-1 mt-1.5">
+        {task.the_one && (
+          <span className="px-1 py-0.5 text-[8px] font-medium rounded bg-yellow-500/20 text-yellow-600 dark:text-yellow-500">
+            Big 3
+          </span>
+        )}
+        {task.tags.length > 0 &&
+          task.tags.slice(0, 2).map((tag) => (
             <span
               key={tag.id}
               className="px-1 py-0.5 text-[8px] font-medium rounded"
@@ -266,8 +285,7 @@ export function DraggableTaskOverlay({
               {tag.name}
             </span>
           ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

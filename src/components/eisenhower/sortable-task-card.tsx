@@ -21,6 +21,7 @@ import {
   useRestoreTaskVersion,
   useTasks,
 } from "@/hooks/use-tasks";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface SortableTaskCardProps {
   task: Task;
@@ -39,6 +40,7 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
   const { active } = useDndContext();
   const isAnyDragging = !!active;
   const shouldShowTooltip = !isAnyDragging;
+  const dictionary = useDictionary();
 
   // Use useTasks hook to subscribe to cache changes
   // This ensures the component re-renders when the cache updates
@@ -131,9 +133,21 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
               </h4>
             )}
           </div>
-          {latestTask.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {latestTask.tags.map((tag) => (
+          <div className="flex flex-wrap items-center gap-1">
+            {latestTask.the_one && (
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-yellow-500/20 text-yellow-600 dark:text-yellow-500">
+                    Big 3
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{dictionary.task_dialog?.the_one_tooltip || "Tarea más importante de hoy"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {latestTask.tags.length > 0 &&
+              latestTask.tags.map((tag) => (
                 <span
                   key={tag.id}
                   className="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
@@ -145,8 +159,7 @@ export function SortableTaskCard({ task }: SortableTaskCardProps) {
                   {tag.name}
                 </span>
               ))}
-            </div>
-          )}
+          </div>
         </div>
       </Card>
 

@@ -8,7 +8,7 @@ import * as z from "zod";
 import { format } from "date-fns/format";
 import { enUS, es } from "date-fns/locale";
 import { usePathname } from "next/navigation";
-import { CalendarIcon, Clock, Trash, Undo, History } from "lucide-react";
+import { CalendarIcon, Clock, Trash, Undo, History, Target } from "lucide-react";
 
 import {
   Dialog,
@@ -41,6 +41,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTaskMutations } from "@/hooks/use-tasks";
 
 const MAX_TITLE_LENGTH = 150;
 const MAX_DESCRIPTION_LENGTH = 1500;
@@ -116,6 +117,7 @@ export function TaskDialog({
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const estimatedTimeRef = useRef<HTMLInputElement>(null);
   const deleteConfirmButtonRef = useRef<HTMLButtonElement>(null);
+  const { updateTask } = useTaskMutations();
 
   // Focus delete button when dialog opens
   useEffect(() => {
@@ -129,6 +131,9 @@ export function TaskDialog({
 
   // Check if history button should be visible
   const showHistoryButton = task && !task.is_completed && versions.length > 0;
+  
+  // Check if the_one button should be visible
+  const showTheOneButton = task && !task.is_completed;
 
   const {
     register,
@@ -248,12 +253,46 @@ export function TaskDialog({
     }, 100);
   };
 
+  const handleTheOneToggle = async () => {
+    if (!task) return;
+    const newTheOneValue = !task.the_one;
+    await updateTask.mutateAsync({
+      id: task.id,
+      updates: { the_one: newTheOneValue },
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-2xl max-h-[90vh] flex gap-0 flex-col"
         onKeyDown={handleKeyDown}
       >
+        {showTheOneButton && (
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "absolute top-2 right-16 h-8 w-8",
+                  task?.the_one && "text-primary"
+                )}
+                onClick={handleTheOneToggle}
+              >
+                <Target className={cn("h-4 w-4", task?.the_one && "fill-current")} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {task?.the_one
+                  ? dictionary.task_dialog?.unmark_the_one || "Unmark as the one"
+                  : dictionary.task_dialog?.mark_the_one || "Mark as the one"}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        )}
         {showHistoryButton && (
           <Popover
             open={isHistoryPopoverOpen}

@@ -35,6 +35,8 @@ export interface Task {
   is_completed: boolean;
   completed_at?: string | Date | null;
   position?: number;
+  the_one?: boolean; // Mark as the most important task of the day
+  the_one_date?: string | Date | null; // Date when the_one was set
   // DB specific fields
   user_id?: string;
   created_at?: string;

@@ -24,6 +24,8 @@ interface DbTask {
   matrix_z_index?: number | null;
   quadrant_coords?: { x: number; y: number } | null;
   position?: number | null;
+  the_one?: boolean | null;
+  the_one_date?: string | Date | null;
   user_id?: string;
   created_at?: string;
   updated_at?: string;
@@ -51,6 +53,8 @@ export function mapDbTaskToTask(item: DbTask): Task {
     is_completed: item.is_completed,
     completed_at: item.completed_at ?? undefined, // Convert null to undefined
     position: item.position ?? undefined,
+    the_one: item.the_one ?? undefined,
+    the_one_date: item.the_one_date ?? undefined, // Convert null to undefined
     user_id: item.user_id,
     created_at: item.created_at,
     updated_at: item.updated_at,

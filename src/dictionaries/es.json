@@ -64,6 +64,7 @@
   "sidebar": {
     "collapse": "Colapsar",
     "expand": "Expandir",
+    "big3": "Big 3",
     "interactive_matrix": "Matriz Interactiva",
     "pomodoro": "Pomodoro",
     "priority_matrix": "Matriz de Prioridad",
@@ -93,6 +94,15 @@
     "last_month": "Días laborales desde el mes pasado",
     "mark_as_incomplete": "Marcar como incompleta"
   },
+  "big3": {
+    "title": "Big 3",
+    "subtitle": "Tus tareas más importantes",
+    "quadrant_title": "LO MÁS IMPORTANTE",
+    "quadrant_subtitle": "Lo único que hace que todo lo demás sea más fácil o innecesario por hoy",
+    "no_tasks": "Aún no hay tareas. ¡Crea tu primera tarea para comenzar!",
+    "focus_mode": "Modo enfoque",
+    "exit_focus_mode": "Salir del modo enfoque"
+  },
   "task_dialog": {
     "title": "Título",
     "description": "Descripción",
@@ -112,6 +122,9 @@
     "restore_version": "Restaurar versión",
     "restore": "Restaurar",
     "mark_as_completed": "Marcar como completada",
+    "mark_the_one": "Marcar como la más importante",
+    "unmark_the_one": "Desmarcar como la más importante",
+    "the_one_tooltip": "Tarea más importante de hoy",
     "characters_remaining": "caracteres restantes",
     "title_placeholder": "¿Qué se debe hacer?",
     "errors": {

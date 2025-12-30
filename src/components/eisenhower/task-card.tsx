@@ -20,6 +20,7 @@ import {
   useRestoreTaskVersion,
   useTasks,
 } from "@/hooks/use-tasks";
+import { useDictionary } from "@/providers/dictionary-provider";
 
 interface TaskCardProps {
   task: Task;
@@ -39,6 +40,7 @@ export const TaskCard = memo(function TaskCard({ task, isOverlay }: TaskCardProp
   const { active } = useDndContext();
   const isAnyDragging = !!active;
   const shouldShowTooltip = !isAnyDragging;
+  const dictionary = useDictionary();
 
   // Use useTasks hook to subscribe to cache changes
   // This ensures the component re-renders when the cache updates
@@ -128,9 +130,21 @@ export const TaskCard = memo(function TaskCard({ task, isOverlay }: TaskCardProp
               </h4>
             )}
           </div>
-          {latestTask.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {latestTask.tags.slice(0, 3).map((tag) => (
+          <div className="flex flex-wrap items-center gap-1">
+            {latestTask.the_one && (
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-yellow-500/20 text-yellow-600 dark:text-yellow-500">
+                    Big 3
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{dictionary.task_dialog?.the_one_tooltip || "Tarea más importante de hoy"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {latestTask.tags.length > 0 &&
+              latestTask.tags.slice(0, 3).map((tag) => (
                 <span
                   key={tag.id}
                   className="px-1.5 py-0.5 text-[10px] font-medium rounded-full"
@@ -142,8 +156,7 @@ export const TaskCard = memo(function TaskCard({ task, isOverlay }: TaskCardProp
                   {tag.name}
                 </span>
               ))}
-            </div>
-          )}
+          </div>
         </div>
       </Card>
 
@@ -172,6 +185,7 @@ export const TaskCard = memo(function TaskCard({ task, isOverlay }: TaskCardProp
     prevProps.task.title === nextProps.task.title &&
     prevProps.task.description === nextProps.task.description &&
     prevProps.task.is_completed === nextProps.task.is_completed &&
+    prevProps.task.the_one === nextProps.task.the_one &&
     prevProps.task.coords.x === nextProps.task.coords.x &&
     prevProps.task.coords.y === nextProps.task.coords.y &&
     prevProps.isOverlay === nextProps.isOverlay

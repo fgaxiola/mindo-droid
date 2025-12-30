@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
-import { BarChart2 } from "lucide-react";
+import { BarChart2, Target } from "lucide-react";
 
 interface NavItem {
   href: string;
@@ -112,6 +112,11 @@ export const Sidebar = memo(function Sidebar() {
 
   const NAV_ITEMS: NavItem[] = useMemo(
     () => [
+      {
+        href: `/${currentLang}/big-3`,
+        label: dictionary.sidebar.big3,
+        icon: <Target className="w-5 h-5" />,
+      },
       {
         href: `/${currentLang}/matrix`,
         label: dictionary.sidebar.priority_matrix,
