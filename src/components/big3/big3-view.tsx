@@ -218,15 +218,20 @@ export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
     const firstTask = localTasks[0];
     return (
       <div className="h-screen w-full flex flex-col bg-background relative overflow-hidden">
-        {/* Exit focus mode button - top right */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setFocusMode(false)}
-          className="fixed top-4 right-4 h-9 w-9 z-50 text-muted-foreground hover:text-foreground bg-background/80 backdrop-blur-sm"
-        >
-          <X className="h-5 w-5" />
-        </Button>
+        {/* Logo and Exit button - top right */}
+        <div className="fixed top-4 z-50 flex items-center justify-between w-full px-4">
+          <h1 className="text-lg font-semibold text-foreground">
+            {dictionary.common.app_name}
+          </h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setFocusMode(false)}
+            className="h-9 w-9 text-muted-foreground hover:text-foreground bg-background/80 backdrop-blur-sm"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
 
         {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto pb-24">

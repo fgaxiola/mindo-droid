@@ -26,6 +26,13 @@ const nextConfig: NextConfig = {
     // It's faster and more efficient than manual webpack configuration
     // Bun runtime works seamlessly with Turbopack
   },
+  // Improve dev server stability and prevent stuck compilation messages
+  onDemandEntries: {
+    // Period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // Number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
   // SWC minification is enabled by default in Next.js 16
   // No need to specify swcMinify - it's automatic
 };
