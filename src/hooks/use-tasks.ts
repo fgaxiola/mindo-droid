@@ -86,6 +86,15 @@ export function useTaskMutations() {
       delete dbUpdates.matrixPosition;
       delete dbUpdates.coords;
 
+      // Handle estimated_time - ensure it's properly set (including 0 or null)
+      if (updates.estimated_time !== undefined) {
+        // Convert NaN or empty string to null, otherwise use the number value
+        const estimatedTime = typeof updates.estimated_time === 'number' && !isNaN(updates.estimated_time) 
+          ? updates.estimated_time 
+          : null;
+        dbUpdates.estimated_time = estimatedTime;
+      }
+
       // Handle completed_at timestamp
       if (updates.is_completed !== undefined) {
         if (updates.is_completed) {

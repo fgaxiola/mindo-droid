@@ -108,7 +108,6 @@ export function TaskDialog({
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const estimatedTimeRef = useRef<HTMLInputElement>(null);
   const deleteConfirmButtonRef = useRef<HTMLButtonElement>(null);
-  const titleEditableRef = useRef<HTMLDivElement>(null);
 
   // Focus delete button when dialog opens
   useEffect(() => {
@@ -137,7 +136,7 @@ export function TaskDialog({
       title: task?.title || "",
       description: task?.description || "",
       due_date: task?.due_date ? new Date(task.due_date) : undefined,
-      estimated_time: task?.estimated_time || 0,
+      estimated_time: task?.estimated_time ?? undefined,
       is_completed: task?.is_completed || false,
     },
   });
@@ -170,16 +169,11 @@ export function TaskDialog({
         title: task?.title || "",
         description: task?.description || "",
         due_date: task?.due_date ? new Date(task.due_date) : undefined,
-        estimated_time: task?.estimated_time || 0,
+        estimated_time: task?.estimated_time ?? undefined,
         is_completed: task?.is_completed || false,
       });
       setTitleLength(Math.min(task?.title?.length || 0, MAX_TITLE_LENGTH));
       setDescriptionLength(task?.description?.length || 0);
-
-      // Update editable title content when dialog opens
-      if (task && titleEditableRef.current) {
-        titleEditableRef.current.textContent = task.title || "";
-      }
     }
   }, [task, open, reset]);
 
@@ -249,7 +243,7 @@ export function TaskDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-2xl max-h-[90vh] flex flex-col"
+        className="max-w-2xl max-h-[90vh] flex gap-0 flex-col"
         onKeyDown={handleKeyDown}
       >
         {showHistoryButton && (
@@ -257,7 +251,7 @@ export function TaskDialog({
             open={isHistoryPopoverOpen}
             onOpenChange={setIsHistoryPopoverOpen}
           >
-            <Tooltip>
+            <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
                 <PopoverTrigger asChild>
                   <Button
@@ -361,100 +355,25 @@ export function TaskDialog({
             id="task-form"
           >
             <div className="space-y-2">
-              {task ? (
-                // Editable title for existing tasks
-                <div className="space-y-1">
-                  <div
-                    ref={titleEditableRef}
-                    contentEditable={!fieldsDisabled}
-                    suppressContentEditableWarning
-                    onBlur={(e) => {
-                      const text = e.currentTarget.textContent || "";
-                      if (text.length <= MAX_TITLE_LENGTH) {
-                        setValue("title", text, { shouldDirty: true });
-                        setTitleLength(text.length);
-                      } else {
-                        // Restore previous value if exceeds max length
-                        const currentTitle = watch("title");
-                        e.currentTarget.textContent = currentTitle;
-                        setTitleLength(currentTitle.length);
-                      }
-                    }}
-                    onInput={(e) => {
-                      const text = e.currentTarget.textContent || "";
-                      if (text.length <= MAX_TITLE_LENGTH) {
-                        setTitleLength(text.length);
-                      } else {
-                        // Prevent typing beyond max length
-                        const currentTitle = watch("title");
-                        e.currentTarget.textContent = currentTitle;
-                        setTitleLength(currentTitle.length);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (
-                        e.key === "Enter" &&
-                        !e.shiftKey &&
-                        !e.ctrlKey &&
-                        !e.metaKey
-                      ) {
-                        e.preventDefault();
-                        titleEditableRef.current?.blur();
-                        // Trigger form submit after blur
-                        setTimeout(() => {
-                          handleSubmit(onSubmit)();
-                        }, 0);
-                      }
-                    }}
-                    className={cn(
-                      "text-xl font-semibold text-foreground outline-none focus:outline-none",
-                      "min-h-[2rem] py-1 px-0",
-                      "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground",
-                      fieldsDisabled &&
-                        "pointer-events-none opacity-70 cursor-not-allowed"
-                    )}
-                    data-placeholder={
-                      dictionary.task_dialog?.title_placeholder || "Task title"
-                    }
-                    style={{
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {watch("title")}
-                  </div>
-                  <p className="text-xs text-muted-foreground text-right">
-                    {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
-                  </p>
-                  {errors.title && (
-                    <p className="text-sm text-destructive">
-                      {errors.title.message}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                // Input for new tasks
-                <>
-                  <Label htmlFor="title">{dictionary.task_dialog?.title}</Label>
-                  <Input
-                    id="title"
-                    {...register("title")}
-                    placeholder="Task title"
-                    maxLength={MAX_TITLE_LENGTH}
-                    autoFocus
-                    className={cn(
-                      fieldsDisabled && "pointer-events-none opacity-70"
-                    )}
-                    disabled={fieldsDisabled}
-                  />
-                  <p className="text-xs text-muted-foreground text-right">
-                    {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
-                  </p>
-                  {errors.title && (
-                    <p className="text-sm text-destructive">
-                      {errors.title.message}
-                    </p>
-                  )}
-                </>
+              <Label htmlFor="title">{dictionary.task_dialog?.title}</Label>
+              <Input
+                id="title"
+                {...register("title")}
+                placeholder="Task title"
+                maxLength={MAX_TITLE_LENGTH}
+                autoFocus
+                className={cn(
+                  fieldsDisabled && "pointer-events-none opacity-70"
+                )}
+                disabled={fieldsDisabled}
+              />
+              <p className="text-xs text-muted-foreground text-right">
+                {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
+              </p>
+              {errors.title && (
+                <p className="text-sm text-destructive">
+                  {errors.title.message}
+                </p>
               )}
             </div>
 
@@ -511,7 +430,14 @@ export function TaskDialog({
                     type="number"
                     disabled={fieldsDisabled}
                     className={cn("pl-9", fieldsDisabled && "opacity-70")}
-                    {...register("estimated_time", { valueAsNumber: true })}
+                    {...register("estimated_time", {
+                      valueAsNumber: true,
+                      setValueAs: (v) => {
+                        // Convert empty string or NaN to undefined
+                        if (v === "" || isNaN(v)) return undefined;
+                        return Number(v);
+                      },
+                    })}
                     ref={(e) => {
                       if (e) estimatedTimeRef.current = e as HTMLInputElement;
                     }}
