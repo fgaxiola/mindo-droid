@@ -35,7 +35,6 @@ export function InteractiveMatrixBoard({
   const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks.filter(t => !t.is_completed));
   const matrixRef = useRef<HTMLDivElement>(null);
   const justFinishedDragRef = useRef<string | null>(null);
-  const [lastMovedTaskId, setLastMovedTaskId] = useState<string | null>(null);
   const lastSyncedTasksRef = useRef<Task[]>(initialTasks);
 
   const sensors = useSensors(
@@ -192,18 +191,34 @@ export function InteractiveMatrixBoard({
           y: Math.max(5, Math.min(95, y)),
         };
         
+        // Calculate new z-index: get max z-index from all matrix tasks and add 1
+        // This ensures the moved task appears on top
+        const matrixTasks = localTasks.filter(t => t.matrixPosition !== null);
+        const maxZIndex = matrixTasks.reduce((max, t) => {
+          const zIndex = t.matrix_z_index ?? 0;
+          return Math.max(max, zIndex);
+        }, 0);
+        const newZIndex = maxZIndex + 1;
+
         // Update locally first for immediate feedback
-        const updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: position } : t);
+        const updated = localTasks.map(t => 
+          t.id === taskId 
+            ? { ...t, matrixPosition: position, matrix_z_index: newZIndex } 
+            : t
+        );
         setLocalTasks(updated);
 
         // Mark that we just finished dragging this task to prevent glitch
         justFinishedDragRef.current = taskId;
         
-        // Set this task as the last moved to give it higher z-index
-        setLastMovedTaskId(taskId);
-        
         try {
-          await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: position } });
+          await updateTask.mutateAsync({ 
+            id: taskId, 
+            updates: { 
+              matrixPosition: position,
+              matrix_z_index: newZIndex 
+            } 
+          });
           onTaskPositionChange?.(taskId, position);
         } finally {
           setTimeout(() => {
@@ -226,9 +241,6 @@ export function InteractiveMatrixBoard({
 
         // Mark that we just finished dragging this task to prevent glitch
         justFinishedDragRef.current = taskId;
-        
-        // Set this task as the last moved to give it higher z-index
-        setLastMovedTaskId(taskId);
 
         try {
           // Always update positions for panel tasks when dropping in panel
@@ -292,7 +304,7 @@ export function InteractiveMatrixBoard({
             </p>
           </div>
           <div ref={matrixRef} className="flex-1 flex">
-            <MatrixCanvas tasks={localTasks as PositionedTask[]} lastMovedTaskId={lastMovedTaskId} />
+            <MatrixCanvas tasks={localTasks as PositionedTask[]} />
           </div>
         </div>
         <TaskPanel tasks={localTasks as PositionedTask[]} isDragging={!!activeTask} />

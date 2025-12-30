@@ -9,10 +9,9 @@ import { useDictionary } from "@/providers/dictionary-provider";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
-  lastMovedTaskId?: string | null;
 }
 
-export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
+export function MatrixCanvas({ tasks }: MatrixCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dictionary = useDictionary();
   const { setNodeRef } = useDroppable({
@@ -25,19 +24,22 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
   );
 
   // Memoize task styles to prevent unnecessary re-renders
-  // Only recalculate when tasks or lastMovedTaskId changes
+  // Use matrix_z_index from database for z-index ordering
   const taskStylesMap = useMemo(() => {
     const stylesMap = new Map<string, React.CSSProperties>();
     positionedTasks.forEach((task) => {
+      // Use matrix_z_index if available, otherwise default to 0
+      // Higher z-index values appear on top
+      const zIndex = task.matrix_z_index ?? 0;
       stylesMap.set(task.id, {
         left: `${task.matrixPosition!.x}%`,
         top: `${task.matrixPosition!.y}%`,
         transform: "translate(-50%, -50%)",
-        zIndex: lastMovedTaskId === task.id ? 10 : 1,
+        zIndex: zIndex,
       });
     });
     return stylesMap;
-  }, [positionedTasks, lastMovedTaskId]);
+  }, [positionedTasks]);
 
   return (
     <div

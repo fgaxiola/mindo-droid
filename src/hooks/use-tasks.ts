@@ -7,7 +7,7 @@ import { mapDbTasksToTasks, mapDbTaskToTask } from "@/lib/task-mapper";
 const supabase = createClient();
 
 // Fields needed from database - optimize query by selecting only what we need
-const TASK_FIELDS = "id,title,description,due_date,estimated_time,is_completed,completed_at,tags,matrix_position,quadrant_coords,position,user_id,created_at,updated_at";
+const TASK_FIELDS = "id,title,description,due_date,estimated_time,is_completed,completed_at,tags,matrix_position,matrix_z_index,quadrant_coords,position,user_id,created_at,updated_at";
 
 function generateTaskId() {
   const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -23,6 +23,7 @@ export function useTasks() {
         // Optimize: Select only fields we need instead of *
         .select(TASK_FIELDS)
         .order("position", { ascending: true, nullsFirst: false })
+        .order("matrix_z_index", { ascending: false, nullsFirst: true })
         .order("created_at", { ascending: true });
 
       if (error) throw error;
@@ -80,6 +81,7 @@ export function useTaskMutations() {
       // Map frontend properties to DB columns if needed
       const dbUpdates: any = { ...updates };
       if (updates.matrixPosition !== undefined) dbUpdates.matrix_position = updates.matrixPosition;
+      if (updates.matrix_z_index !== undefined) dbUpdates.matrix_z_index = updates.matrix_z_index;
       if (updates.coords !== undefined) dbUpdates.quadrant_coords = updates.coords;
 
       // Remove frontend-only props that might conflict
@@ -187,6 +189,7 @@ export function useTaskMutations() {
             due_date: t.due_date ?? null,
             estimated_time: t.estimated_time ?? null,
             matrix_position: t.matrixPosition ?? null,
+            matrix_z_index: t.matrix_z_index ?? null,
             quadrant_coords: t.coords ?? null,
             tags: t.tags ?? [],
             is_completed: t.is_completed ?? false,
@@ -207,6 +210,9 @@ export function useTaskMutations() {
           }
           if (update.matrixPosition !== undefined) {
             dbObj.matrix_position = update.matrixPosition;
+          }
+          if (update.matrix_z_index !== undefined) {
+            dbObj.matrix_z_index = update.matrix_z_index;
           }
 
           return dbObj;

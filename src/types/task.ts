@@ -31,6 +31,7 @@ export interface Task {
   due_date?: Date | string;
   estimated_time?: number;
   matrixPosition?: { x: number; y: number } | null;
+  matrix_z_index?: number; // Z-index for interactive matrix (higher = on top)
   is_completed: boolean;
   completed_at?: string | Date | null;
   position?: number;
