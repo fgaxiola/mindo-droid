@@ -265,7 +265,14 @@ export function EisenhowerBoard({
       }
 
       if (tasksToUpdate.length > 0) {
-        await updateTasks.mutateAsync(tasksToUpdate);
+        try {
+          await updateTasks.mutateAsync(tasksToUpdate);
+        } catch (error) {
+          // Revert local state on error
+          setLocalTasks(lastSyncedTasksRef.current);
+          // Re-throw to let React Query handle it
+          throw error;
+        }
       }
     }
     

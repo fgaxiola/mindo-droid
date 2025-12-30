@@ -169,28 +169,35 @@ export function useTaskMutations() {
         .map((t) => {
           const update = updateMap.get(t.id)!;
           
-          // Start with the existing task from cache (contains all DB fields)
-          const dbObj: any = { ...t };
+          // Create a clean copy with only DB fields to avoid sending frontend-only properties
+          const dbObj: any = {
+            id: t.id,
+            user_id: t.user_id,
+            title: t.title,
+            description: t.description ?? null,
+            due_date: t.due_date ?? null,
+            estimated_time: t.estimated_time ?? null,
+            matrix_position: t.matrixPosition ?? null,
+            quadrant_coords: t.coords ?? null,
+            tags: t.tags ?? [],
+            is_completed: t.is_completed ?? false,
+            completed_at: t.completed_at ?? null,
+            position: t.position ?? null,
+            created_at: t.created_at,
+            updated_at: t.updated_at,
+          };
 
           // Apply updates
-          if (update.position !== undefined) dbObj.position = update.position;
+          if (update.position !== undefined) {
+            dbObj.position = update.position;
+          }
           
           // Map frontend props back to DB columns
-          if (update.coords) {
+          if (update.coords !== undefined) {
             dbObj.quadrant_coords = update.coords;
           }
           if (update.matrixPosition !== undefined) {
             dbObj.matrix_position = update.matrixPosition;
-          }
-
-          // Cleanup: Remove frontend-only properties that shouldn't be sent to DB
-          delete dbObj.coords;
-          delete dbObj.matrixPosition;
-          
-          // Ensure user_id is present (it should be in the cached object)
-          // If for some reason it's missing, the upsert might fail RLS if not caught here
-          if (!dbObj.user_id) {
-             console.error("Missing user_id for task", t.id);
           }
 
           return dbObj;
@@ -203,7 +210,10 @@ export function useTaskMutations() {
         .upsert(dbUpserts)
         .select(TASK_FIELDS);
 
-      if (error) throw error;
+      if (error) {
+        // Convert Supabase error object to Error with readable message
+        throw new Error(error.message || `Failed to update tasks: ${JSON.stringify(error)}`);
+      }
       if (!data) return [];
       
       return mapDbTasksToTasks(data);
@@ -249,15 +259,16 @@ export function useTaskMutations() {
     onSuccess: (data) => {
       // Update cache with the actual returned data from server to confirm consistency
       // This avoids a full refetch (GET) of the tasks list
+      // Note: data is already mapped to Task[] by mutationFn, so we use it directly
       if (data && data.length > 0) {
         queryClient.setQueryData<Task[]>(["tasks"], (old) => {
-          if (!old) return mapDbTasksToTasks(data);
+          if (!old) return data;
 
           // Optimized: Use for loop for update map creation
           const updateMap = new Map<string, Task>();
           const dataLength = data.length;
           for (let i = 0; i < dataLength; i++) {
-            const task = mapDbTaskToTask(data[i]);
+            const task = data[i];
             updateMap.set(task.id, task);
           }
 
