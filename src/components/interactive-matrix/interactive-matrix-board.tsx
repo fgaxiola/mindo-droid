@@ -12,11 +12,10 @@ import {
   useSensors,
   pointerWithin,
 } from "@dnd-kit/core";
-import { PositionedTask, MatrixPosition } from "@/types/task";
+import { PositionedTask, MatrixPosition, Task } from "@/types/task";
 import { MatrixCanvas } from "./matrix-canvas";
 import { TaskPanel } from "./task-panel";
 import { DraggableTaskOverlay } from "./draggable-task";
-import { Task } from "@/types/task";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { useTaskMutations, useTasks } from "@/hooks/use-tasks";
 
@@ -31,12 +30,13 @@ export function InteractiveMatrixBoard({
 }: InteractiveMatrixBoardProps) {
   const dictionary = useDictionary();
   const { data: tasks = initialTasks } = useTasks();
-  const { updateTask } = useTaskMutations();
+  const { updateTask, updateTasks } = useTaskMutations();
   const [activeTask, setActiveTask] = useState<PositionedTask | null>(null);
   const [localTasks, setLocalTasks] = useState<Task[]>(initialTasks.filter(t => !t.is_completed));
   const matrixRef = useRef<HTMLDivElement>(null);
   const justFinishedDragRef = useRef<string | null>(null);
   const [lastMovedTaskId, setLastMovedTaskId] = useState<string | null>(null);
+  const lastSyncedTasksRef = useRef<Task[]>(initialTasks);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -50,7 +50,8 @@ export function InteractiveMatrixBoard({
     // Skip updates if dragging to prevent conflicts
     if (activeTask) return;
 
-    if (tasks) {
+    if (tasks && tasks !== lastSyncedTasksRef.current) {
+      lastSyncedTasksRef.current = tasks;
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalTasks(prev => {
         // Filter out completed tasks before processing
@@ -126,8 +127,8 @@ export function InteractiveMatrixBoard({
         setLocalTasks(updated);
       }
       
-      // Perform sorting if over another task
-      if (overTask && overTask.matrixPosition === null) {
+      // Perform sorting if over another task in the same list
+      if (overTask && overTask.matrixPosition === null && currentTask.matrixPosition === null) {
         moveTaskLocally(activeId as string, overId as string);
       }
     } else {
@@ -141,12 +142,38 @@ export function InteractiveMatrixBoard({
     }
   };
 
+  const updatePositions = (tasks: Task[]): Task[] => {
+    // Calculate new positions for all tasks based on their current order in the array
+    // Group tasks by matrixPosition (null = panel, non-null = matrix)
+    const panelTasks = tasks.filter(t => t.matrixPosition === null);
+    
+    // Update positions for panel tasks based on their index within the panel
+    const updatedTasks = tasks.map(task => {
+      if (task.matrixPosition === null) {
+        const position = panelTasks.findIndex(t => t.id === task.id);
+        // Use index * 100 to allow inserting between tasks later
+        return { ...task, position: position * 100 };
+      }
+      return task;
+    });
+
+    return updatedTasks;
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     const taskId = active.id as string;
-    setActiveTask(null);
 
-    if (!over) return;
+    if (!over) {
+      setActiveTask(null);
+      return;
+    }
+
+    const activeTaskObj = localTasks.find((t) => t.id === taskId);
+    if (!activeTaskObj) {
+      setActiveTask(null);
+      return;
+    }
 
     // Check if dropped into the matrix area
     if (over.id === "matrix-canvas" && matrixRef.current) {
@@ -165,12 +192,11 @@ export function InteractiveMatrixBoard({
           y: Math.max(5, Math.min(95, y)),
         };
         
-        // Update locally first for immediate feedback (though handleDragOver usually handles this)
+        // Update locally first for immediate feedback
         const updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: position } : t);
         setLocalTasks(updated);
 
         // Mark that we just finished dragging this task to prevent glitch
-        // This prevents the useEffect from overwriting the local position with stale server data
         justFinishedDragRef.current = taskId;
         
         // Set this task as the last moved to give it higher z-index
@@ -180,8 +206,6 @@ export function InteractiveMatrixBoard({
           await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: position } });
           onTaskPositionChange?.(taskId, position);
         } finally {
-          // Clear the ref after mutation completes to allow normal sync
-          // Use a small delay to ensure server response has been processed
           setTimeout(() => {
             justFinishedDragRef.current = null;
           }, 200);
@@ -190,32 +214,63 @@ export function InteractiveMatrixBoard({
     } else {
       // Check if dropped into the sidebar (task-panel or onto another task in the list)
       const isOverTaskPanel = over.id === "task-panel";
-      const isOverPanelTask = localTasks.find(t => t.id === over.id)?.matrixPosition === null;
+      const overTask = localTasks.find(t => t.id === over.id);
+      const isOverPanelTask = overTask?.matrixPosition === null;
 
       if (isOverTaskPanel || isOverPanelTask) {
-        // Update locally first
-        const updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: null } : t);
+        const wasInPanel = activeTaskObj.matrixPosition === null;
+
+        // Update locally first - ensure task is in panel
+        let updated = localTasks.map(t => t.id === taskId ? { ...t, matrixPosition: null } : t);
         setLocalTasks(updated);
 
         // Mark that we just finished dragging this task to prevent glitch
-        // This prevents the useEffect from overwriting the local position with stale server data
         justFinishedDragRef.current = taskId;
         
         // Set this task as the last moved to give it higher z-index
         setLastMovedTaskId(taskId);
 
         try {
-          await updateTask.mutateAsync({ id: taskId, updates: { matrixPosition: null } });
-          onTaskPositionChange?.(taskId, null);
+          // Always update positions for panel tasks when dropping in panel
+          // This handles both moving from matrix to panel and reordering within panel
+          const updatedTasks = updatePositions(updated);
+          setLocalTasks(updatedTasks);
+          
+          const panelTasks = updatedTasks.filter(t => t.matrixPosition === null);
+          const tasksToUpdate: Partial<Task>[] = [];
+          const tasksMap = new Map(tasks.map(t => [t.id, t]));
+
+          for (const task of panelTasks) {
+            const originalTask = tasksMap.get(task.id);
+            // Update position if it changed, or update matrixPosition if task moved from matrix
+            if (!originalTask || originalTask.position !== task.position || 
+                originalTask.matrixPosition !== null) {
+              tasksToUpdate.push({
+                id: task.id,
+                position: task.position,
+                matrixPosition: null, // Ensure it's set to null for panel tasks
+              });
+            }
+          }
+
+          if (tasksToUpdate.length > 0) {
+            await updateTasks.mutateAsync(tasksToUpdate);
+          }
+
+          // Only call onTaskPositionChange if task was moved from matrix to panel
+          if (!wasInPanel) {
+            onTaskPositionChange?.(taskId, null);
+          }
+          // Don't call onTaskPositionChange when just reordering within panel
         } finally {
-          // Clear the ref after mutation completes to allow normal sync
-          // Use a small delay to ensure server response has been processed
           setTimeout(() => {
             justFinishedDragRef.current = null;
           }, 200);
         }
       }
     }
+    
+    setActiveTask(null);
   };
 
   return (

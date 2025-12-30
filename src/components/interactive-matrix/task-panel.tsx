@@ -6,14 +6,13 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { PositionedTask } from "@/types/task";
+import { PositionedTask, Task } from "@/types/task";
 import { SortableTaskCard } from "@/components/eisenhower/sortable-task-card";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { QuickTaskCard } from "@/components/tasks/quick-task-card";
 import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { useTaskMutations } from "@/hooks/use-tasks";
-import { Task } from "@/types/task";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useRef } from "react";
@@ -39,8 +38,13 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
       });
     }, 100);
   };
+
+  // Memoize droppable data to prevent infinite re-renders
+  const droppableData = useMemo(() => ({ coords: { x: -1, y: -1 } }), []);
+
   const { setNodeRef } = useDroppable({
     id: "task-panel",
+    data: droppableData,
   });
 
   const unpositionedTasks = useMemo(
@@ -49,19 +53,15 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
   );
 
   // Convert PositionedTask to Task format for SortableTaskCard
+  // Use coords: { x: -1, y: -1 } to match TaskSidebar behavior
   const tasksAsTaskType = useMemo(
     () =>
       unpositionedTasks.map(
         (t): Task => ({
           ...t,
-          coords: { x: -1, y: -1 }, // SortableTaskCard expects coords, not matrixPosition
+          coords: { x: -1, y: -1 }, // SortableTaskCard expects coords
         })
       ),
-    [unpositionedTasks]
-  );
-
-  const taskIds = useMemo(
-    () => unpositionedTasks.map((t) => t.id),
     [unpositionedTasks]
   );
 
@@ -99,7 +99,10 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-2 relative"
       >
-        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+        <SortableContext
+          items={tasksAsTaskType.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
           {tasksAsTaskType.map((task) => (
             <SortableTaskCard key={task.id} task={task} />
           ))}
