@@ -30,7 +30,7 @@ CREATE TABLE public.tasks (
 );
 
 
-
+-- task_update_trigger that uses tasks table and function handle_task_update to handle task updates and versioning
 -- handle_task_update function to handle task updates and versioning
 BEGIN
   -- Only create version if something other than matrix_z_index changed
