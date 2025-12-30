@@ -110,3 +110,4 @@ if (typeof window !== 'undefined') {
   console.log("💡 Función debugTaskUpdate() disponible. Ejecuta: debugTaskUpdate()");
 }
 
+

@@ -26,6 +26,7 @@ import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { useTaskMutations } from "@/hooks/use-tasks";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { useFocusMode } from "@/providers/focus-mode-provider";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 
@@ -43,12 +44,14 @@ interface Big3ViewProps {
 export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
   const dictionary = useDictionary();
   const { setFocusMode } = useFocusMode();
+  const queryClient = useQueryClient();
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const { createTask, updateTasks } = useTaskMutations();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const lastSyncedTasksRef = useRef<Task[]>(tasks);
+  const hasRecentReorderRef = useRef(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -58,15 +61,37 @@ export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
     })
   );
 
-  // Sync localTasks with props when they change (but not during drag)
+  // Sync localTasks with props when they change (but not during drag or focus mode)
   useEffect(() => {
-    if (activeTask) return;
+    if (activeTask || focusMode) return;
 
     if (tasks && tasks !== lastSyncedTasksRef.current) {
       lastSyncedTasksRef.current = tasks;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocalTasks((prev) => {
-        // Create a map of updated tasks for O(1) lookup
+        // If we just did a reorder, preserve the local order until tasks is properly updated
+        if (hasRecentReorderRef.current) {
+          // Check if tasks order matches localTasks order by comparing positions
+          const prevOrder = prev.map((t) => t.id).join(",");
+          const tasksOrder = tasks.map((t) => t.id).join(",");
+
+          // If orders match, clear the flag and sync normally
+          if (prevOrder === tasksOrder) {
+            hasRecentReorderRef.current = false;
+          } else {
+            // Orders don't match yet - preserve local order but update task data
+            const tasksMap = new Map(tasks.map((t) => [t.id, t]));
+            const mergedTasks = prev
+              .map((t) => tasksMap.get(t.id) || t)
+              .filter((t) => tasksMap.has(t.id));
+
+            const prevIds = new Set(prev.map((t) => t.id));
+            const newTasks = tasks.filter((t) => !prevIds.has(t.id));
+
+            return [...mergedTasks, ...newTasks];
+          }
+        }
+
+        // Normal sync: Create a map of updated tasks for O(1) lookup
         const tasksMap = new Map(tasks.map((t) => [t.id, t]));
 
         // Keep existing order for tasks that are still in the list
@@ -81,7 +106,7 @@ export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
         return [...mergedTasks, ...newTasks];
       });
     }
-  }, [tasks, activeTask]);
+  }, [tasks, activeTask, focusMode]);
 
   const handleCreateClick = () => {
     setShowQuickCreate(true);
@@ -191,9 +216,14 @@ export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
 
       if (tasksToUpdate.length > 0) {
         try {
+          // Mark that we just did a reorder
+          hasRecentReorderRef.current = true;
           await updateTasks.mutateAsync(tasksToUpdate);
+          // Invalidate queries to force refetch with correct order
+          await queryClient.invalidateQueries({ queryKey: ["tasks"] });
         } catch (error) {
           // Revert local state on error
+          hasRecentReorderRef.current = false;
           setLocalTasks(lastSyncedTasksRef.current);
           throw error;
         }
@@ -205,7 +235,16 @@ export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
 
   // Focus mode: show only the first task centered, full screen
   if (focusMode) {
-    if (localTasks.length === 0) {
+    // Always use localTasks[0] directly as it reflects the current visual order
+    // This is calculated at render time to ensure we get the most up-to-date order
+    const firstTask =
+      localTasks.length > 0
+        ? localTasks[0]
+        : tasks.length > 0
+        ? tasks[0]
+        : null;
+
+    if (!firstTask) {
       return (
         <div className="h-screen w-full flex items-center justify-center bg-background">
           <p className="text-muted-foreground text-center">
@@ -214,8 +253,6 @@ export function Big3View({ tasks, focusMode = false }: Big3ViewProps) {
         </div>
       );
     }
-
-    const firstTask = localTasks[0];
     return (
       <div className="h-screen w-full flex flex-col bg-background relative overflow-hidden">
         {/* Logo and Exit button - top right */}
