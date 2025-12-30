@@ -61,13 +61,19 @@ export function RichTextEditor({
       attributes: {
         class: cn(
           "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[150px]",
+          "[&_p]:text-base [&_p]:md:text-sm",
+          "[&_*]:text-base [&_*]:md:text-sm",
           readOnly && "pointer-events-none opacity-70",
           className
         ),
       },
       handleKeyDown: (view, event) => {
         if (onKeyDown) {
-          onKeyDown(event as KeyboardEvent);
+          const result = onKeyDown(event as KeyboardEvent);
+          // If handler returns true, prevent default behavior
+          if (result === true) {
+            return true;
+          }
         }
         return false;
       },

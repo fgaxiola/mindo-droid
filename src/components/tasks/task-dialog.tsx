@@ -6,6 +6,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns/format";
+import { enUS, es } from "date-fns/locale";
+import { usePathname } from "next/navigation";
 import { CalendarIcon, Clock, Trash, Undo, History } from "lucide-react";
 
 import {
@@ -96,6 +98,9 @@ export function TaskDialog({
   viewOnly = false,
 }: TaskDialogProps) {
   const dictionary = useDictionary();
+  const pathname = usePathname();
+  const locale = (pathname.split("/")[1] || "en") as "en" | "es";
+  const dateLocale = locale === "es" ? es : enUS;
   const [isHistoryPopoverOpen, setIsHistoryPopoverOpen] = useState(false);
   const [titleLength, setTitleLength] = useState(0);
   const [descriptionLength, setDescriptionLength] = useState(0);
@@ -103,6 +108,7 @@ export function TaskDialog({
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const estimatedTimeRef = useRef<HTMLInputElement>(null);
   const deleteConfirmButtonRef = useRef<HTMLButtonElement>(null);
+  const titleEditableRef = useRef<HTMLDivElement>(null);
 
   // Focus delete button when dialog opens
   useEffect(() => {
@@ -169,6 +175,11 @@ export function TaskDialog({
       });
       setTitleLength(Math.min(task?.title?.length || 0, MAX_TITLE_LENGTH));
       setDescriptionLength(task?.description?.length || 0);
+
+      // Update editable title content when dialog opens
+      if (task && titleEditableRef.current) {
+        titleEditableRef.current.textContent = task.title || "";
+      }
     }
   }, [task, open, reset]);
 
@@ -198,13 +209,13 @@ export function TaskDialog({
   const handleKeyDown = (e: React.KeyboardEvent | KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
-      if ("stopPropagation" in e) {
-        e.stopPropagation();
-      }
+      e.stopPropagation();
       if (!isSubmitDisabled) {
         handleSubmit(onSubmit)(e as React.FormEvent);
       }
+      return true; // Prevent default behavior
     }
+    return false;
   };
 
   const handleDeleteConfirmKeyDown = (e: React.KeyboardEvent) => {
@@ -307,7 +318,9 @@ export function TaskDialog({
                           <Undo className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0 group-hover:text-primary transition-colors" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-muted-foreground">
-                              {format(new Date(version.created_at), "PPP p")}
+                              {format(new Date(version.created_at), "PPP p", {
+                                locale: dateLocale,
+                              })}
                             </p>
                             <p className="text-sm font-medium mt-1 line-clamp-1 group-hover:text-primary transition-colors">
                               {snapshot.title}
@@ -348,25 +361,100 @@ export function TaskDialog({
             id="task-form"
           >
             <div className="space-y-2">
-              <Label htmlFor="title">{dictionary.task_dialog?.title}</Label>
-              <Input
-                id="title"
-                {...register("title")}
-                placeholder="Task title"
-                maxLength={MAX_TITLE_LENGTH}
-                autoFocus
-                className={cn(
-                  fieldsDisabled && "pointer-events-none opacity-70"
-                )}
-                disabled={fieldsDisabled}
-              />
-              <p className="text-xs text-muted-foreground text-right">
-                {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
-              </p>
-              {errors.title && (
-                <p className="text-sm text-destructive">
-                  {errors.title.message}
-                </p>
+              {task ? (
+                // Editable title for existing tasks
+                <div className="space-y-1">
+                  <div
+                    ref={titleEditableRef}
+                    contentEditable={!fieldsDisabled}
+                    suppressContentEditableWarning
+                    onBlur={(e) => {
+                      const text = e.currentTarget.textContent || "";
+                      if (text.length <= MAX_TITLE_LENGTH) {
+                        setValue("title", text, { shouldDirty: true });
+                        setTitleLength(text.length);
+                      } else {
+                        // Restore previous value if exceeds max length
+                        const currentTitle = watch("title");
+                        e.currentTarget.textContent = currentTitle;
+                        setTitleLength(currentTitle.length);
+                      }
+                    }}
+                    onInput={(e) => {
+                      const text = e.currentTarget.textContent || "";
+                      if (text.length <= MAX_TITLE_LENGTH) {
+                        setTitleLength(text.length);
+                      } else {
+                        // Prevent typing beyond max length
+                        const currentTitle = watch("title");
+                        e.currentTarget.textContent = currentTitle;
+                        setTitleLength(currentTitle.length);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Enter" &&
+                        !e.shiftKey &&
+                        !e.ctrlKey &&
+                        !e.metaKey
+                      ) {
+                        e.preventDefault();
+                        titleEditableRef.current?.blur();
+                        // Trigger form submit after blur
+                        setTimeout(() => {
+                          handleSubmit(onSubmit)();
+                        }, 0);
+                      }
+                    }}
+                    className={cn(
+                      "text-xl font-semibold text-foreground outline-none focus:outline-none",
+                      "min-h-[2rem] py-1 px-0",
+                      "empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground",
+                      fieldsDisabled &&
+                        "pointer-events-none opacity-70 cursor-not-allowed"
+                    )}
+                    data-placeholder={
+                      dictionary.task_dialog?.title_placeholder || "Task title"
+                    }
+                    style={{
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {watch("title")}
+                  </div>
+                  <p className="text-xs text-muted-foreground text-right">
+                    {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
+                  </p>
+                  {errors.title && (
+                    <p className="text-sm text-destructive">
+                      {errors.title.message}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                // Input for new tasks
+                <>
+                  <Label htmlFor="title">{dictionary.task_dialog?.title}</Label>
+                  <Input
+                    id="title"
+                    {...register("title")}
+                    placeholder="Task title"
+                    maxLength={MAX_TITLE_LENGTH}
+                    autoFocus
+                    className={cn(
+                      fieldsDisabled && "pointer-events-none opacity-70"
+                    )}
+                    disabled={fieldsDisabled}
+                  />
+                  <p className="text-xs text-muted-foreground text-right">
+                    {MAX_TITLE_LENGTH - titleLength} / {MAX_TITLE_LENGTH}
+                  </p>
+                  {errors.title && (
+                    <p className="text-sm text-destructive">
+                      {errors.title.message}
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -393,7 +481,7 @@ export function TaskDialog({
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(field.value, "PPP", { locale: dateLocale })
                           ) : (
                             <span>{dictionary.task_dialog?.pick_a_date}</span>
                           )}
@@ -438,7 +526,11 @@ export function TaskDialog({
                 control={control}
                 name="description"
                 render={({ field }) => (
-                  <Suspense fallback={<div className="h-[150px] border border-input rounded-md p-3 animate-pulse bg-muted" />}>
+                  <Suspense
+                    fallback={
+                      <div className="h-[150px] border border-input rounded-md p-3 animate-pulse bg-muted" />
+                    }
+                  >
                     <RichTextEditor
                       content={field.value || ""}
                       onChange={(html, length) => {
@@ -451,6 +543,7 @@ export function TaskDialog({
                       maxLength={MAX_DESCRIPTION_LENGTH}
                       readOnly={fieldsDisabled}
                       onKeyDown={handleKeyDown as (e: KeyboardEvent) => void}
+                      className="text-base md:text-sm"
                     />
                   </Suspense>
                 )}

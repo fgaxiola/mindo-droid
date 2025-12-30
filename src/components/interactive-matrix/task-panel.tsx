@@ -11,8 +11,12 @@ import { SortableTaskCard } from "@/components/eisenhower/sortable-task-card";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { QuickTaskCard } from "@/components/tasks/quick-task-card";
+import { CreateTaskButton } from "@/components/tasks/create-task-button";
 import { useTaskMutations } from "@/hooks/use-tasks";
 import { Task } from "@/types/task";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useRef } from "react";
 
 interface TaskPanelProps {
   tasks: PositionedTask[];
@@ -23,6 +27,18 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleCreateClick = () => {
+    setShowQuickCreate(true);
+    // Scroll to bottom after a short delay to ensure QuickTaskCard is rendered
+    setTimeout(() => {
+      scrollContainerRef.current?.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 100);
+  };
   const { setNodeRef } = useDroppable({
     id: "task-panel",
   });
@@ -65,9 +81,31 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
             {dictionary.interactive_matrix.drag_to_matrix}
           </p>
         </div>
+        <div
+          className={cn(
+            "flex gap-1 relative transition-opacity",
+            isDragging
+              ? "opacity-0 pointer-events-none"
+              : "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <CreateTaskButton
+            onClick={handleCreateClick}
+            className="static opacity-100"
+          />
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-2 relative">
-        {/* Quick Create Card */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto p-4 space-y-2 relative"
+      >
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+          {tasksAsTaskType.map((task) => (
+            <SortableTaskCard key={task.id} task={task} />
+          ))}
+        </SortableContext>
+        
+        {/* Quick Create Card - at the end */}
         {showQuickCreate && (
           <QuickTaskCard
             onSave={async (data) => {
@@ -78,35 +116,68 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
               setShowQuickCreate(false);
             }}
             onCancel={() => setShowQuickCreate(false)}
+            scrollContainerRef={scrollContainerRef}
             className={cn(
               isDragging && "opacity-50 pointer-events-none"
             )}
           />
         )}
         
-        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          {tasksAsTaskType.map((task) => (
-            <SortableTaskCard key={task.id} task={task} />
-          ))}
-        </SortableContext>
-        
         {/* Show create button when not showing quick create */}
         {!showQuickCreate && (
-          <button
-            type="button"
-            onClick={() => setShowQuickCreate(true)}
-            className={cn(
-              "w-full text-left text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md p-3 hover:bg-accent/50 hover:border-border transition-colors",
-              isDragging && "opacity-0 pointer-events-none",
-              unpositionedTasks.length > 0 && "opacity-0 group-hover:opacity-100"
+          <>
+            {unpositionedTasks.length > 0 && (
+              <div
+                className={cn(
+                  "pt-2 transition-all duration-200",
+                  isDragging
+                    ? "opacity-0 pointer-events-none"
+                    : "opacity-0 group-hover:opacity-100"
+                )}
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCreateClick}
+                  className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-transparent border border-dashed border-border/50 rounded-md"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span className="text-sm">
+                    {dictionary.task_dialog?.create_new || "Create New"}
+                  </span>
+                </Button>
+              </div>
             )}
-          >
-            {unpositionedTasks.length === 0 ? (
-              <span>{dictionary.interactive_matrix.all_tasks_in_matrix}</span>
-            ) : (
-              <span>{dictionary.task_dialog?.create_new || "Create New"}</span>
+            {unpositionedTasks.length === 0 && (
+              <>
+                <div className="text-center py-8 text-xs text-muted-foreground">
+                  {dictionary.interactive_matrix.all_tasks_in_matrix}
+                </div>
+                <div
+                  className={cn(
+                    "pt-2 transition-all duration-200",
+                    isDragging
+                      ? "opacity-0 pointer-events-none"
+                      : "opacity-0 group-hover:opacity-100"
+                  )}
+                >
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCreateClick}
+                    className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-dashed border-border/50 rounded-md"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span className="text-sm">
+                      {dictionary.task_dialog?.create_new || "Create New"}
+                    </span>
+                  </Button>
+                </div>
+              </>
             )}
-          </button>
+          </>
         )}
       </div>
     </div>

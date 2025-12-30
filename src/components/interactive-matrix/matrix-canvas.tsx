@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
 import { QuickTaskCard } from "@/components/tasks/quick-task-card";
 import { useTaskMutations } from "@/hooks/use-tasks";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
@@ -190,8 +192,29 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
         />
       ))}
 
+      {/* Create button - appears on hover over canvas */}
+      {!showQuickCreate && (
+        <div
+          className={cn(
+            "absolute bottom-4 right-4 transition-all duration-200 z-10",
+            "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => setShowQuickCreate(true)}
+            className="shadow-lg hover:shadow-xl transition-shadow"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span>{dictionary.task_dialog?.create_new || "Create New"}</span>
+          </Button>
+        </div>
+      )}
+
       {/* Quick Create Card - appears on hover over canvas */}
-      {showQuickCreate ? (
+      {showQuickCreate && (
         <div
           className={cn(
             "absolute bottom-4 right-4 z-10 w-80"
@@ -207,21 +230,6 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
             }}
             onCancel={() => setShowQuickCreate(false)}
           />
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "absolute bottom-4 right-4 transition-all duration-200 z-10",
-            "opacity-0 group-hover:opacity-100"
-          )}
-        >
-          <button
-            type="button"
-            onClick={() => setShowQuickCreate(true)}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md shadow-lg hover:shadow-xl transition-shadow text-sm font-medium"
-          >
-            {dictionary.task_dialog?.create_new || "Create New"}
-          </button>
         </div>
       )}
     </div>
