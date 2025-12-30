@@ -1,15 +1,11 @@
 "use client";
 
-import { useRef, useState, useMemo } from "react";
+import { useRef, useMemo } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { PositionedTask } from "@/types/task";
 import { DraggableTask } from "./draggable-task";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
-import { QuickTaskCard } from "@/components/tasks/quick-task-card";
-import { useTaskMutations } from "@/hooks/use-tasks";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
@@ -17,12 +13,6 @@ interface MatrixCanvasProps {
 }
 
 export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
-  const [showQuickCreate, setShowQuickCreate] = useState(false);
-  const [createPosition, setCreatePosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const { createTask } = useTaskMutations();
   const containerRef = useRef<HTMLDivElement>(null);
   const dictionary = useDictionary();
   const { setNodeRef } = useDroppable({
@@ -191,47 +181,6 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
           style={taskStylesMap.get(task.id)}
         />
       ))}
-
-      {/* Create button - appears on hover over canvas */}
-      {!showQuickCreate && (
-        <div
-          className={cn(
-            "absolute bottom-4 right-4 transition-all duration-200 z-10",
-            "opacity-0 group-hover:opacity-100"
-          )}
-        >
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            onClick={() => setShowQuickCreate(true)}
-            className="shadow-lg hover:shadow-xl transition-shadow"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span>{dictionary.task_dialog?.create_new || "Create New"}</span>
-          </Button>
-        </div>
-      )}
-
-      {/* Quick Create Card - appears on hover over canvas */}
-      {showQuickCreate && (
-        <div
-          className={cn(
-            "absolute bottom-4 right-4 z-10 w-80"
-          )}
-        >
-          <QuickTaskCard
-            onSave={async (data) => {
-              await createTask.mutateAsync({
-                ...data,
-                matrixPosition: createPosition,
-              });
-              setShowQuickCreate(false);
-            }}
-            onCancel={() => setShowQuickCreate(false)}
-          />
-        </div>
-      )}
     </div>
   );
 }
