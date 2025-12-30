@@ -28,3 +28,39 @@ CREATE TABLE public.tasks (
   CONSTRAINT tasks_pkey PRIMARY KEY (id),
   CONSTRAINT tasks_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
+
+
+
+-- handle_task_update function to handle task updates and versioning
+BEGIN
+  -- Only create version if something other than matrix_z_index changed
+  -- Compare all fields except matrix_z_index
+  IF (
+    OLD.title IS DISTINCT FROM NEW.title OR
+    OLD.description IS DISTINCT FROM NEW.description OR
+    OLD.due_date IS DISTINCT FROM NEW.due_date OR
+    OLD.estimated_time IS DISTINCT FROM NEW.estimated_time OR
+    OLD.matrix_position IS DISTINCT FROM NEW.matrix_position OR
+    OLD.quadrant_coords IS DISTINCT FROM NEW.quadrant_coords OR
+    OLD.tags IS DISTINCT FROM NEW.tags OR
+    OLD.is_completed IS DISTINCT FROM NEW.is_completed OR
+    OLD.completed_at IS DISTINCT FROM NEW.completed_at OR
+    OLD.position IS DISTINCT FROM NEW.position
+  ) THEN
+    -- Insert current state into versions
+    INSERT INTO task_versions (task_id, snapshot)
+    VALUES (OLD.id, to_jsonb(OLD));
+    
+    -- Delete oldest versions if count > 50
+    DELETE FROM task_versions
+    WHERE id IN (
+      SELECT id FROM task_versions
+      WHERE task_id = OLD.id
+      ORDER BY created_at DESC
+      OFFSET 50
+    );
+  END IF;
+  
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
