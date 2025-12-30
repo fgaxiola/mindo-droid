@@ -24,6 +24,7 @@ CREATE TABLE public.tasks (
   is_completed boolean DEFAULT false,
   completed_at timestamp with time zone,
   position bigint,
+  matrix_z_index integer DEFAULT 0,
   CONSTRAINT tasks_pkey PRIMARY KEY (id),
   CONSTRAINT tasks_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
