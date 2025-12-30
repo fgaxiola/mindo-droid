@@ -47,6 +47,14 @@ const MAX_DESCRIPTION_LENGTH = 1500;
 
 type Dictionary = Record<string, any>;
 
+// Normalize empty HTML to empty string for comparison
+function normalizeEmptyHtml(html: string | undefined): string {
+  if (!html) return "";
+  // Remove all HTML tags and check if there's any actual content
+  const textContent = html.replace(/<[^>]*>/g, "").trim();
+  return textContent === "" ? "" : html;
+}
+
 const createTaskSchema = (dict: Dictionary) =>
   z.object({
     title: z
@@ -134,7 +142,7 @@ export function TaskDialog({
     resolver: zodResolver(createTaskSchema(dictionary)),
     defaultValues: {
       title: task?.title || "",
-      description: task?.description || "",
+      description: normalizeEmptyHtml(task?.description),
       due_date: task?.due_date ? new Date(task.due_date) : undefined,
       estimated_time: task?.estimated_time ?? undefined,
       is_completed: task?.is_completed || false,
@@ -167,7 +175,7 @@ export function TaskDialog({
       setIsHistoryPopoverOpen(false);
       reset({
         title: task?.title || "",
-        description: task?.description || "",
+        description: normalizeEmptyHtml(task?.description),
         due_date: task?.due_date ? new Date(task.due_date) : undefined,
         estimated_time: task?.estimated_time ?? undefined,
         is_completed: task?.is_completed || false,
@@ -232,7 +240,7 @@ export function TaskDialog({
   };
 
   const handleDateSelect = (date: Date | undefined) => {
-    setValue("due_date", date);
+    setValue("due_date", date, { shouldDirty: true });
     setIsDatePopoverOpen(false);
     // Focus on estimated_time input after popover closes
     setTimeout(() => {
@@ -425,22 +433,32 @@ export function TaskDialog({
                 </Label>
                 <div className="relative">
                   <Clock className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="estimated_time"
-                    type="number"
-                    disabled={fieldsDisabled}
-                    className={cn("pl-9", fieldsDisabled && "opacity-70")}
-                    {...register("estimated_time", {
-                      valueAsNumber: true,
-                      setValueAs: (v) => {
-                        // Convert empty string or NaN to undefined
-                        if (v === "" || isNaN(v)) return undefined;
-                        return Number(v);
-                      },
-                    })}
-                    ref={(e) => {
-                      if (e) estimatedTimeRef.current = e as HTMLInputElement;
-                    }}
+                  <Controller
+                    control={control}
+                    name="estimated_time"
+                    render={({ field }) => (
+                      <Input
+                        id="estimated_time"
+                        type="number"
+                        disabled={fieldsDisabled}
+                        className={cn("pl-9", fieldsDisabled && "opacity-70")}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Convert empty string or NaN to undefined
+                          const numValue =
+                            value === "" || isNaN(Number(value))
+                              ? undefined
+                              : Number(value);
+                          field.onChange(numValue);
+                        }}
+                        ref={(e) => {
+                          field.ref(e);
+                          if (e)
+                            estimatedTimeRef.current = e as HTMLInputElement;
+                        }}
+                      />
+                    )}
                   />
                 </div>
               </div>
@@ -460,7 +478,9 @@ export function TaskDialog({
                     <RichTextEditor
                       content={field.value || ""}
                       onChange={(html, length) => {
-                        field.onChange(html);
+                        // Normalize empty HTML to empty string for proper dirty comparison
+                        const normalizedHtml = normalizeEmptyHtml(html);
+                        field.onChange(normalizedHtml);
                         if (length !== undefined) {
                           setDescriptionLength(length);
                         }
