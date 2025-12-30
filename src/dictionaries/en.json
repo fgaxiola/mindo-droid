@@ -112,6 +112,7 @@
     "restore": "Restore",
     "mark_as_completed": "Mark as completed",
     "characters_remaining": "characters remaining",
+    "title_placeholder": "What needs to be done?",
     "errors": {
       "title_required": "Title is required",
       "title_too_long": "Title must be less than 150 characters",

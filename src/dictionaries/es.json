@@ -113,6 +113,7 @@
     "restore": "Restaurar",
     "mark_as_completed": "Marcar como completada",
     "characters_remaining": "caracteres restantes",
+    "title_placeholder": "¿Qué se debe hacer?",
     "errors": {
       "title_required": "El título es obligatorio",
       "title_too_long": "El título debe tener menos de 150 caracteres",

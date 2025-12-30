@@ -6,10 +6,8 @@ import { PositionedTask } from "@/types/task";
 import { DraggableTask } from "./draggable-task";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
-import { TaskDialog } from "@/components/tasks/task-dialog";
+import { QuickTaskCard } from "@/components/tasks/quick-task-card";
 import { useTaskMutations } from "@/hooks/use-tasks";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface MatrixCanvasProps {
   tasks: PositionedTask[];
@@ -17,7 +15,7 @@ interface MatrixCanvasProps {
 }
 
 export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [createPosition, setCreatePosition] = useState<{
     x: number;
     y: number;
@@ -192,35 +190,40 @@ export function MatrixCanvas({ tasks, lastMovedTaskId }: MatrixCanvasProps) {
         />
       ))}
 
-      {/* Create button - appears on hover over canvas */}
-      <div
-        className={cn(
-          "absolute bottom-4 right-4 transition-all duration-200 z-10",
-          "opacity-0 group-hover:opacity-100"
-        )}
-      >
-        <Button
-          type="button"
-          variant="default"
-          size="sm"
-          onClick={() => setIsCreateOpen(true)}
-          className="shadow-lg hover:shadow-xl transition-shadow"
+      {/* Quick Create Card - appears on hover over canvas */}
+      {showQuickCreate ? (
+        <div
+          className={cn(
+            "absolute bottom-4 right-4 z-10 w-80"
+          )}
         >
-          <Plus className="h-4 w-4 mr-2" />
-          <span>{dictionary.task_dialog?.create_new || "Create New"}</span>
-        </Button>
-      </div>
-
-      <TaskDialog
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        onSave={async (data) => {
-          await createTask.mutateAsync({
-            ...data,
-            matrixPosition: createPosition,
-          });
-        }}
-      />
+          <QuickTaskCard
+            onSave={async (data) => {
+              await createTask.mutateAsync({
+                ...data,
+                matrixPosition: createPosition,
+              });
+              setShowQuickCreate(false);
+            }}
+            onCancel={() => setShowQuickCreate(false)}
+          />
+        </div>
+      ) : (
+        <div
+          className={cn(
+            "absolute bottom-4 right-4 transition-all duration-200 z-10",
+            "opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => setShowQuickCreate(true)}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md shadow-lg hover:shadow-xl transition-shadow text-sm font-medium"
+          >
+            {dictionary.task_dialog?.create_new || "Create New"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

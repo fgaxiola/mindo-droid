@@ -10,12 +10,9 @@ import { PositionedTask } from "@/types/task";
 import { SortableTaskCard } from "@/components/eisenhower/sortable-task-card";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/providers/dictionary-provider";
-import { CreateTaskButton } from "@/components/tasks/create-task-button";
-import { TaskDialog } from "@/components/tasks/task-dialog";
+import { QuickTaskCard } from "@/components/tasks/quick-task-card";
 import { useTaskMutations } from "@/hooks/use-tasks";
 import { Task } from "@/types/task";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface TaskPanelProps {
   tasks: PositionedTask[];
@@ -23,7 +20,7 @@ interface TaskPanelProps {
 }
 
 export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
   const { setNodeRef } = useDroppable({
@@ -68,91 +65,50 @@ export function TaskPanel({ tasks, isDragging }: TaskPanelProps) {
             {dictionary.interactive_matrix.drag_to_matrix}
           </p>
         </div>
-        <div
-          className={cn(
-            "flex gap-1 relative transition-opacity",
-            isDragging
-              ? "opacity-0 pointer-events-none"
-              : "opacity-0 group-hover:opacity-100"
-          )}
-        >
-          <CreateTaskButton
-            onClick={() => setIsCreateOpen(true)}
-            className="static opacity-100"
-          />
-        </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2 relative">
+        {/* Quick Create Card */}
+        {showQuickCreate && (
+          <QuickTaskCard
+            onSave={async (data) => {
+              await createTask.mutateAsync({
+                ...data,
+                matrixPosition: null, // Explicitly for list
+              });
+              setShowQuickCreate(false);
+            }}
+            onCancel={() => setShowQuickCreate(false)}
+            className={cn(
+              isDragging && "opacity-50 pointer-events-none"
+            )}
+          />
+        )}
+        
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {tasksAsTaskType.map((task) => (
             <SortableTaskCard key={task.id} task={task} />
           ))}
         </SortableContext>
-        {/* Create button - appears on hover, right after tasks (only when there are tasks) */}
-        {unpositionedTasks.length > 0 && (
-          <div
+        
+        {/* Show create button when not showing quick create */}
+        {!showQuickCreate && (
+          <button
+            type="button"
+            onClick={() => setShowQuickCreate(true)}
             className={cn(
-              "pt-2 transition-all duration-200",
-              isDragging
-                ? "opacity-0 pointer-events-none"
-                : "opacity-0 group-hover:opacity-100"
+              "w-full text-left text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md p-3 hover:bg-accent/50 hover:border-border transition-colors",
+              isDragging && "opacity-0 pointer-events-none",
+              unpositionedTasks.length > 0 && "opacity-0 group-hover:opacity-100"
             )}
           >
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsCreateOpen(true)}
-              className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-transparent border border-dashed border-border/50 rounded-md"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="text-sm">
-                {dictionary.task_dialog?.create_new || "Create New"}
-              </span>
-            </Button>
-          </div>
-        )}
-        {unpositionedTasks.length === 0 && (
-          <>
-            <div className="text-center py-8 text-xs text-muted-foreground">
-              {dictionary.interactive_matrix.all_tasks_in_matrix}
-            </div>
-            {/* Create button - appears on hover, below empty message */}
-            <div
-              className={cn(
-                "pt-2 transition-all duration-200",
-                isDragging
-                  ? "opacity-0 pointer-events-none"
-                  : "opacity-0 group-hover:opacity-100"
-              )}
-            >
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsCreateOpen(true)}
-                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-dashed border-border/50 rounded-md"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="text-sm">
-                  {dictionary.task_dialog?.create_new || "Create New"}
-                </span>
-              </Button>
-            </div>
-          </>
+            {unpositionedTasks.length === 0 ? (
+              <span>{dictionary.interactive_matrix.all_tasks_in_matrix}</span>
+            ) : (
+              <span>{dictionary.task_dialog?.create_new || "Create New"}</span>
+            )}
+          </button>
         )}
       </div>
-
-      <TaskDialog
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        onSave={async (data) => {
-          await createTask.mutateAsync({
-            ...data,
-            matrixPosition: null, // Explicitly for list
-          });
-        }}
-      />
     </div>
   );
 }

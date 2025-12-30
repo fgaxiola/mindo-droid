@@ -9,11 +9,8 @@ import {
 import { Task, Quadrant as QuadrantType } from "@/types/task";
 import { SortableTaskCard } from "./sortable-task-card";
 import { cn } from "@/lib/utils";
-import { CreateTaskButton } from "@/components/tasks/create-task-button";
-import { TaskDialog } from "@/components/tasks/task-dialog";
+import { QuickTaskCard } from "@/components/tasks/quick-task-card";
 import { useTaskMutations } from "@/hooks/use-tasks";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useDictionary } from "@/providers/dictionary-provider";
 
 interface QuadrantProps {
@@ -23,7 +20,7 @@ interface QuadrantProps {
 }
 
 export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
   const { createTask } = useTaskMutations();
   const dictionary = useDictionary();
 
@@ -54,19 +51,27 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
           </h3>
           <p className="text-xs text-muted-foreground">{quadrant.description}</p>
         </div>
-        <CreateTaskButton
-          onClick={() => setIsCreateOpen(true)}
-          className={cn(
-            "relative transition-opacity",
-            isDragging
-              ? "!opacity-0 pointer-events-none"
-              : "opacity-0 group-hover:opacity-100"
-          )}
-        />
       </div>
       
       {/* Scrollable Tasks Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2 min-h-0 scrollbar-transparent">
+        {/* Quick Create Card */}
+        {showQuickCreate && (
+          <QuickTaskCard
+            onSave={async (data) => {
+              await createTask.mutateAsync({
+                ...data,
+                coords: quadrant.coords,
+              });
+              setShowQuickCreate(false);
+            }}
+            onCancel={() => setShowQuickCreate(false)}
+            className={cn(
+              isDragging && "opacity-50 pointer-events-none"
+            )}
+          />
+        )}
+        
         <SortableContext
           items={taskIds}
           strategy={verticalListSortingStrategy}
@@ -75,46 +80,27 @@ export function Quadrant({ quadrant, tasks, isDragging }: QuadrantProps) {
             <SortableTaskCard key={task.id} task={task} />
           ))}
         </SortableContext>
-        {tasks.length === 0 && (
-          <div className="flex items-center justify-center min-h-[100px] text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md">
-            Drop tasks here
-          </div>
+        
+        {/* Show create button when not showing quick create */}
+        {!showQuickCreate && (
+          <button
+            type="button"
+            onClick={() => setShowQuickCreate(true)}
+            className={cn(
+              "w-full text-left text-xs text-muted-foreground border-2 border-dashed border-border/50 rounded-md p-3 hover:bg-accent/50 hover:border-border transition-colors",
+              isDragging && "opacity-0 pointer-events-none"
+            )}
+          >
+            {tasks.length === 0 ? (
+              <span>Drop tasks here or click to create</span>
+            ) : (
+              <span className="opacity-0 group-hover:opacity-100 transition-opacity">
+                {dictionary.task_dialog?.create_new || "Create New"}
+              </span>
+            )}
+          </button>
         )}
       </div>
-
-      {/* Fixed Create Button at Bottom */}
-      <div className="shrink-0 px-4 pt-4 pb-4">
-        <div
-          className={cn(
-            "transition-all duration-200",
-            isDragging
-              ? "opacity-0 pointer-events-none"
-              : "opacity-0 group-hover:opacity-100"
-          )}
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsCreateOpen(true)}
-            className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-transparent border border-dashed border-border/50 rounded-md"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="text-sm">{dictionary.task_dialog?.create_new || "Create New"}</span>
-          </Button>
-        </div>
-      </div>
-
-      <TaskDialog
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        onSave={async (data) => {
-          await createTask.mutateAsync({
-            ...data,
-            coords: quadrant.coords,
-          });
-        }}
-      />
     </div>
   );
 }
